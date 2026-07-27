@@ -69,7 +69,7 @@ a{color:inherit}
 .brand__mark{font-family:var(--display);font-size:19px;letter-spacing:.02em}
 .brand__mark em{color:var(--signal);font-style:normal}
 .brand__sub{
-  font-family:var(--mono);font-size:9.5px;letter-spacing:.26em;
+  font-family:var(--display);font-size:19px;letter-spacing:.02em;
   color:var(--signal);text-transform:uppercase;
 }
 .topbar__spacer{flex:1}
@@ -470,8 +470,6 @@ a{color:inherit}
       <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.5 22v-8h2.7l.4-3.2h-3.1V8.7c0-.9.3-1.6 1.7-1.6h1.5V4.2c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4v2.7H7.8V14h2.7v8z"/></svg>
       <span>NIJA Helmets</span>
     </a>
-    <div class="topbar__spacer"></div>
-    <button id="adminBtn" style="font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--chrome)">ADMIN</button>
   </div>
 </footer>
 
@@ -505,8 +503,8 @@ const SETTINGS = {
   // Leave projectId "" to run on the built-in demo products below.
   // Fill it in to load products + save orders in your own Firebase.
   firebase: {
-    projectId: "",                // e.g. "ridekit-shop"
-    apiKey:    "",                // Web API key from Firebase console
+    projectId: "nija-helmets",                // e.g. "ridekit-shop"
+    apiKey:    "AIzaSyApyTWsALmtURKP73n8zYi6hAT7lzzgJOk",                // Web API key from Firebase console
     products:  "shop_products",
     orders:    "shop_orders"
   },
@@ -515,7 +513,8 @@ const SETTINGS = {
   // Note: a bot token placed here is visible to anyone who views the
   // page source. Fine for a small shop, but use a bot that can only
   // message you. Leave blank to use the "Send on Telegram" button instead.
-  bot: { token: "", chatId: "" },
+  bot: { token: "8715076890:AAGPMgAwirPJbqiBJAxGZrjer6onxVudEi4", chatId: "6098054051
+" },
 
   adminPin: "1234"
 };
@@ -605,7 +604,7 @@ const T = {
   km:{
     promo:"ដឹកជញ្ជូន $2 ក្នុងភ្នំពេញ និងខេត្ត — ផ្ញើរាល់ថ្ងៃ!",
     cart:"កន្ត្រក", eyebrow:"NIJA Helmets · ភ្នំពេញ",
-    heroTitle:'គ្រឿងបំពាក់ដែលនាំអ្នក<em>ដល់ផ្ទះសុវត្ថិភាព</em>',
+    heroTitle:'គ្រឿងបំពាក់ម៉ូតូដែលនាំអ្នក<em>ដល់ផ្ទះដោយសុវត្ថិភាព</em>',
     heroSub:"មួកសុវត្ថិភាព កាបូបការពារទឹក និងឧបករណ៍ជិះម៉ូតូប្រចាំថ្ងៃ — តម្លៃជាដុល្លារ និងរៀល ដឹកជញ្ជូនទូទាំងប្រទេស។",
     statDays:"ថ្ងៃ ដឹកជញ្ជូន", statCod:"បង់ពេលទទួល",
     infoPayT:"របៀបបង់ប្រាក់", infoPayB:"បង់ប្រាក់ពេលទទួលទំនិញនៅភ្នំពេញ ឬផ្ទេរតាម ABA Pay, KHQR, Wing ឬ ACLEDA មុនពេលដឹក។",
@@ -1080,7 +1079,6 @@ $("#cartClose").addEventListener("click", closeOverlays);
 $("#cartOpen").addEventListener("click", openCart);
 $("#langEn").addEventListener("click", () => setLang("en"));
 $("#langKm").addEventListener("click", () => setLang("km"));
-$("#adminBtn").addEventListener("click", openAdmin);
 $("#search").addEventListener("input", e => { query = e.target.value; renderGrid(); });
 
 (async function boot(){
