@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NIJA Helmets Admin — Products & Orders</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Kantumruy+Pro:wght@400;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ground:#E7E8E3; --ink:#16202B; --red:#F2A413; --grey:#9AA3A8; --paper:#FBFBF9;
+  --display:"Archivo Black","Kantumruy Pro",sans-serif;
+  --body:"Kantumruy Pro",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+  --gut:clamp(14px,3.5vw,28px);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--ground);color:var(--ink);font-family:var(--body);line-height:1.5;-webkit-font-smoothing:antialiased}
+img{max-width:100%;display:block}
+button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+.tape{height:12px;background:repeating-linear-gradient(115deg,var(--red) 0 22px,var(--ink) 22px 44px)}
+
+.top{background:var(--ink);color:#fff}
+.top__in{max-width:1100px;margin:0 auto;padding:13px var(--gut);display:flex;align-items:center;gap:12px}
+.brand{font-family:var(--display);font-size:19px;letter-spacing:-.02em}
+.brand em{color:var(--red);font-style:normal}
+.top__tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;color:var(--grey);text-transform:uppercase}
+.spacer{flex:1}
+.top a{color:#fff;font-size:12.5px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,.3);padding:6px 13px;border-radius:99px}
+.top a:hover{border-color:var(--red);color:var(--red)}
+
+.wrap{max-width:1100px;margin:0 auto;padding:22px var(--gut) 70px}
+
+/* login */
+.gate{max-width:340px;margin:60px auto;background:var(--paper);border:1px solid #E2E2E2;border-radius:3px;padding:26px;text-align:center}
+.gate h1{font-family:var(--display);font-weight:400;font-size:19px;text-transform:uppercase;margin-bottom:6px}
+.gate p{font-size:13px;color:var(--grey);margin-bottom:16px}
+.gate input{width:100%;padding:12px;text-align:center;font-family:var(--mono);font-size:18px;letter-spacing:.3em;border:1px solid #D8D8D8;border-radius:2px;margin-bottom:11px}
+.gate .err{color:var(--red);font-size:12.5px;margin-top:9px;min-height:17px}
+
+/* tabs */
+.tabs{display:flex;gap:8px;margin-bottom:18px}
+.tab{padding:9px 18px;border-radius:99px;border:1px solid #D5D5D5;background:var(--paper);font-size:13.5px;font-weight:700}
+.tab[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.tab b{font-family:var(--mono);font-weight:600;color:var(--red);margin-left:5px;font-size:11.5px}
+.tab[aria-pressed="true"] b{color:var(--red)}
+
+/* layout */
+.cols{display:grid;gap:18px;grid-template-columns:minmax(300px,420px) 1fr;align-items:start}
+@media (max-width:860px){.cols{grid-template-columns:1fr}}
+.panel{background:var(--paper);border:1px solid #E2E2E2;border-radius:3px}
+.panel__head{padding:13px 16px;border-bottom:2px solid var(--ink);display:flex;align-items:center;gap:10px}
+.panel__head h2{font-family:var(--display);font-weight:400;font-size:14px;text-transform:uppercase;letter-spacing:.01em}
+.panel__body{padding:16px}
+
+/* form */
+.field{margin-bottom:12px}
+.field label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--grey);margin-bottom:4px}
+.field input,.field select,.field textarea{width:100%;padding:10px 11px;border:1px solid #D8D8D8;border-radius:2px;background:#fff;font-size:14px}
+.field textarea{min-height:56px;resize:vertical}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--ink);outline:none;box-shadow:0 0 0 3px rgba(242,164,19,.3)}
+.row2{display:grid;gap:10px;grid-template-columns:1fr 1fr}
+.hint{font-size:11px;color:var(--grey);margin-top:3px;line-height:1.45}
+.pstrip{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;min-height:8px}
+.pthumb{position:relative;width:66px;height:66px;border:1px solid #D8D8D8;border-radius:2px;overflow:hidden;background:#FAFAFA}
+.pthumb img{width:100%;height:100%;object-fit:cover}
+.pthumb button{position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:99px;background:var(--ink);color:#fff;font-size:11px;line-height:1;display:grid;place-items:center}
+.pthumb--first::after{content:"1st";position:absolute;left:2px;bottom:2px;font-family:var(--mono);font-size:8px;background:var(--red);color:var(--ink);padding:1px 4px;border-radius:2px}
+.photo{display:flex;gap:12px;align-items:center}
+.photo__prev{width:74px;height:74px;flex:none;border:1px dashed #C9C9C9;border-radius:2px;background:#FAFAFA;display:grid;place-items:center;overflow:hidden;font-size:10px;color:var(--grey);text-align:center}
+.photo__prev img{width:100%;height:100%;object-fit:cover}
+.btn{width:100%;padding:12px;border-radius:2px;background:var(--red);color:var(--ink);font-weight:700;font-size:14px}
+.btn:hover{filter:brightness(.92)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn--ghost{background:none;border:1px solid #CFCFCF;color:var(--ink);margin-top:8px}
+.btn--ghost:hover{border-color:var(--ink);filter:none}
+
+/* product list */
+.plist{display:grid;gap:9px}
+.prow{display:flex;gap:11px;align-items:center;border:1px solid #E7E7E7;border-radius:2px;padding:9px 11px;background:#fff}
+.prow__art{width:48px;height:48px;flex:none;background:#F0F0F0;border-radius:2px;overflow:hidden;display:grid;place-items:center;font-size:9px;color:var(--grey)}
+.prow__art img{width:100%;height:100%;object-fit:cover}
+.prow__main{flex:1;min-width:0}
+.prow__name{font-size:13.5px;font-weight:600;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.prow__meta{font-family:var(--mono);font-size:10.5px;color:var(--grey);margin-top:2px}
+.prow__meta b{color:var(--red);font-weight:600}
+.prow__act{display:flex;gap:6px}
+.mini{font-size:11.5px;font-weight:700;padding:6px 11px;border-radius:2px;border:1px solid #D5D5D5}
+.mini:hover{border-color:var(--ink)}
+.mini--del{color:#B3372B;border-color:rgba(179,55,43,.4)}
+.mini--del:hover{background:#B3372B;color:#fff;border-color:#B3372B}
+
+/* orders */
+.orow{border:1px solid #E7E7E7;border-radius:2px;padding:12px;background:#fff;margin-bottom:9px;font-size:13px}
+.orow b{font-family:var(--mono);font-size:11.5px}
+.orow .st{float:right;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border-radius:2px;background:var(--red);color:var(--ink)}
+.orow .st--done{background:var(--ink);color:#fff}
+.orow__items{white-space:pre-line;margin:6px 0;padding:7px 9px;background:#FAFAFA;border-radius:2px;font-size:12.5px}
+.orow__meta{color:var(--grey);font-size:11.5px;line-height:1.55}
+.orow__act{margin-top:8px;display:flex;gap:6px;flex-wrap:wrap}
+
+.empty{padding:34px 16px;text-align:center;color:var(--grey);border:1px dashed #CFCFCF;border-radius:2px;font-size:13.5px}
+.warn{background:#FFF8EA;border:1px solid rgba(242,164,19,.6);border-radius:2px;padding:11px 13px;font-size:12.5px;line-height:1.55;margin-bottom:14px}
+.warn b{color:#B3372B}
+.toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,16px);background:var(--ink);color:#fff;padding:12px 20px;border-radius:99px;font-size:13px;font-weight:600;z-index:50;opacity:0;pointer-events:none;transition:.2s;box-shadow:0 8px 24px -10px rgba(0,0,0,.5)}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.searchbox{margin-bottom:11px}
+.searchbox input{width:100%;padding:9px 12px;border:1px solid #D8D8D8;border-radius:99px;font-size:13px;background:#fff}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top__in">
+    <span class="brand">NIJA<em>.</em></span>
+    <span class="top__tag">Admin</span>
+    <div class="spacer"></div>
+    <a href="index.html">← View shop</a>
+  </div>
+</header>
+<div class="tape"></div>
+
+<!-- LOGIN -->
+<div class="wrap" id="gateWrap">
+  <div class="gate">
+    <h1>Admin login</h1>
+    <p>Enter your PIN to manage products and orders.</p>
+    <input id="pin" type="password" inputmode="numeric" placeholder="••••" maxlength="8">
+    <button class="btn" id="pinGo">Enter</button>
+    <div class="err" id="pinErr"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="wrap" id="app" hidden>
+  <div class="warn" id="fbWarn" hidden>
+    <b>Firebase is not connected.</b> Products you add here are kept only on this device until the page closes.
+    Open this file and fill in <span style="font-family:var(--mono)">SETTINGS.firebase</span> (same projectId + apiKey as the shop file) to save them permanently.
+  </div>
+
+  <div class="tabs">
+    <button class="tab" id="tabP" aria-pressed="true">Products <b id="nP">0</b></button>
+    <button class="tab" id="tabO" aria-pressed="false">Orders <b id="nO">0</b></button>
+  </div>
+
+  <!-- PRODUCTS -->
+  <div class="cols" id="viewP">
+    <section class="panel">
+      <div class="panel__head"><h2 id="formTitle">Add product</h2></div>
+      <div class="panel__body">
+        <div class="row2">
+          <div class="field"><label for="fSku">SKU / code</label><input id="fSku" placeholder="H4"></div>
+          <div class="field"><label for="fCat">Category</label>
+            <select id="fCat">
+              <option value="helmet">Helmet</option>
+              <option value="bag">Bag</option>
+              <option value="gear">Accessory</option>
+            </select></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label for="fBrand">Brand</label><input id="fBrand" placeholder="Index"></div>
+          <div class="field"><label for="fUsd">Price USD</label><input id="fUsd" type="number" step="0.01" min="0" placeholder="38"></div>
+        </div>
+        <div class="field"><label for="fEn">Name — English</label><input id="fEn" placeholder="Full-face helmet, matte black"></div>
+        <div class="field"><label for="fKm">Name — ខ្មែរ</label><input id="fKm" placeholder="មួកសុវត្ថិភាពពេញមុខ"></div>
+        <div class="field"><label for="fEnD">Description — English</label><textarea id="fEnD"></textarea></div>
+        <div class="field"><label for="fKmD">Description — ខ្មែរ</label><textarea id="fKmD"></textarea></div>
+        <div class="field"><label for="fSpecs">Specs — one per line, Label: Value</label>
+          <textarea id="fSpecs" placeholder="Sizes: M · L · XL&#10;Cert: DOT"></textarea></div>
+        <div class="row2">
+          <div class="field"><label for="fFlag">Badge</label>
+            <select id="fFlag"><option value="">None</option><option value="new">New</option><option value="cert">Certified</option></select></div>
+          <div class="field"><label for="fFile">Photos — up to 4</label>
+            <input id="fFile" type="file" accept="image/*" multiple>
+          </div>
+        </div>
+        <div class="pstrip" id="prevStrip"></div>
+        <p class="hint" style="margin:-4px 0 12px">Photos are resized and compressed automatically. First photo = the one shown in the shop grid. Tap × on a photo to remove it. <span id="sizeInfo"></span></p>
+        <div class="field"><label for="fVideo">Video link (optional)</label>
+          <input id="fVideo" placeholder="https://youtu.be/… or Facebook video link">
+          <p class="hint">Post the video on YouTube, Facebook or TikTok first, then paste the link here. YouTube plays inside the product page; other links show a "Watch video" button.</p>
+        </div>
+        <button class="btn" id="saveBtn">Save product</button>
+        <button class="btn btn--ghost" id="resetBtn" hidden>Cancel edit — back to Add</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel__head"><h2>Products in the shop</h2>
+        <div class="spacer"></div>
+        <button class="mini" id="reloadP">Reload</button>
+      </div>
+      <div class="panel__body">
+        <div class="searchbox"><input id="pSearch" type="search" placeholder="Search products"></div>
+        <div class="plist" id="plist"><div class="empty">Loading…</div></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ORDERS -->
+  <div id="viewO" hidden>
+    <section class="panel">
+      <div class="panel__head"><h2>Orders</h2>
+        <div class="spacer"></div>
+        <button class="mini" id="reloadO">Reload</button>
+      </div>
+      <div class="panel__body" id="olist"><div class="empty">Loading…</div></div>
+    </section>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═════════ SETTINGS — must match the shop file ═════════ */
+const SETTINGS = {
+  adminPin: "1234",
+  khrRate: 4100,
+  firebase: {
+    projectId: "nija-helmets",            // same as shop file
+    apiKey:    "AIzaSyApyTWsALmtURKP73n8zYi6hAT7lzzgJOk",
+    products:  "shop_products",
+    orders:    "shop_orders"
+  }
+};
+
+/* ═════════ helpers ═════════ */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const money = u => "$" + (+u||0).toFixed(2);
+function toast(m){const e=$("#toast");e.textContent=m;e.classList.add("on");clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove("on"),2400);}
+
+const FB = SETTINGS.firebase;
+const fbOn = () => !!FB.projectId;
+const base = () => `https://firestore.googleapis.com/v1/projects/${FB.projectId}/databases/(default)/documents/`;
+const key = (sep="?") => FB.apiKey ? sep+"key="+FB.apiKey : "";
+
+const unwrap = v =>
+  v.stringValue ?? (v.integerValue!==undefined ? +v.integerValue : undefined) ??
+  v.doubleValue ?? v.booleanValue ??
+  (v.arrayValue ? (v.arrayValue.values||[]).map(unwrap) : undefined) ??
+  (v.mapValue ? Object.fromEntries(Object.entries(v.mapValue.fields||{}).map(([k,x])=>[k,unwrap(x)])) : undefined) ?? null;
+const wrap = v =>
+  typeof v==="number" ? {doubleValue:v} :
+  typeof v==="boolean" ? {booleanValue:v} :
+  Array.isArray(v) ? {arrayValue:{values:v.map(wrap)}} :
+  v && typeof v==="object" ? {mapValue:{fields:Object.fromEntries(Object.entries(v).map(([k,x])=>[k,wrap(x)]))}} :
+  {stringValue:String(v??"")};
+const toFields = o => ({fields:Object.fromEntries(Object.entries(o).map(([k,v])=>[k,wrap(v)]))});
+const fromDoc = d => {
+  const o = Object.fromEntries(Object.entries(d.fields||{}).map(([k,v])=>[k,unwrap(v)]));
+  o._doc = d.name.split("/").pop();
+  return o;
+};
+
+/* ═════════ state ═════════ */
+let products = [];      // each has _doc (Firestore doc id)
+let orders = [];
+let localOnly = [];     // fallback store when Firebase not set
+let editingDoc = null;  // doc id being edited
+let photos = [];        // compressed base64 images, max 4
+const MAXPH = 4;
+
+/* ═════════ Firestore CRUD ═════════ */
+async function fetchProducts(){
+  if(!fbOn()) return localOnly;
+  const r = await fetch(base()+FB.products+key()+ (FB.apiKey?"&":"?") + "pageSize=300");
+  if(!r.ok) throw new Error("read "+r.status);
+  const j = await r.json();
+  return (j.documents||[]).map(fromDoc);
+}
+async function createProduct(docId, data){
+  if(!fbOn()){ localOnly.push({...data,_doc:docId||("L"+Date.now())}); return; }
+  const url = base()+FB.products+key()+ (docId ? (FB.apiKey?"&":"?")+"documentId="+encodeURIComponent(docId) : "");
+  const r = await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(toFields(data))});
+  if(!r.ok) throw new Error("create "+r.status+" "+await r.text());
+}
+async function updateProduct(docId, data){
+  if(!fbOn()){
+    const i = localOnly.findIndex(p=>p._doc===docId);
+    if(i>-1) localOnly[i]={...data,_doc:docId};
+    return;
+  }
+  const r = await fetch(base()+FB.products+"/"+encodeURIComponent(docId)+key(),
+    {method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify(toFields(data))});
+  if(!r.ok) throw new Error("update "+r.status);
+}
+async function deleteProduct(docId){
+  if(!fbOn()){ localOnly = localOnly.filter(p=>p._doc!==docId); return; }
+  const r = await fetch(base()+FB.products+"/"+encodeURIComponent(docId)+key(),{method:"DELETE"});
+  if(!r.ok) throw new Error("delete "+r.status);
+}
+async function fetchOrders(){
+  if(!fbOn()) return [];
+  const r = await fetch(base()+FB.orders+key()+ (FB.apiKey?"&":"?") + "pageSize=100");
+  if(!r.ok) throw new Error("orders "+r.status);
+  const j = await r.json();
+  return (j.documents||[]).map(fromDoc).sort((a,b)=>String(b.createdAt).localeCompare(String(a.createdAt)));
+}
+async function setOrderStatus(docId, status){
+  const r = await fetch(base()+FB.orders+"/"+encodeURIComponent(docId)+key()+ (FB.apiKey?"&":"?") + "updateMask.fieldPaths=status",
+    {method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify(toFields({status}))});
+  if(!r.ok) throw new Error("status "+r.status);
+}
+
+/* ═════════ photo compression ═════════ */
+function compress(file){
+  return new Promise((res,rej)=>{
+    const img = new Image();
+    img.onload = () => {
+      const MAX = 640;
+      let {width:w,height:h} = img;
+      if(Math.max(w,h) > MAX){ const k = MAX/Math.max(w,h); w=Math.round(w*k); h=Math.round(h*k); }
+      const c = document.createElement("canvas");
+      c.width=w; c.height=h;
+      c.getContext("2d").drawImage(img,0,0,w,h);
+      let out = c.toDataURL("image/jpeg",0.7);
+      // up to 4 photos must fit one 1 MB Firestore document — keep each small
+      let q = 0.7;
+      while(out.length > 190000 && q > 0.28){ q -= 0.1; out = c.toDataURL("image/jpeg",q); }
+      URL.revokeObjectURL(img.src);
+      res(out);
+    };
+    img.onerror = rej;
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+/* ═════════ form ═════════ */
+function readForm(){
+  const specs = $("#fSpecs").value.split("\n").map(l=>l.trim()).filter(Boolean)
+    .map(l=>{ const i=l.indexOf(":"); return i>-1 ? [l.slice(0,i).trim(), l.slice(i+1).trim()] : [l,""]; });
+  return {
+    id: $("#fSku").value.trim() || ("P"+Date.now().toString(36).toUpperCase().slice(-5)),
+    cat: $("#fCat").value,
+    brand: $("#fBrand").value.trim(),
+    usd: parseFloat($("#fUsd").value)||0,
+    en: $("#fEn").value.trim(),
+    km: $("#fKm").value.trim(),
+    enD: $("#fEnD").value.trim(),
+    kmD: $("#fKmD").value.trim(),
+    flag: $("#fFlag").value,
+    specs: JSON.stringify(specs),   // stored as string, shop file parses it back
+    photo: photos[0] || "",         // first photo — shown in the shop grid
+    photos: photos,
+    video: $("#fVideo").value.trim()
+  };
+}
+function fillForm(p){
+  editingDoc = p._doc;
+  $("#formTitle").textContent = "Edit product";
+  $("#resetBtn").hidden = false;
+  $("#fSku").value = p.id || p._doc;
+  $("#fCat").value = ["helmet","bag","gear"].includes(p.cat)?p.cat:"gear";
+  $("#fBrand").value = p.brand||"";
+  $("#fUsd").value = p.usd||"";
+  $("#fEn").value = p.en||"";
+  $("#fKm").value = p.km||"";
+  $("#fEnD").value = p.enD||"";
+  $("#fKmD").value = p.kmD||"";
+  $("#fFlag").value = p.flag||"";
+  let specs = p.specs;
+  if(typeof specs==="string"){ try{specs=JSON.parse(specs)}catch{specs=[]} }
+  $("#fSpecs").value = (specs||[]).map(s=>s[0]+": "+s[1]).join("\n");
+  photos = Array.isArray(p.photos) && p.photos.length ? p.photos.slice(0,MAXPH) : (p.photo ? [p.photo] : []);
+  $("#fVideo").value = p.video || "";
+  renderStrip();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function resetForm(){
+  editingDoc = null;
+  photos = [];
+  $("#formTitle").textContent = "Add product";
+  $("#resetBtn").hidden = true;
+  ["fSku","fBrand","fUsd","fEn","fKm","fEnD","fKmD","fSpecs","fVideo"].forEach(id=>$("#"+id).value="");
+  $("#fCat").value="helmet"; $("#fFlag").value="";
+  $("#fFile").value="";
+  renderStrip();
+}
+
+function renderStrip(){
+  $("#prevStrip").innerHTML = photos.map((ph,i)=>`
+    <div class="pthumb ${i===0?"pthumb--first":""}">
+      <img src="${ph}">
+      <button data-rmph="${i}" aria-label="Remove photo">×</button>
+    </div>`).join("");
+  const kb = Math.round(photos.reduce((s,p)=>s+p.length,0)/1024);
+  $("#sizeInfo").textContent = photos.length ? `(${photos.length}/${MAXPH} — ${kb} KB total)` : "";
+}
+
+async function save(){
+  const d = readForm();
+  if(!d.en && !d.km){ toast("Give the product a name first."); return; }
+  if(!d.usd){ toast("Price is missing."); return; }
+  if(JSON.stringify(d).length > 980000){ toast("Photos too large for one product — remove one and try again."); return; }
+  const btn=$("#saveBtn"); btn.disabled=true; btn.textContent="Saving…";
+  try{
+    if(editingDoc) await updateProduct(editingDoc, d);
+    else await createProduct(d.id, d);
+    toast(editingDoc ? "Product updated ✓" : "Product added ✓");
+    resetForm();
+    await loadP();
+  }catch(e){
+    console.error(e);
+    toast("Save failed — check Firebase config and rules.");
+  }
+  btn.disabled=false; btn.textContent="Save product";
+}
+
+/* ═════════ render ═════════ */
+function renderP(){
+  const q = $("#pSearch").value.trim().toLowerCase();
+  const list = products.filter(p=>!q || ((p.en||"")+(p.km||"")+(p.brand||"")+(p.id||"")).toLowerCase().includes(q));
+  $("#nP").textContent = products.length;
+  if(!list.length){ $("#plist").innerHTML = `<div class="empty">${products.length?"No match.":"No products yet — add your first one on the left."}</div>`; return; }
+  $("#plist").innerHTML = list.map(p=>`
+    <div class="prow">
+      <div class="prow__art">${p.photo?`<img src="${p.photo}">`:esc(p.cat||"")}</div>
+      <div class="prow__main">
+        <div class="prow__name">${esc(p.en||p.km||p._doc)}</div>
+        <div class="prow__meta">${esc(p.id||p._doc)} · ${esc(p.cat||"")} · <b>${money(p.usd)}</b></div>
+      </div>
+      <div class="prow__act">
+        <button class="mini" data-edit="${esc(p._doc)}">Edit</button>
+        <button class="mini mini--del" data-del="${esc(p._doc)}">Delete</button>
+      </div>
+    </div>`).join("");
+}
+function renderO(){
+  $("#nO").textContent = orders.length;
+  if(!fbOn()){ $("#olist").innerHTML = `<div class="empty">Connect Firebase to see orders here.</div>`; return; }
+  if(!orders.length){ $("#olist").innerHTML = `<div class="empty">No orders yet.</div>`; return; }
+  $("#olist").innerHTML = orders.map(o=>`
+    <div class="orow">
+      <span class="st ${o.status==="done"?"st--done":""}">${esc(o.status||"new")}</span>
+      <b>${esc(o.ref||"—")}</b> · ${esc(o.name||"")} · ${esc(o.phone||"")}
+      <div class="orow__items">${esc(o.items||"")}</div>
+      <div class="orow__meta">
+        ${money(o.totalUsd)} · ${esc(o.payment||"")}<br>
+        ${esc(o.province||"")} — ${esc(o.address||"")}${o.note?" · "+esc(o.note):""}<br>
+        ${esc(String(o.createdAt||"").replace("T"," ").slice(0,16))}
+      </div>
+      <div class="orow__act">
+        ${o.status!=="done"?`<button class="mini" data-done="${esc(o._doc)}">Mark done</button>`:""}
+        ${o.phone?`<a class="mini" style="text-decoration:none" href="tel:${esc(o.phone)}">Call</a>`:""}
+      </div>
+    </div>`).join("");
+}
+
+async function loadP(){
+  try{ products = await fetchProducts(); }catch(e){ console.error(e); products=[]; toast("Could not load products."); }
+  renderP();
+}
+async function loadO(){
+  try{ orders = await fetchOrders(); }catch(e){ console.error(e); orders=[]; }
+  renderO();
+}
+
+/* ═════════ events ═════════ */
+$("#pinGo").addEventListener("click", enter);
+$("#pin").addEventListener("keydown", e=>{ if(e.key==="Enter") enter(); });
+function enter(){
+  if($("#pin").value !== SETTINGS.adminPin){ $("#pinErr").textContent="Wrong PIN."; return; }
+  $("#gateWrap").hidden = true;
+  $("#app").hidden = false;
+  $("#fbWarn").hidden = fbOn();
+  loadP(); loadO();
+}
+
+$("#tabP").addEventListener("click", ()=>{ swap(true); });
+$("#tabO").addEventListener("click", ()=>{ swap(false); loadO(); });
+function swap(p){
+  $("#tabP").setAttribute("aria-pressed",p);
+  $("#tabO").setAttribute("aria-pressed",!p);
+  $("#viewP").hidden=!p; $("#viewO").hidden=p;
+}
+
+$("#saveBtn").addEventListener("click", save);
+$("#resetBtn").addEventListener("click", resetForm);
+$("#reloadP").addEventListener("click", loadP);
+$("#reloadO").addEventListener("click", loadO);
+$("#pSearch").addEventListener("input", renderP);
+$("#fFile").addEventListener("change", async e=>{
+  const files = Array.from(e.target.files||[]);
+  if(!files.length) return;
+  for(const f of files){
+    if(photos.length >= MAXPH){ toast("Maximum "+MAXPH+" photos per product."); break; }
+    try{ photos.push(await compress(f)); }
+    catch{ toast("Could not read one of the images."); }
+  }
+  e.target.value = "";
+  renderStrip();
+});
+
+document.addEventListener("click", async e=>{
+  const rm = e.target.closest("[data-rmph]");
+  if(rm){ photos.splice(+rm.dataset.rmph,1); renderStrip(); return; }
+  const ed = e.target.closest("[data-edit]");
+  const dl = e.target.closest("[data-del]");
+  const dn = e.target.closest("[data-done]");
+  if(ed){ const p = products.find(x=>x._doc===ed.dataset.edit); if(p) fillForm(p); }
+  if(dl){
+    const p = products.find(x=>x._doc===dl.dataset.del);
+    if(p && confirm(`Delete "${p.en||p._doc}"? This cannot be undone.`)){
+      try{ await deleteProduct(p._doc); toast("Deleted."); loadP(); }
+      catch(err){ console.error(err); toast("Delete failed."); }
+    }
+  }
+  if(dn){
+    try{ await setOrderStatus(dn.dataset.done,"done"); toast("Marked done ✓"); loadO(); }
+    catch(err){ console.error(err); toast("Could not update order."); }
+  }
+});
+</script>
+</body>
+</html>

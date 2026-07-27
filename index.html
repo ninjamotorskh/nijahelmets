@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NIJA Helmets — Helmets, Bags & Moto Gear · Cambodia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Kantumruy+Pro:wght@300;400;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   CONFIG NOTE: All look-and-feel lives in these tokens.
+   ============================================================ */
+:root{
+  --concrete:#E7E8E3;      /* pale concrete — page ground */
+  --ink:#16202B;           /* asphalt indigo — text & dark blocks */
+  --signal:#F2A413;        /* amber signal — visor tint */
+  --oxide:#B3372B;         /* oxide red — riel price, sale marks */
+  --chrome:#9AA3A8;        /* steel — hairlines, muted text */
+  --paper:#FBFBF9;         /* card surface */
+
+  --display:"Archivo Black","Kantumruy Pro",sans-serif;
+  --body:"Kantumruy Pro",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+
+  --gut:clamp(16px,4vw,32px);
+  --radius:3px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--concrete);color:var(--ink);
+  font-family:var(--body);font-weight:400;line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+body.lock{overflow:hidden}
+img{max-width:100%;display:block}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+input,select,textarea{font:inherit;color:inherit}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--signal);outline-offset:2px}
+
+/* ---------- SIGNATURE: reflective hazard tape ---------- */
+.tape{
+  height:14px;
+  background:repeating-linear-gradient(115deg,
+    var(--signal) 0 22px, var(--ink) 22px 44px);
+}
+.tape--thin{height:6px}
+
+/* ---------- announce bar ---------- */
+.announce{
+  background:var(--signal);color:var(--ink);text-align:center;
+  font-size:12.5px;font-weight:700;padding:7px var(--gut);letter-spacing:.01em;
+}
+/* ---------- top bar ---------- */
+.topbar{
+  position:sticky;top:0;z-index:60;
+  background:var(--ink);color:var(--paper);
+}
+.topbar__in{
+  max-width:1200px;margin:0 auto;padding:12px var(--gut);
+  display:flex;align-items:center;gap:14px;
+}
+.brand{display:flex;align-items:center;gap:10px;letter-spacing:-.02em}
+.brand__logo{width:34px;height:34px;flex:none}
+.brand__txt{display:flex;flex-direction:column;line-height:1}
+.brand__mark{font-family:var(--display);font-size:19px;letter-spacing:.02em}
+.brand__mark em{color:var(--signal);font-style:normal}
+.brand__sub{
+  font-family:var(--mono);font-size:8.5px;letter-spacing:.34em;
+  color:var(--signal);text-transform:uppercase;margin-top:3px;
+}
+.topbar__spacer{flex:1}
+.langtog{
+  display:flex;border:1px solid rgba(251,251,249,.28);border-radius:99px;overflow:hidden;
+}
+.langtog button{
+  padding:5px 11px;font-size:12px;font-weight:600;color:var(--chrome);
+  transition:background .15s,color .15s;
+}
+.langtog button[aria-pressed="true"]{background:var(--signal);color:var(--ink)}
+.cartbtn{
+  position:relative;display:flex;align-items:center;gap:7px;
+  padding:7px 14px;background:var(--signal);color:var(--ink);
+  font-weight:700;font-size:13px;border-radius:99px;
+}
+.cartbtn__n{
+  font-family:var(--mono);font-size:11px;background:var(--ink);color:var(--signal);
+  min-width:19px;height:19px;border-radius:99px;
+  display:grid;place-items:center;padding:0 5px;
+}
+
+/* ---------- hero ---------- */
+.hero{background:var(--ink);color:var(--paper);position:relative;overflow:hidden}
+.hero__in{
+  max-width:1200px;margin:0 auto;padding:clamp(38px,8vw,74px) var(--gut) clamp(30px,6vw,54px);
+  position:relative;z-index:2;
+}
+.hero__eyebrow{
+  font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--signal);margin-bottom:16px;
+}
+.hero h1{
+  font-family:var(--display);font-weight:400;
+  font-size:clamp(34px,9vw,74px);line-height:.94;letter-spacing:-.035em;
+  text-transform:uppercase;max-width:14ch;
+}
+.hero h1 em{color:var(--signal);font-style:normal}
+:lang(km) .hero h1{font-family:var(--body);font-weight:700;line-height:1.25;letter-spacing:0}
+.hero p{
+  margin-top:18px;max-width:44ch;color:#C9D1D6;font-size:clamp(14px,3.4vw,17px);
+}
+.hero__stats{
+  display:flex;flex-wrap:wrap;gap:10px;margin-top:26px;
+}
+.chipstat{
+  font-family:var(--mono);font-size:11px;letter-spacing:.04em;
+  border:1px solid rgba(251,251,249,.22);padding:7px 12px;border-radius:99px;
+  color:#C9D1D6;
+}
+.chipstat b{color:var(--signal);font-weight:600}
+/* faint route lines in hero background */
+.hero__grid{
+  position:absolute;inset:0;z-index:1;opacity:.5;
+  background-image:linear-gradient(90deg,rgba(154,163,168,.13) 1px,transparent 1px);
+  background-size:56px 100%;
+}
+
+/* ---------- controls ---------- */
+.controls{
+  position:sticky;top:53px;z-index:50;
+  background:var(--concrete);border-bottom:1px solid rgba(22,32,43,.14);
+}
+.controls__in{
+  max-width:1200px;margin:0 auto;padding:12px var(--gut);
+  display:flex;gap:12px;align-items:center;
+}
+.cats{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;flex:1}
+.cats::-webkit-scrollbar{display:none}
+.cat{
+  white-space:nowrap;padding:7px 14px;border-radius:99px;
+  border:1px solid rgba(22,32,43,.2);font-size:13px;font-weight:600;
+  transition:background .15s,color .15s,border-color .15s;
+}
+.cat[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.search{
+  border:1px solid rgba(22,32,43,.2);border-radius:99px;background:var(--paper);
+  padding:8px 14px;width:170px;font-size:13px;
+}
+.search::placeholder{color:var(--chrome)}
+
+/* ---------- grid ---------- */
+.wrap{max-width:1200px;margin:0 auto;padding:26px var(--gut) 70px}
+.grid{
+  display:grid;gap:14px;
+  grid-template-columns:repeat(auto-fill,minmax(158px,1fr));
+}
+.card{
+  background:var(--paper);border:1px solid rgba(22,32,43,.13);border-radius:var(--radius);
+  display:flex;flex-direction:column;overflow:hidden;
+  transition:transform .18s ease,box-shadow .18s ease;
+  text-align:left;
+}
+.card:hover{transform:translateY(-3px);box-shadow:0 10px 26px -14px rgba(22,32,43,.5)}
+.card__art{
+  aspect-ratio:1;background:#DFE1DC;position:relative;
+  display:grid;place-items:center;overflow:hidden;
+}
+.card__art img{width:100%;height:100%;object-fit:cover}
+.card__art svg{width:62%;height:62%;opacity:.62}
+.card__flag{
+  position:absolute;top:8px;left:8px;
+  font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+  background:var(--oxide);color:#fff;padding:3px 7px;border-radius:2px;
+}
+.card__flag--cert{background:var(--ink);color:var(--signal)}
+.card__vid{
+  position:absolute;right:8px;bottom:8px;
+  width:26px;height:26px;border-radius:99px;
+  background:var(--ink);color:var(--signal);
+  display:grid;place-items:center;font-size:10px;
+  box-shadow:0 2px 8px rgba(0,0,0,.35);
+  pointer-events:none;
+}
+.card__body{padding:11px 12px 13px;display:flex;flex-direction:column;flex:1;gap:3px}
+.card__brand{
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--chrome);
+}
+.card__name{font-size:13.5px;font-weight:600;line-height:1.3;margin-bottom:5px}
+.card__price{margin-top:auto;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.usd{font-family:var(--mono);font-weight:600;font-size:17px}
+.khr{font-family:var(--mono);font-size:10.5px;color:var(--oxide)}
+.card__cta{
+  margin-top:9px;width:100%;padding:8px;border-radius:2px;
+  background:var(--ink);color:var(--paper);font-size:12px;font-weight:700;
+  letter-spacing:.02em;transition:background .15s;
+}
+.card__cta:hover{background:var(--signal);color:var(--ink)}
+.empty{
+  grid-column:1/-1;padding:54px 20px;text-align:center;color:var(--chrome);
+  border:1px dashed rgba(22,32,43,.25);border-radius:var(--radius);
+}
+
+/* ---------- info strip ---------- */
+.strip{background:var(--ink);color:var(--paper)}
+.strip__in{
+  max-width:1200px;margin:0 auto;padding:34px var(--gut);
+  display:grid;gap:22px;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+}
+.strip h3{
+  font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--signal);margin-bottom:9px;
+}
+.strip p{color:#C9D1D6;font-size:13.5px}
+
+/* ---------- drawer / modal shell ---------- */
+.scrim{
+  position:fixed;inset:0;background:rgba(22,32,43,.62);z-index:90;
+  opacity:0;pointer-events:none;transition:opacity .22s;
+}
+.scrim.on{opacity:1;pointer-events:auto}
+.drawer{
+  position:fixed;top:0;right:0;bottom:0;width:min(420px,100%);
+  background:var(--concrete);z-index:100;display:flex;flex-direction:column;
+  transform:translateX(102%);transition:transform .28s cubic-bezier(.4,0,.2,1);
+}
+.drawer.on{transform:translateX(0)}
+.drawer__head{
+  background:var(--ink);color:var(--paper);padding:15px var(--gut);
+  display:flex;align-items:center;gap:12px;
+}
+.drawer__head h2{font-family:var(--display);font-weight:400;font-size:16px;text-transform:uppercase;letter-spacing:-.01em;flex:1}
+:lang(km) .drawer__head h2{font-family:var(--body);font-weight:700;text-transform:none}
+.x{font-size:22px;line-height:1;width:32px;height:32px;border-radius:99px;display:grid;place-items:center}
+.x:hover{background:rgba(251,251,249,.14)}
+.drawer__body{flex:1;overflow-y:auto;padding:16px var(--gut)}
+.drawer__foot{
+  padding:14px var(--gut);border-top:1px solid rgba(22,32,43,.16);background:var(--paper);
+}
+
+/* ---------- cart lines ---------- */
+.line{display:flex;gap:11px;padding:11px 0;border-bottom:1px solid rgba(22,32,43,.12)}
+.line__art{
+  width:56px;height:56px;flex:none;background:#DFE1DC;border-radius:2px;
+  display:grid;place-items:center;overflow:hidden;
+}
+.line__art img{width:100%;height:100%;object-fit:cover}
+.line__art svg{width:64%;height:64%;opacity:.6}
+.line__main{flex:1;min-width:0}
+.line__name{font-size:13px;font-weight:600;line-height:1.3}
+.line__price{font-family:var(--mono);font-size:12px;color:var(--chrome);margin-top:2px}
+.qty{display:flex;align-items:center;gap:9px;margin-top:7px}
+.qty button{
+  width:25px;height:25px;border:1px solid rgba(22,32,43,.24);border-radius:2px;
+  display:grid;place-items:center;font-size:15px;line-height:1;
+}
+.qty button:hover{background:var(--ink);color:var(--paper)}
+.qty span{font-family:var(--mono);font-size:13px;min-width:18px;text-align:center}
+.line__rm{font-size:11px;color:var(--oxide);text-decoration:underline;align-self:flex-start}
+
+.total{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:11px}
+.total__lab{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--chrome)}
+.total__val{text-align:right}
+.total__val .usd{font-size:22px}
+.btn{
+  width:100%;padding:13px;border-radius:2px;font-weight:700;font-size:14px;
+  background:var(--signal);color:var(--ink);transition:filter .15s;
+}
+.btn:hover{filter:brightness(.93)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn--ghost{background:none;border:1px solid rgba(22,32,43,.28);color:var(--ink);margin-top:8px}
+
+/* ---------- form ---------- */
+.field{margin-bottom:13px}
+.field label{
+  display:block;font-family:var(--mono);font-size:10px;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--chrome);margin-bottom:5px;
+}
+.field input,.field select,.field textarea{
+  width:100%;padding:11px 12px;background:var(--paper);
+  border:1px solid rgba(22,32,43,.22);border-radius:2px;font-size:14px;
+}
+.field textarea{min-height:66px;resize:vertical}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--ink);outline:none;box-shadow:0 0 0 3px rgba(242,164,19,.3)}
+.pays{display:grid;gap:7px}
+.pay{
+  display:flex;align-items:center;gap:10px;padding:11px 12px;background:var(--paper);
+  border:1px solid rgba(22,32,43,.22);border-radius:2px;cursor:pointer;font-size:13.5px;
+}
+.pay input{accent-color:var(--ink)}
+.pay:has(input:checked){border-color:var(--ink);box-shadow:inset 3px 0 0 var(--signal)}
+.note{font-size:11.5px;color:var(--chrome);margin-top:9px;line-height:1.45}
+
+/* ---------- product sheet ---------- */
+.sheet{
+  position:fixed;left:50%;top:50%;transform:translate(-50%,-46%) scale(.97);
+  width:min(560px,calc(100% - 24px));max-height:88vh;overflow-y:auto;
+  background:var(--concrete);z-index:100;border-radius:var(--radius);
+  opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;
+}
+.sheet.on{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
+.sheet__art{aspect-ratio:16/10;background:#DFE1DC;display:grid;place-items:center;position:relative}
+.sheet__art img{width:100%;height:100%;object-fit:cover}
+.sheet__art svg{width:38%;height:38%;opacity:.6}
+.sheet__x{position:absolute;top:10px;right:10px;background:var(--ink);color:var(--paper)}
+.gal{display:flex;gap:7px;padding:9px var(--gut) 0;flex-wrap:wrap}
+.gal__t{width:54px;height:54px;border:2px solid transparent;border-radius:2px;overflow:hidden;padding:0;background:#DFE1DC;opacity:.7;transition:opacity .15s,border-color .15s}
+.gal__t img{width:100%;height:100%;object-fit:cover}
+.gal__t.on,.gal__t:hover{opacity:1;border-color:var(--signal)}
+.vid{position:relative;aspect-ratio:16/9;margin-bottom:12px;border-radius:2px;overflow:hidden;background:var(--ink)}
+.vid iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.sheet__body{padding:18px var(--gut) var(--gut)}
+.sheet h2{font-size:20px;font-weight:700;line-height:1.25;margin:4px 0 8px}
+.sheet__desc{font-size:14px;color:#4A5661;margin:12px 0 16px}
+.specs{
+  display:grid;gap:0;border-top:1px solid rgba(22,32,43,.14);margin-bottom:16px;
+}
+.spec{
+  display:flex;justify-content:space-between;gap:14px;padding:9px 0;
+  border-bottom:1px solid rgba(22,32,43,.1);font-size:13px;
+}
+.spec dt{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--chrome)}
+.spec dd{text-align:right;font-weight:600}
+
+/* ---------- toast ---------- */
+.toast{
+  position:fixed;left:50%;bottom:24px;transform:translate(-50%,18px);
+  background:var(--ink);color:var(--paper);padding:12px 20px;border-radius:99px;
+  font-size:13px;font-weight:600;z-index:120;opacity:0;pointer-events:none;
+  transition:opacity .2s,transform .2s;box-shadow:0 8px 26px -10px rgba(0,0,0,.6);
+}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* ---------- success ---------- */
+.done{text-align:center;padding:26px 6px}
+.done__tick{
+  width:58px;height:58px;border-radius:99px;background:var(--signal);color:var(--ink);
+  display:grid;place-items:center;margin:0 auto 16px;font-size:28px;font-weight:700;
+}
+.done h3{font-size:19px;font-weight:700;margin-bottom:8px}
+.done p{font-size:13.5px;color:#4A5661;margin-bottom:6px}
+.done__ref{font-family:var(--mono);font-size:13px;background:var(--paper);border:1px dashed rgba(22,32,43,.3);padding:9px;border-radius:2px;margin:14px 0}
+
+/* ---------- footer ---------- */
+.foot{background:var(--ink);color:var(--chrome);font-size:12px}
+.foot__in{max-width:1200px;margin:0 auto;padding:24px var(--gut);display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+.foot__in a{color:var(--signal);text-decoration:none}
+.fbbtn{
+  display:inline-flex;align-items:center;gap:6px;
+  border:1px solid rgba(242,164,19,.5);border-radius:99px;
+  padding:5px 12px;font-weight:700;font-size:11.5px;margin-left:4px;
+}
+.fbbtn:hover{background:var(--signal);color:var(--ink) !important;text-decoration:none !important}
+.foot__in a:hover{text-decoration:underline}
+
+/* ---------- admin ---------- */
+.orders__row{
+  background:var(--paper);border:1px solid rgba(22,32,43,.14);border-radius:2px;
+  padding:12px;margin-bottom:9px;font-size:13px;
+}
+.orders__row b{font-family:var(--mono);font-size:11.5px}
+.orders__meta{color:var(--chrome);font-size:11.5px;margin-top:4px}
+
+@media (max-width:520px){
+  .controls{top:53px}
+  .search{width:110px}
+  .brand__sub{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition-duration:.01ms !important;animation-duration:.01ms !important}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ ANNOUNCE + TOP BAR ═══════════════ -->
+<div class="announce" data-i="promo">$2 delivery in Phnom Penh &amp; provinces — sent every day!</div>
+<header class="topbar">
+  <div class="topbar__in">
+    <div class="brand" id="brand">
+      <svg class="brand__logo" viewBox="0 0 48 48" aria-hidden="true">
+        <!-- ninja full-face helmet mark -->
+        <path d="M8 27a16 16 0 0 1 32 0v9a4 4 0 0 1-4 4H12a4 4 0 0 1-4-4z" fill="#FBFBF9"/>
+        <path d="M8 27a16 16 0 0 1 32 0v2H8z" fill="none"/>
+        <rect x="12" y="23" width="24" height="6" rx="3" fill="#F2A413"/>
+        <rect x="15" y="25" width="12" height="2" rx="1" fill="#16202B" opacity=".55"/>
+        <path d="M40 33h6l-3 3z" fill="#F2A413"/>
+        <path d="M30 8 44 3l-4 12" fill="none" stroke="#F2A413" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="brand__txt">
+        <span class="brand__mark">NIJA<em>.</em></span>
+        <span class="brand__sub">Helmets</span>
+      </span>
+    </div>
+    <div class="topbar__spacer"></div>
+    <div class="langtog" role="group" aria-label="Language">
+      <button id="langEn" aria-pressed="true">EN</button>
+      <button id="langKm" aria-pressed="false">ខ្មែរ</button>
+    </div>
+    <button class="cartbtn" id="cartOpen">
+      <span data-i="cart">Cart</span>
+      <span class="cartbtn__n" id="cartN">0</span>
+    </button>
+  </div>
+</header>
+<div class="tape"></div>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<section class="hero">
+  <div class="hero__grid"></div>
+  <div class="hero__in">
+    <div class="hero__eyebrow" data-i="eyebrow">Helmets · Bags · Riding gear</div>
+    <h1 data-i="heroTitle">Gear that gets you <em>home</em>.</h1>
+    <p data-i="heroSub">Certified helmets, waterproof tail bags and daily riding kit — priced in dollars and riel, delivered anywhere in Cambodia.</p>
+    <div class="hero__stats">
+      <span class="chipstat"><b>1–3</b> <span data-i="statDays">day delivery</span></span>
+      <span class="chipstat"><b>COD</b> <span data-i="statCod">available</span></span>
+      <span class="chipstat"><b>ABA</b> · KHQR · Wing</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ FILTERS ═══════════════ -->
+<div class="controls">
+  <div class="controls__in">
+    <div class="cats" id="cats"></div>
+    <input class="search" id="search" type="search" placeholder="Search" aria-label="Search products">
+  </div>
+</div>
+
+<!-- ═══════════════ PRODUCT GRID ═══════════════ -->
+<main class="wrap">
+  <div class="grid" id="grid"></div>
+</main>
+
+<!-- ═══════════════ INFO ═══════════════ -->
+<div class="tape tape--thin"></div>
+<section class="strip">
+  <div class="strip__in">
+    <div>
+      <h3 data-i="infoPayT">How to pay</h3>
+      <p data-i="infoPayB">Cash on delivery in Phnom Penh, or transfer by ABA Pay, KHQR, Wing or ACLEDA before we ship.</p>
+    </div>
+    <div>
+      <h3 data-i="infoShipT">Delivery</h3>
+      <p data-i="infoShipB">Same or next day inside Phnom Penh. 2–3 days to the provinces by J&amp;T or VET Express.</p>
+    </div>
+    <div>
+      <h3 data-i="infoFitT">Helmet sizing</h3>
+      <p data-i="infoFitB">Measure around your head just above the eyebrows. Send us the number in centimetres and we will pick the size.</p>
+    </div>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="foot__in">
+    <span>© <span id="yr"></span> NIJA Helmets</span>
+    <span>·</span>
+    <span data-i="footContact">Telegram / Phone</span>:
+    <a href="#" id="footTg">@yourshop</a>
+    <span>·</span>
+    <a href="#" id="footPh">078 801 070</a>
+    <a href="#" id="footFb" target="_blank" rel="noopener" class="fbbtn" aria-label="Facebook page">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.5 22v-8h2.7l.4-3.2h-3.1V8.7c0-.9.3-1.6 1.7-1.6h1.5V4.2c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4v2.7H7.8V14h2.7v8z"/></svg>
+      <span>NIJA Helmets</span>
+    </a>
+    <div class="topbar__spacer"></div>
+    <button id="adminBtn" style="font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--chrome)">ADMIN</button>
+  </div>
+</footer>
+
+<!-- ═══════════════ OVERLAYS ═══════════════ -->
+<div class="scrim" id="scrim"></div>
+
+<aside class="drawer" id="cart" aria-hidden="true">
+  <div class="drawer__head">
+    <h2 data-i="cartTitle">Your order</h2>
+    <button class="x" id="cartClose" aria-label="Close">×</button>
+  </div>
+  <div class="drawer__body" id="cartBody"></div>
+  <div class="drawer__foot" id="cartFoot"></div>
+</aside>
+
+<section class="sheet" id="sheet" aria-hidden="true"></section>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════
+   1 ── SETTINGS — edit this block only
+   ══════════════════════════════════════════════════════════════ */
+const SETTINGS = {
+  shopName:  "NIJA Helmets",
+  telegram:  "Sengphengto",       // your Telegram username, no @
+  phone:     "078 801 070",
+  facebook:  "https://www.facebook.com/profile.php?id=61557152730640",
+  khrRate:   4100,                // riel per US dollar
+
+  // Leave projectId "" to run on the built-in demo products below.
+  // Fill it in to load products + save orders in your own Firebase.
+  firebase: {
+    projectId: "nija-helmets",                // e.g. "ridekit-shop"
+    apiKey:    "AIzaSyApyTWsALmtURKP73n8zYi6hAT7lzzgJOk",                // Web API key from Firebase console
+    products:  "shop_products",
+    orders:    "shop_orders"
+  },
+
+  // Optional: order alerts straight to Telegram.
+  // Note: a bot token placed here is visible to anyone who views the
+  // page source. Fine for a small shop, but use a bot that can only
+  // message you. Leave blank to use the "Send on Telegram" button instead.
+  bot: { token: "", chatId: "" },
+
+  adminPin: "1234"
+};
+
+/* ══════════════════════════════════════════════════════════════
+   2 ── DEMO PRODUCTS  ("hardcoded" — typed straight into the file)
+        Delete or replace these once Firebase is connected.
+        cat: helmet | bag | gear
+   ══════════════════════════════════════════════════════════════ */
+const DEMO = [
+  { id:"H1", cat:"helmet", brand:"Index", usd:38, en:"Full-face helmet, matte black", km:"មួកសុវត្ថិភាពពេញមុខ ពណ៌ខ្មៅ",
+    enD:"Hard-shell full-face with clear visor and washable inner lining. Certified to DOT standard.",
+    kmD:"មួកពេញមុខ សំបកររឹង មានកញ្ចក់ថ្លា និងស្រទាប់ក្នុងអាចលាងបាន។",
+    specs:[["Sizes","M · L · XL"],["Shell","ABS"],["Visor","Clear + smoke"],["Cert","DOT"]], flag:"cert" },
+  { id:"H2", cat:"helmet", brand:"Index", usd:29, en:"Open-face helmet with sun visor", km:"មួកបើកមុខ មានកញ្ចក់ការពារថ្ងៃ",
+    enD:"Light open-face for city riding. Drop-down tinted visor for afternoon sun.",
+    kmD:"មួកបើកមុខ ស្រាល សម្រាប់ជិះក្នុងក្រុង។ មានកញ្ចក់ការពារពន្លឺថ្ងៃ។",
+    specs:[["Sizes","M · L · XL"],["Weight","950 g"],["Visor","Drop-down tint"]] },
+  { id:"H3", cat:"helmet", brand:"Vega", usd:62, en:"Modular flip-up helmet", km:"មួកបត់ចំហមុខបាន",
+    enD:"Chin bar flips up so you can talk, drink or take a call without removing the helmet.",
+    kmD:"ផ្នែកចង្កាអាចបត់ឡើងលើ ដើម្បីនិយាយ ឬផឹកទឹក ដោយមិនចាំបាច់ដោះមួក។",
+    specs:[["Sizes","L · XL"],["Shell","Polycarbonate"],["Cert","ECE 22.06"]], flag:"cert" },
+
+  { id:"B1", cat:"bag", brand:"Rhinowalk", usd:26, en:"Waterproof tail bag, 20 L", km:"កាបូបក្រោយម៉ូតូ ការពារទឹក ២០ លីត្រ",
+    enD:"Roll-top seal keeps rain out through monsoon season. Straps to any rear rack or pillion seat.",
+    kmD:"បិទបែបរមូរ ការពារទឹកភ្លៀងបានល្អ។ ចងបានលើកង្រឹលក្រោយ ឬកៅអីអ្នកជិះក្រោយ។",
+    specs:[["Volume","20 L"],["Material","500D tarpaulin"],["Rain","Fully sealed"]] },
+  { id:"B2", cat:"bag", brand:"Rhinowalk", usd:19, en:"Fuel tank bag with phone window", km:"កាបូបលើធុងសាំង មានកន្លែងដាក់ទូរស័ព្ទ",
+    enD:"Magnetic base, clear touch-through window on top so you can follow the map while riding.",
+    kmD:"បាតមេដែក មានផ្ទាំងថ្លាអាចប៉ះទូរស័ព្ទបាន ដើម្បីមើលផែនទីពេលបើកបរ។",
+    specs:[["Volume","6 L"],["Mount","Magnetic"],["Phone","Up to 6.7 in"]] },
+  { id:"B3", cat:"bag", brand:"Givi", usd:74, en:"Hard top box, 30 L, with lock", km:"ប្រអប់រឹងក្រោយម៉ូតូ ៣០ លីត្រ មានសោ",
+    enD:"Lockable hard case that fits one full-face helmet. Mounting plate included.",
+    kmD:"ប្រអប់រឹងមានសោ ដាក់មួកពេញមុខបាន ១។ មានបន្ទះសម្រាប់ភ្ជាប់។",
+    specs:[["Volume","30 L"],["Fits","1 full-face"],["Lock","Keyed"]], flag:"new" },
+
+  { id:"G1", cat:"gear", brand:"Pro-biker", usd:11, en:"Riding gloves, touchscreen tips", km:"ស្រោមដៃបើកបរ ប៉ះអេក្រង់បាន",
+    enD:"Knuckle protection with breathable mesh back. Index finger works on your phone screen.",
+    kmD:"ការពារសន្លាក់ដៃ ខ្នងសំណាញ់ខ្យល់ចេញចូល។ ម្រាមចង្អុលអាចប៉ះអេក្រង់ទូរស័ព្ទបាន។",
+    specs:[["Sizes","M · L · XL"],["Palm","Reinforced"]] },
+  { id:"G2", cat:"gear", brand:"Generic", usd:7, en:"Two-piece rain suit", km:"អាវភ្លៀងពីរផ្នែក",
+    enD:"Jacket and trousers with taped seams and a storage pouch that fits under the seat.",
+    kmD:"អាវ និងខោ ថ្នេរបិទជិត មានថង់ដាក់ក្រោមកៅអី។",
+    specs:[["Sizes","L · XL · XXL"],["Colours","Navy · Olive"]] },
+  { id:"G3", cat:"gear", brand:"Baseus", usd:9, en:"Handlebar phone mount", km:"ជើងទម្រទូរស័ព្ទលើដង",
+    enD:"Aluminium clamp with silicone corner grips. Holds through Phnom Penh potholes.",
+    kmD:"ដង្កៀបអាលុយមីញ៉ូម មានជ័រកាន់ជ្រុង។ កាន់ជាប់ល្អ ទោះផ្លូវរដិបរដុប។",
+    specs:[["Fits","22–32 mm bar"],["Phone","4.7–7 in"]] },
+  { id:"G4", cat:"gear", brand:"Kovix", usd:16, en:"Disc brake lock with alarm", km:"សោហ្វ្រាំង មានកញ្ជ្រោងសំឡេង",
+    enD:"110 dB alarm sounds if the bike is moved. Reminder cable included so you do not ride off with it on.",
+    kmD:"សំឡេងរោទ៍ ១១០ dB ពេលមានគេចលនាម៉ូតូ។ មានខ្សែរំលឹកភ្ជាប់ជាមួយ។",
+    specs:[["Alarm","110 dB"],["Pin","5.5 mm"]], flag:"new" }
+];
+
+/* ══════════════════════════════════════════════════════════════
+   3 ── TEXT IN TWO LANGUAGES
+   ══════════════════════════════════════════════════════════════ */
+const T = {
+  en:{
+    promo:"$2 delivery in Phnom Penh & provinces — sent every day!",
+    cart:"Cart", eyebrow:"NIJA Helmets · Phnom Penh",
+    heroTitle:'Gear that gets you <em>home</em>.',
+    heroSub:"Certified helmets, waterproof tail bags and daily riding kit — priced in dollars and riel, delivered anywhere in Cambodia.",
+    statDays:"day delivery", statCod:"available",
+    infoPayT:"How to pay", infoPayB:"Cash on delivery in Phnom Penh, or transfer by ABA Pay, KHQR, Wing or ACLEDA before we ship.",
+    infoShipT:"Delivery", infoShipB:"Same or next day inside Phnom Penh. 2–3 days to the provinces by J&T or VET Express.",
+    infoFitT:"Helmet sizing", infoFitB:"Measure around your head just above the eyebrows. Send us the number in centimetres and we will pick the size.",
+    footContact:"Telegram / Phone",
+    all:"All", helmet:"Helmets", bag:"Bags", gear:"Accessories",
+    search:"Search", noResults:"Nothing matches that search yet. Try another word or pick a different category.",
+    add:"Add to order", added:"Added to your order", cartTitle:"Your order", watchVideo:"Watch video",
+    emptyCart:"Your order is empty. Add a helmet or a bag to get started.",
+    total:"Total", checkout:"Continue to details", keepShopping:"Keep looking",
+    remove:"Remove", details:"Delivery details",
+    fName:"Your name", fPhone:"Phone / Telegram", fProvince:"Province or city",
+    fAddress:"Delivery address", fNote:"Note for us (optional)", fPay:"Payment",
+    payCod:"Cash on delivery", payAba:"ABA Pay / KHQR", payWing:"Wing", payBank:"Bank transfer",
+    placeOrder:"Place order", sending:"Sending…", back:"Back to order",
+    fillAll:"Please fill in your name, phone and address.",
+    doneT:"Order received", doneB:"We will message you on Telegram to confirm stock and delivery time.",
+    ref:"Reference", sendTg:"Send this order on Telegram", newOrder:"Back to shop",
+    unit:"each", offline:"Saved on this device — send it on Telegram so we see it.",
+    adminT:"Recent orders", adminPin:"Enter admin PIN", adminNo:"Wrong PIN.",
+    adminEmpty:"No orders yet.", adminNeedFb:"Connect Firebase to store and read orders.",
+    loading:"Loading products…"
+  },
+  km:{
+    promo:"ដឹកជញ្ជូន $2 ក្នុងភ្នំពេញ និងខេត្ត — ផ្ញើរាល់ថ្ងៃ!",
+    cart:"កន្ត្រក", eyebrow:"NIJA Helmets · ភ្នំពេញ",
+    heroTitle:'ឧបករណ៍ដែលនាំអ្នក<em>ដល់ផ្ទះ</em>',
+    heroSub:"មួកសុវត្ថិភាព កាបូបការពារទឹក និងឧបករណ៍ជិះម៉ូតូប្រចាំថ្ងៃ — តម្លៃជាដុល្លារ និងរៀល ដឹកជញ្ជូនទូទាំងប្រទេស។",
+    statDays:"ថ្ងៃ ដឹកជញ្ជូន", statCod:"បង់ពេលទទួល",
+    infoPayT:"របៀបបង់ប្រាក់", infoPayB:"បង់ប្រាក់ពេលទទួលទំនិញនៅភ្នំពេញ ឬផ្ទេរតាម ABA Pay, KHQR, Wing ឬ ACLEDA មុនពេលដឹក។",
+    infoShipT:"ការដឹកជញ្ជូន", infoShipB:"ដឹកជូនក្នុងថ្ងៃ ឬថ្ងៃបន្ទាប់នៅភ្នំពេញ ២–៣ ថ្ងៃ ទៅខេត្ត តាម J&T ឬ VET Express។",
+    infoFitT:"ការជ្រើសទំហំមួក", infoFitB:"វាស់ជុំវិញក្បាល ខាងលើចិញ្ចើមបន្តិច ផ្ញើលេខជាសង់ទីម៉ែត្រមកយើង យើងនឹងជ្រើសទំហំឲ្យ។",
+    footContact:"តេលេក្រាម / ទូរស័ព្ទ",
+    all:"ទាំងអស់", helmet:"មួក", bag:"កាបូប", gear:"គ្រឿងបន្លាស់",
+    search:"ស្វែងរក", noResults:"រកមិនឃើញទេ សូមសាកល្បងពាក្យផ្សេង ឬជ្រើសប្រភេទផ្សេង។",
+    add:"បញ្ចូលការបញ្ជាទិញ", added:"បានបញ្ចូលរួចរាល់", cartTitle:"ការបញ្ជាទិញរបស់អ្នក", watchVideo:"មើលវីដេអូ",
+    emptyCart:"មិនទាន់មានទំនិញទេ។ សូមជ្រើសមួក ឬកាបូបជាមុនសិន។",
+    total:"សរុប", checkout:"បន្តទៅព័ត៌មាន", keepShopping:"បន្តមើលទំនិញ",
+    remove:"លុបចេញ", details:"ព័ត៌មានដឹកជញ្ជូន",
+    fName:"ឈ្មោះរបស់អ្នក", fPhone:"ទូរស័ព្ទ / តេលេក្រាម", fProvince:"ខេត្ត ឬ ក្រុង",
+    fAddress:"អាសយដ្ឋានដឹកជញ្ជូន", fNote:"សម្គាល់ (បើមាន)", fPay:"ការបង់ប្រាក់",
+    payCod:"បង់ប្រាក់ពេលទទួល", payAba:"ABA Pay / KHQR", payWing:"Wing", payBank:"ផ្ទេរតាមធនាគារ",
+    placeOrder:"បញ្ជាទិញ", sending:"កំពុងផ្ញើ…", back:"ត្រឡប់ក្រោយ",
+    fillAll:"សូមបំពេញឈ្មោះ លេខទូរស័ព្ទ និងអាសយដ្ឋាន។",
+    doneT:"បានទទួលការបញ្ជាទិញ", doneB:"យើងនឹងផ្ញើសារតាមតេលេក្រាម ដើម្បីបញ្ជាក់ស្តុក និងពេលដឹកជញ្ជូន។",
+    ref:"លេខយោង", sendTg:"ផ្ញើការបញ្ជាទិញតាមតេលេក្រាម", newOrder:"ត្រឡប់ទៅហាង",
+    unit:"ក្នុងមួយ", offline:"បានរក្សាទុកក្នុងឧបករណ៍ — សូមផ្ញើតាមតេលេក្រាមដើម្បីឲ្យយើងឃើញ។",
+    adminT:"ការបញ្ជាទិញថ្មីៗ", adminPin:"បញ្ចូលលេខសម្ងាត់អ្នកគ្រប់គ្រង", adminNo:"លេខសម្ងាត់មិនត្រឹមត្រូវ។",
+    adminEmpty:"មិនទាន់មានការបញ្ជាទិញទេ។", adminNeedFb:"ភ្ជាប់ Firebase ដើម្បីរក្សាទុកការបញ្ជាទិញ។",
+    loading:"កំពុងទាញទំនិញ…"
+  }
+};
+
+/* ══════════════════════════════════════════════════════════════
+   4 ── STATE + HELPERS
+   ══════════════════════════════════════════════════════════════ */
+let lang = "en";
+let products = [];
+let cart = [];          // {id, qty}
+let filterCat = "all";
+let query = "";
+let localOrders = [];   // fallback when Firebase is not connected
+
+const $ = s => document.querySelector(s);
+const t = k => T[lang][k] ?? k;
+const money = usd => "$" + usd.toFixed(2);
+const riel = usd => (Math.round(usd * SETTINGS.khrRate / 100) * 100).toLocaleString("en-US") + " ៛";
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const pName = p => lang === "km" ? (p.km || p.en) : p.en;
+const pDesc = p => lang === "km" ? (p.kmD || p.enD || "") : (p.enD || "");
+
+/* Line-drawn placeholders — used when a product has no photo */
+const ART = {
+  helmet:`<svg viewBox="0 0 100 100" fill="none" stroke="#16202B" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 62a35 35 0 0 1 70 0"/><path d="M15 62v6a6 6 0 0 0 6 6h58a6 6 0 0 0 6-6v-6"/><path d="M28 55a22 22 0 0 1 42-4l13 3"/><path d="M28 55h44"/></svg>`,
+  bag:`<svg viewBox="0 0 100 100" fill="none" stroke="#16202B" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><rect x="18" y="36" width="64" height="42" rx="6"/><path d="M18 48h64"/><path d="M34 36V26a16 16 0 0 1 32 0v10"/><path d="M42 60h16"/></svg>`,
+  gear:`<svg viewBox="0 0 100 100" fill="none" stroke="#16202B" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="50" cy="50" r="15"/><path d="M50 22v-8M50 86v-8M78 50h8M14 50h8M70 30l6-6M24 76l6-6M70 70l6 6M24 24l6 6"/></svg>`
+};
+const photosOf = p => (Array.isArray(p.photos) && p.photos.length) ? p.photos : (p.photo ? [p.photo] : []);
+const art = p => { const ph = photosOf(p)[0]; return ph ? `<img src="${esc(ph)}" alt="${esc(pName(p))}" loading="lazy">` : (ART[p.cat] || ART.gear); };
+function ytId(url){
+  const m = String(url||"").match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|embed\/))([\w-]{6,})/);
+  return m ? m[1] : null;
+}
+
+function toast(msg){
+  const el = $("#toast");
+  el.textContent = msg;
+  el.classList.add("on");
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove("on"), 2200);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   5 ── FIREBASE (REST — no SDK needed)
+   ══════════════════════════════════════════════════════════════ */
+const FB = SETTINGS.firebase;
+const fbOn = () => !!FB.projectId;
+const fbUrl = coll =>
+  `https://firestore.googleapis.com/v1/projects/${FB.projectId}/databases/(default)/documents/${coll}` +
+  (FB.apiKey ? `?key=${FB.apiKey}` : "");
+
+const unwrap = v =>
+  v.stringValue ?? (v.integerValue !== undefined ? +v.integerValue : undefined) ??
+  v.doubleValue ?? v.booleanValue ??
+  (v.arrayValue ? (v.arrayValue.values || []).map(unwrap) : undefined) ??
+  (v.mapValue ? Object.fromEntries(Object.entries(v.mapValue.fields || {}).map(([k, x]) => [k, unwrap(x)])) : undefined) ??
+  null;
+
+const wrap = v =>
+  typeof v === "number" ? { doubleValue: v } :
+  typeof v === "boolean" ? { booleanValue: v } :
+  Array.isArray(v) ? { arrayValue: { values: v.map(wrap) } } :
+  v && typeof v === "object" ? { mapValue: { fields: Object.fromEntries(Object.entries(v).map(([k, x]) => [k, wrap(x)])) } } :
+  { stringValue: String(v ?? "") };
+
+async function loadProducts(){
+  if(!fbOn()) return DEMO;
+  try{
+    const r = await fetch(fbUrl(FB.products) + (FB.apiKey ? "&" : "?") + "pageSize=300");
+    if(!r.ok) throw new Error(r.status);
+    const j = await r.json();
+    const rows = (j.documents || []).map(d => {
+      const f = Object.fromEntries(Object.entries(d.fields || {}).map(([k, v]) => [k, unwrap(v)]));
+      f.id = d.name.split("/").pop();
+      f.usd = Number(f.usd) || 0;
+      f.cat = f.cat || "gear";
+      if(typeof f.specs === "string"){ try{ f.specs = JSON.parse(f.specs); }catch{ f.specs = []; } }
+      return f;
+    }).filter(p => p.en || p.km);
+    return rows.length ? rows : DEMO;
+  }catch(e){
+    console.warn("Firestore read failed, using built-in products:", e);
+    return DEMO;
+  }
+}
+
+async function saveOrder(order){
+  if(!fbOn()){ localOrders.unshift(order); return false; }
+  const r = await fetch(fbUrl(FB.orders), {
+    method:"POST", headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({ fields: Object.fromEntries(Object.entries(order).map(([k, v]) => [k, wrap(v)])) })
+  });
+  if(!r.ok) throw new Error("Firestore write failed: " + r.status);
+  return true;
+}
+
+async function readOrders(){
+  if(!fbOn()) return localOrders;
+  const r = await fetch(fbUrl(FB.orders) + (FB.apiKey ? "&" : "?") + "pageSize=50");
+  if(!r.ok) throw new Error(r.status);
+  const j = await r.json();
+  return (j.documents || [])
+    .map(d => Object.fromEntries(Object.entries(d.fields || {}).map(([k, v]) => [k, unwrap(v)])))
+    .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+}
+
+/* ══════════════════════════════════════════════════════════════
+   6 ── TELEGRAM
+   ══════════════════════════════════════════════════════════════ */
+function orderText(o){
+  return [
+    `🛒 NEW ORDER — ${SETTINGS.shopName}`,
+    `Ref: ${o.ref}`,
+    ``,
+    o.items,
+    ``,
+    `Total: ${money(o.totalUsd)}  (${riel(o.totalUsd)})`,
+    `Pay: ${o.payment}`,
+    ``,
+    `Name: ${o.name}`,
+    `Phone: ${o.phone}`,
+    `Address: ${o.province} — ${o.address}`,
+    o.note ? `Note: ${o.note}` : ``
+  ].filter(Boolean).join("\n");
+}
+
+async function notifyBot(text){
+  const { token, chatId } = SETTINGS.bot;
+  if(!token || !chatId) return false;
+  try{
+    const r = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method:"POST", headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ chat_id: chatId, text })
+    });
+    return r.ok;
+  }catch{ return false; }
+}
+const tgShareLink = text => "https://t.me/share/url?url=" + encodeURIComponent(text);
+
+/* ══════════════════════════════════════════════════════════════
+   7 ── RENDER: catalogue
+   ══════════════════════════════════════════════════════════════ */
+const CATS = ["all", "helmet", "bag", "gear"];
+
+function renderCats(){
+  $("#cats").innerHTML = CATS.map(c =>
+    `<button class="cat" data-cat="${c}" aria-pressed="${c === filterCat}">${esc(t(c))}</button>`
+  ).join("");
+}
+
+function visible(){
+  const q = query.trim().toLowerCase();
+  return products.filter(p => {
+    if(filterCat !== "all" && p.cat !== filterCat) return false;
+    if(!q) return true;
+    return (p.en + " " + (p.km || "") + " " + (p.brand || "")).toLowerCase().includes(q);
+  });
+}
+
+function renderGrid(){
+  const list = visible();
+  if(!list.length){ $("#grid").innerHTML = `<div class="empty">${esc(t("noResults"))}</div>`; return; }
+  $("#grid").innerHTML = list.map(p => `
+    <article class="card">
+      <button class="card__art" data-open="${esc(p.id)}" aria-label="${esc(pName(p))}">
+        ${art(p)}
+        ${p.flag ? `<span class="card__flag ${p.flag === "cert" ? "card__flag--cert" : ""}">${p.flag === "cert" ? "Certified" : "New"}</span>` : ""}
+        ${p.video ? `<span class="card__vid" aria-hidden="true">▶</span>` : ""}
+      </button>
+      <div class="card__body">
+        <div class="card__brand">${esc(p.brand || "")}</div>
+        <button class="card__name" data-open="${esc(p.id)}" style="text-align:left">${esc(pName(p))}</button>
+        <div class="card__price">
+          <span class="usd">${money(p.usd)}</span>
+          <span class="khr">${riel(p.usd)}</span>
+        </div>
+        <button class="card__cta" data-add="${esc(p.id)}">${esc(t("add"))}</button>
+      </div>
+    </article>`).join("");
+}
+
+/* ══════════════════════════════════════════════════════════════
+   8 ── RENDER: product sheet
+   ══════════════════════════════════════════════════════════════ */
+let sheetP = null;
+function openSheet(id){
+  const p = products.find(x => x.id === id);
+  if(!p) return;
+  sheetP = p;
+  const specs = Array.isArray(p.specs) ? p.specs : [];
+  const phs = photosOf(p);
+  const yid = ytId(p.video);
+  $("#sheet").innerHTML = `
+    <div class="sheet__art" id="galMain">
+      ${art(p)}
+      <button class="x sheet__x" data-close-sheet aria-label="Close">×</button>
+    </div>
+    ${phs.length > 1 ? `<div class="gal">${phs.map((ph,i)=>`
+      <button class="gal__t ${i===0?"on":""}" data-gal="${i}"><img src="${esc(ph)}" alt=""></button>`).join("")}</div>` : ""}
+    <div class="sheet__body">
+      <div class="card__brand">${esc(p.brand || "")}</div>
+      <h2>${esc(pName(p))}</h2>
+      <div class="card__price">
+        <span class="usd" style="font-size:24px">${money(p.usd)}</span>
+        <span class="khr" style="font-size:13px">${riel(p.usd)}</span>
+      </div>
+      ${pDesc(p) ? `<p class="sheet__desc">${esc(pDesc(p))}</p>` : ""}
+      ${specs.length ? `<dl class="specs">${specs.map(s =>
+        `<div class="spec"><dt>${esc(s[0])}</dt><dd>${esc(s[1])}</dd></div>`).join("")}</dl>` : ""}
+      ${yid ? `<div class="vid"><iframe src="https://www.youtube.com/embed/${yid}" title="Product video" allowfullscreen loading="lazy"></iframe></div>`
+        : (p.video ? `<a class="btn btn--ghost" style="display:block;text-align:center;text-decoration:none;margin:0 0 10px" href="${esc(p.video)}" target="_blank" rel="noopener">▶ ${esc(t("watchVideo"))}</a>` : "")}
+      <button class="btn" data-add="${esc(p.id)}">${esc(t("add"))}</button>
+    </div>`;
+  $("#sheet").classList.add("on");
+  $("#sheet").setAttribute("aria-hidden", "false");
+  $("#scrim").classList.add("on");
+  document.body.classList.add("lock");
+}
+
+function closeOverlays(){
+  $("#sheet").classList.remove("on"); $("#sheet").setAttribute("aria-hidden", "true");
+  $("#cart").classList.remove("on");  $("#cart").setAttribute("aria-hidden", "true");
+  $("#scrim").classList.remove("on");
+  document.body.classList.remove("lock");
+}
+
+/* ══════════════════════════════════════════════════════════════
+   9 ── CART
+   ══════════════════════════════════════════════════════════════ */
+const cartLines = () => cart.map(c => ({ ...c, p: products.find(p => p.id === c.id) })).filter(x => x.p);
+const cartTotal = () => cartLines().reduce((s, x) => s + x.p.usd * x.qty, 0);
+const cartCount = () => cart.reduce((s, c) => s + c.qty, 0);
+
+function addToCart(id){
+  const line = cart.find(c => c.id === id);
+  if(line) line.qty++; else cart.push({ id, qty:1 });
+  $("#cartN").textContent = cartCount();
+  toast(t("added"));
+  if($("#cart").classList.contains("on")) renderCart();
+}
+function setQty(id, d){
+  const line = cart.find(c => c.id === id);
+  if(!line) return;
+  line.qty += d;
+  if(line.qty < 1) cart = cart.filter(c => c.id !== id);
+  $("#cartN").textContent = cartCount();
+  renderCart();
+}
+
+function openCart(){
+  renderCart();
+  $("#cart").classList.add("on");
+  $("#cart").setAttribute("aria-hidden", "false");
+  $("#scrim").classList.add("on");
+  document.body.classList.add("lock");
+}
+
+function renderCart(){
+  $("#cart").querySelector("h2").textContent = t("cartTitle");
+  const lines = cartLines();
+  if(!lines.length){
+    $("#cartBody").innerHTML = `<div class="empty" style="border:none">${esc(t("emptyCart"))}</div>`;
+    $("#cartFoot").innerHTML = `<button class="btn btn--ghost" data-close style="margin-top:0">${esc(t("keepShopping"))}</button>`;
+    return;
+  }
+  $("#cartBody").innerHTML = lines.map(x => `
+    <div class="line">
+      <div class="line__art">${art(x.p)}</div>
+      <div class="line__main">
+        <div class="line__name">${esc(pName(x.p))}</div>
+        <div class="line__price">${money(x.p.usd)} ${esc(t("unit"))} · ${riel(x.p.usd)}</div>
+        <div class="qty">
+          <button data-q="-1" data-id="${esc(x.id)}" aria-label="Less">−</button>
+          <span>${x.qty}</span>
+          <button data-q="1" data-id="${esc(x.id)}" aria-label="More">+</button>
+          <div style="flex:1"></div>
+          <span class="usd" style="font-size:14px">${money(x.p.usd * x.qty)}</span>
+        </div>
+      </div>
+    </div>`).join("");
+  $("#cartFoot").innerHTML = `
+    <div class="total">
+      <span class="total__lab">${esc(t("total"))}</span>
+      <span class="total__val">
+        <span class="usd">${money(cartTotal())}</span><br>
+        <span class="khr">${riel(cartTotal())}</span>
+      </span>
+    </div>
+    <button class="btn" data-step="form">${esc(t("checkout"))}</button>
+    <button class="btn btn--ghost" data-close>${esc(t("keepShopping"))}</button>`;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   10 ── CHECKOUT
+   ══════════════════════════════════════════════════════════════ */
+const PROVINCES = ["Phnom Penh","Kandal","Siem Reap","Battambang","Kampong Cham","Kampong Speu","Kampong Thom","Kampong Chhnang","Preah Sihanouk","Takeo","Kampot","Prey Veng","Svay Rieng","Banteay Meanchey","Pursat","Kratie","Tboung Khmum","Other"];
+
+function renderForm(){
+  $("#cart").querySelector("h2").textContent = t("details");
+  $("#cartBody").innerHTML = `
+    <div class="field"><label for="fName">${esc(t("fName"))}</label><input id="fName" autocomplete="name"></div>
+    <div class="field"><label for="fPhone">${esc(t("fPhone"))}</label><input id="fPhone" inputmode="tel" autocomplete="tel" placeholder="012 345 678"></div>
+    <div class="field"><label for="fProvince">${esc(t("fProvince"))}</label>
+      <select id="fProvince">${PROVINCES.map(p => `<option>${p}</option>`).join("")}</select></div>
+    <div class="field"><label for="fAddress">${esc(t("fAddress"))}</label><textarea id="fAddress" placeholder="St. 271, Sangkat Toul Tumpoung"></textarea></div>
+    <div class="field"><label>${esc(t("fPay"))}</label>
+      <div class="pays">
+        <label class="pay"><input type="radio" name="pay" value="Cash on delivery" checked>${esc(t("payCod"))}</label>
+        <label class="pay"><input type="radio" name="pay" value="ABA Pay / KHQR">${esc(t("payAba"))}</label>
+        <label class="pay"><input type="radio" name="pay" value="Wing">${esc(t("payWing"))}</label>
+        <label class="pay"><input type="radio" name="pay" value="Bank transfer">${esc(t("payBank"))}</label>
+      </div>
+    </div>
+    <div class="field"><label for="fNote">${esc(t("fNote"))}</label><textarea id="fNote" placeholder="Size, colour, landmark…"></textarea></div>`;
+  $("#cartFoot").innerHTML = `
+    <div class="total">
+      <span class="total__lab">${esc(t("total"))}</span>
+      <span class="total__val"><span class="usd">${money(cartTotal())}</span><br><span class="khr">${riel(cartTotal())}</span></span>
+    </div>
+    <button class="btn" id="placeBtn">${esc(t("placeOrder"))}</button>
+    <button class="btn btn--ghost" data-step="cart">${esc(t("back"))}</button>`;
+}
+
+async function placeOrder(){
+  const name = $("#fName").value.trim();
+  const phone = $("#fPhone").value.trim();
+  const address = $("#fAddress").value.trim();
+  if(!name || !phone || !address){ toast(t("fillAll")); return; }
+
+  const btn = $("#placeBtn");
+  btn.disabled = true; btn.textContent = t("sending");
+
+  const order = {
+    ref: "NJ" + Date.now().toString(36).toUpperCase().slice(-6),
+    name, phone, address,
+    province: $("#fProvince").value,
+    note: $("#fNote").value.trim(),
+    payment: document.querySelector('input[name="pay"]:checked').value,
+    items: cartLines().map(x => `${x.qty} × ${x.p.en} — ${money(x.p.usd * x.qty)}`).join("\n"),
+    totalUsd: +cartTotal().toFixed(2),
+    totalKhr: Math.round(cartTotal() * SETTINGS.khrRate),
+    status: "new",
+    createdAt: new Date().toISOString()
+  };
+
+  let stored = false;
+  try{ stored = await saveOrder(order); }
+  catch(e){ console.warn(e); localOrders.unshift(order); }
+
+  const text = orderText(order);
+  await notifyBot(text);
+
+  cart = [];
+  $("#cartN").textContent = "0";
+  renderDone(order, text, stored);
+}
+
+function renderDone(order, text, stored){
+  $("#cart").querySelector("h2").textContent = t("doneT");
+  $("#cartBody").innerHTML = `
+    <div class="done">
+      <div class="done__tick">✓</div>
+      <h3>${esc(t("doneT"))}</h3>
+      <p>${esc(t("doneB"))}</p>
+      <div class="done__ref">${esc(t("ref"))}: <b>${esc(order.ref)}</b></div>
+      ${stored ? "" : `<p class="note">${esc(t("offline"))}</p>`}
+    </div>`;
+  $("#cartFoot").innerHTML = `
+    <a class="btn" style="display:block;text-align:center;text-decoration:none"
+       href="${tgShareLink(text)}" target="_blank" rel="noopener">${esc(t("sendTg"))}</a>
+    <button class="btn btn--ghost" data-close>${esc(t("newOrder"))}</button>`;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   11 ── ADMIN
+   ══════════════════════════════════════════════════════════════ */
+async function openAdmin(){
+  const pin = prompt(t("adminPin"));
+  if(pin === null) return;
+  if(pin !== SETTINGS.adminPin){ toast(t("adminNo")); return; }
+  openCart();
+  $("#cart").querySelector("h2").textContent = t("adminT");
+  $("#cartBody").innerHTML = `<div class="empty" style="border:none">${esc(t("loading"))}</div>`;
+  $("#cartFoot").innerHTML = `<button class="btn btn--ghost" data-close style="margin-top:0">${esc(t("newOrder"))}</button>`;
+  let rows = [];
+  try{ rows = await readOrders(); }catch(e){ console.warn(e); }
+  if(!rows.length){
+    $("#cartBody").innerHTML = `<div class="empty" style="border:none">${esc(fbOn() ? t("adminEmpty") : t("adminNeedFb"))}</div>`;
+    return;
+  }
+  $("#cartBody").innerHTML = rows.map(o => `
+    <div class="orders__row">
+      <b>${esc(o.ref || "—")}</b> · ${esc(o.name || "")} · ${esc(o.phone || "")}<br>
+      <div style="white-space:pre-line;margin-top:5px">${esc(o.items || "")}</div>
+      <div class="orders__meta">
+        ${money(Number(o.totalUsd) || 0)} · ${esc(o.payment || "")} · ${esc(o.province || "")}<br>
+        ${esc(o.address || "")}${o.note ? " · " + esc(o.note) : ""}<br>
+        ${esc((o.createdAt || "").replace("T", " ").slice(0, 16))}
+      </div>
+    </div>`).join("");
+}
+
+/* ══════════════════════════════════════════════════════════════
+   12 ── LANGUAGE
+   ══════════════════════════════════════════════════════════════ */
+function setLang(l){
+  lang = l;
+  document.documentElement.lang = l === "km" ? "km" : "en";
+  $("#langEn").setAttribute("aria-pressed", l === "en");
+  $("#langKm").setAttribute("aria-pressed", l === "km");
+  document.querySelectorAll("[data-i]").forEach(el => {
+    const v = T[l][el.dataset.i];
+    if(v === undefined) return;
+    if(el.dataset.i === "heroTitle") el.innerHTML = v; else el.textContent = v;
+  });
+  $("#search").placeholder = t("search");
+  renderCats(); renderGrid();
+  if($("#cart").classList.contains("on")) renderCart();
+}
+
+/* ══════════════════════════════════════════════════════════════
+   13 ── EVENTS + BOOT
+   ══════════════════════════════════════════════════════════════ */
+document.addEventListener("click", e => {
+  const g = e.target.closest("[data-gal]");
+  if(g && sheetP){
+    const ph = photosOf(sheetP)[+g.dataset.gal];
+    if(ph){
+      $("#galMain").innerHTML = `<img src="${esc(ph)}" alt=""><button class="x sheet__x" data-close-sheet aria-label="Close">×</button>`;
+      document.querySelectorAll(".gal__t").forEach(b=>b.classList.toggle("on", b===g));
+    }
+    return;
+  }
+  const el = e.target.closest("[data-add],[data-open],[data-q],[data-close],[data-close-sheet],[data-step],[data-cat]");
+  if(!el) return;
+  if(el.dataset.add !== undefined){ addToCart(el.dataset.add); if($("#sheet").classList.contains("on")) closeOverlays(); return; }
+  if(el.dataset.open !== undefined){ openSheet(el.dataset.open); return; }
+  if(el.dataset.q !== undefined){ setQty(el.dataset.id, +el.dataset.q); return; }
+  if(el.dataset.closeSheet !== undefined || el.dataset.close !== undefined){ closeOverlays(); return; }
+  if(el.dataset.step === "form"){ renderForm(); return; }
+  if(el.dataset.step === "cart"){ renderCart(); return; }
+  if(el.dataset.cat !== undefined){ filterCat = el.dataset.cat; renderCats(); renderGrid(); return; }
+});
+document.addEventListener("click", e => { if(e.target.id === "placeBtn") placeOrder(); });
+document.addEventListener("keydown", e => { if(e.key === "Escape") closeOverlays(); });
+
+$("#scrim").addEventListener("click", closeOverlays);
+$("#cartClose").addEventListener("click", closeOverlays);
+$("#cartOpen").addEventListener("click", openCart);
+$("#langEn").addEventListener("click", () => setLang("en"));
+$("#langKm").addEventListener("click", () => setLang("km"));
+$("#adminBtn").addEventListener("click", openAdmin);
+$("#search").addEventListener("input", e => { query = e.target.value; renderGrid(); });
+
+(async function boot(){
+  $("#yr").textContent = new Date().getFullYear();
+  $("#footTg").textContent = "@" + SETTINGS.telegram;
+  $("#footTg").href = "https://t.me/" + SETTINGS.telegram;
+  $("#footPh").textContent = SETTINGS.phone;
+  $("#footPh").href = "tel:" + SETTINGS.phone.replace(/\s/g,"");
+  $("#footFb").href = SETTINGS.facebook;
+  $("#grid").innerHTML = `<div class="empty">${esc(t("loading"))}</div>`;
+  renderCats();
+  products = await loadProducts();
+  renderGrid();
+})();
+</script>
+</body>
+</html>
