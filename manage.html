@@ -17,7 +17,10 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 [hidden]{display:none !important}
+html,body{max-width:100%;overflow-x:clip}
 body{background:var(--ground);color:var(--ink);font-family:var(--body);line-height:1.5;-webkit-font-smoothing:antialiased}
+input,select,textarea,button,img{max-width:100%}
+.wrap,.cols,.panel,.panel__body,.field,.row2,.prow,.prow__main{min-width:0}
 img{max-width:100%;display:block}
 button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 input,select,textarea{font:inherit;color:inherit}
@@ -64,6 +67,8 @@ input,select,textarea{font:inherit;color:inherit}
 .field textarea{min-height:56px;resize:vertical}
 .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--ink);outline:none;box-shadow:0 0 0 3px rgba(242,164,19,.3)}
 .row2{display:grid;gap:10px;grid-template-columns:1fr 1fr}
+.row2>*{min-width:0}
+input[type="file"]{max-width:100%;font-size:12px}
 .hint{font-size:11px;color:var(--grey);margin-top:3px;line-height:1.45}
 .pstrip{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;min-height:8px}
 .pthumb{position:relative;width:66px;height:66px;border:1px solid #D8D8D8;border-radius:2px;overflow:hidden;background:#FAFAFA}
@@ -229,7 +234,7 @@ const SETTINGS = {
   adminPin: "9898",
   khrRate: 4100,
   firebase: {
-    projectId: "nija-helmets",            // same as shop file
+    projectId: "nija-helmets",
     apiKey:    "AIzaSyApyTWsALmtURKP73n8zYi6hAT7lzzgJOk",
     products:  "shop_products",
     orders:    "shop_orders"
@@ -286,7 +291,12 @@ async function createProduct(docId, data){
   if(!fbOn()){ localOnly.push({...data,_doc:docId||("L"+Date.now())}); return; }
   const url = base()+FB.products+key()+ (docId ? (FB.apiKey?"&":"?")+"documentId="+encodeURIComponent(docId) : "");
   const r = await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(toFields(data))});
-  if(!r.ok) throw new Error("create "+r.status+" "+await r.text());
+  if(!r.ok){
+    const e = new Error("create "+r.status);
+    e.status = r.status;
+    try{ e.detail = (await r.json()).error?.message || ""; }catch{ e.detail = ""; }
+    throw e;
+  }
 }
 async function updateProduct(docId, data){
   if(!fbOn()){
@@ -415,7 +425,14 @@ async function save(){
     await loadP();
   }catch(e){
     console.error(e);
-    toast("Save failed — check Firebase config and rules.");
+    if(e.status === 409)
+      toast("That SKU / code already exists — use a different code, or Edit the existing product instead.");
+    else if(e.status === 403 || e.status === 401)
+      toast("Firebase refused the write — check the Rules tab allows write on shop_products.");
+    else if(e.status === 400 && /exceeds the maximum/i.test(e.detail||""))
+      toast("Product too large — remove a photo and try again.");
+    else
+      toast("Save failed ("+(e.status||"network")+"): "+(e.detail||"check your internet connection."));
   }
   btn.disabled=false; btn.textContent="Save product";
 }
