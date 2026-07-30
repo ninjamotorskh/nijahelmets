@@ -503,8 +503,8 @@ const SETTINGS = {
   // Leave projectId "" to run on the built-in demo products below.
   // Fill it in to load products + save orders in your own Firebase.
   firebase: {
-    projectId: "nija-helmets",                // e.g. "ridekit-shop"
-    apiKey:    "AIzaSyApyTWsALmtURKP73n8zYi6hAT7lzzgJOk",                // Web API key from Firebase console
+    projectId: "nija-helmets",
+    apiKey:    "AIzaSyApyTWsALmtURKP73n8zYi6hAT7lzzgJOk",
     products:  "shop_products",
     orders:    "shop_orders"
   },
@@ -593,7 +593,7 @@ const T = {
     payCod:"Cash on delivery", payAba:"ABA Pay / KHQR", payWing:"Wing", payBank:"Bank transfer",
     placeOrder:"Place order", sending:"Sending…", back:"Back to order",
     fillAll:"Please fill in your name, phone and address.",
-    doneT:"Order received", doneB:"We will message you on Telegram to confirm stock and delivery time.",
+    doneT:"Order received", doneB:"We will message you on Telegram to confirm stock and delivery time.", cancelNote:"Want to change or cancel? Message us on Telegram with your reference number — free before shipping.",
     ref:"Reference", sendTg:"Send this order on Telegram", newOrder:"Back to shop",
     unit:"each", offline:"Saved on this device — send it on Telegram so we see it.",
     adminT:"Recent orders", adminPin:"Enter admin PIN", adminNo:"Wrong PIN.",
@@ -621,7 +621,7 @@ const T = {
     payCod:"បង់ប្រាក់ពេលទទួល", payAba:"ABA Pay / KHQR", payWing:"Wing", payBank:"ផ្ទេរតាមធនាគារ",
     placeOrder:"បញ្ជាទិញ", sending:"កំពុងផ្ញើ…", back:"ត្រឡប់ក្រោយ",
     fillAll:"សូមបំពេញឈ្មោះ លេខទូរស័ព្ទ និងអាសយដ្ឋាន។",
-    doneT:"បានទទួលការបញ្ជាទិញ", doneB:"យើងនឹងផ្ញើសារតាមតេលេក្រាម ដើម្បីបញ្ជាក់ស្តុក និងពេលដឹកជញ្ជូន។",
+    doneT:"បានទទួលការបញ្ជាទិញ", doneB:"យើងនឹងផ្ញើសារតាមតេលេក្រាម ដើម្បីបញ្ជាក់ស្តុក និងពេលដឹកជញ្ជូន។", cancelNote:"ចង់ផ្លាស់ប្តូរ ឬបោះបង់ការបញ្ជាទិញ? សូមផ្ញើសារតាមតេលេក្រាម ដោយភ្ជាប់លេខយោង — ឥតគិតថ្លៃ មុនពេលដឹកជញ្ជូន។",
     ref:"លេខយោង", sendTg:"ផ្ញើការបញ្ជាទិញតាមតេលេក្រាម", newOrder:"ត្រឡប់ទៅហាង",
     unit:"ក្នុងមួយ", offline:"បានរក្សាទុកក្នុងឧបករណ៍ — សូមផ្ញើតាមតេលេក្រាមដើម្បីឲ្យយើងឃើញ។",
     adminT:"ការបញ្ជាទិញថ្មីៗ", adminPin:"បញ្ចូលលេខសម្ងាត់អ្នកគ្រប់គ្រង", adminNo:"លេខសម្ងាត់មិនត្រឹមត្រូវ។",
@@ -992,6 +992,7 @@ function renderDone(order, text, stored){
       <h3>${esc(t("doneT"))}</h3>
       <p>${esc(t("doneB"))}</p>
       <div class="done__ref">${esc(t("ref"))}: <b>${esc(order.ref)}</b></div>
+      <p class="note">${esc(t("cancelNote"))}</p>
       ${stored ? "" : `<p class="note">${esc(t("offline"))}</p>`}
     </div>`;
   $("#cartFoot").innerHTML = `

@@ -104,6 +104,7 @@ input[type="file"]{max-width:100%;font-size:12px}
 .orow b{font-family:var(--mono);font-size:11.5px}
 .orow .st{float:right;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border-radius:2px;background:var(--red);color:var(--ink)}
 .orow .st--done{background:var(--ink);color:#fff}
+.st--cxl{background:#B3372B;color:#fff}
 .orow__items{white-space:pre-line;margin:6px 0;padding:7px 9px;background:#FAFAFA;border-radius:2px;font-size:12.5px}
 .orow__meta{color:var(--grey);font-size:11.5px;line-height:1.55}
 .orow__act{margin-top:8px;display:flex;gap:6px;flex-wrap:wrap}
@@ -182,7 +183,7 @@ input[type="file"]{max-width:100%;font-size:12px}
         <div class="row2">
           <div class="field"><label for="fFlag">Badge</label>
             <select id="fFlag"><option value="">None</option><option value="new">New</option><option value="cert">Certified</option></select></div>
-          <div class="field"><label for="fFile">Photos — up to 4</label>
+          <div class="field"><label for="fFile">Photos — up to 10</label>
             <input id="fFile" type="file" accept="image/*" multiple>
           </div>
         </div>
@@ -217,6 +218,7 @@ input[type="file"]{max-width:100%;font-size:12px}
           <button class="of" data-of="all" aria-pressed="true">All</button>
           <button class="of" data-of="new" aria-pressed="false">New</button>
           <button class="of" data-of="done" aria-pressed="false">Done</button>
+          <button class="of" data-of="cancelled" aria-pressed="false">Cancelled</button>
         </div>
         <div class="spacer"></div>
         <button class="mini" id="reloadO">Reload</button>
@@ -276,8 +278,8 @@ let orders = [];
 let orderFilter = "all";   // all | new | done
 let localOnly = [];     // fallback store when Firebase not set
 let editingDoc = null;  // doc id being edited
-let photos = [];        // compressed base64 images, max 4
-const MAXPH = 4;
+let photos = [];        // compressed base64 images, max 10
+const MAXPH = 10;
 
 /* ═════════ Firestore CRUD ═════════ */
 async function fetchProducts(){
@@ -331,16 +333,16 @@ function compress(file){
   return new Promise((res,rej)=>{
     const img = new Image();
     img.onload = () => {
-      const MAX = 640;
+      const MAX = 560;
       let {width:w,height:h} = img;
       if(Math.max(w,h) > MAX){ const k = MAX/Math.max(w,h); w=Math.round(w*k); h=Math.round(h*k); }
       const c = document.createElement("canvas");
       c.width=w; c.height=h;
       c.getContext("2d").drawImage(img,0,0,w,h);
-      let out = c.toDataURL("image/jpeg",0.7);
-      // up to 4 photos must fit one 1 MB Firestore document — keep each small
-      let q = 0.7;
-      while(out.length > 190000 && q > 0.28){ q -= 0.1; out = c.toDataURL("image/jpeg",q); }
+      let out = c.toDataURL("image/jpeg",0.68);
+      // up to 10 photos must fit one 1 MB Firestore document — keep each small
+      let q = 0.68;
+      while(out.length > 88000 && q > 0.24){ q -= 0.08; out = c.toDataURL("image/jpeg",q); }
       URL.revokeObjectURL(img.src);
       res(out);
     };
@@ -457,19 +459,21 @@ function renderP(){
     </div>`).join("");
 }
 function renderO(){
-  const newCount = orders.filter(o=>o.status!=="done").length;
-  $("#nO").textContent = newCount || orders.length;
+  const newCount = orders.filter(o=>o.status!=="done" && o.status!=="cancelled").length;
+  $("#nO").textContent = newCount;
   if(!fbOn()){ $("#olist").innerHTML = `<div class="empty">Connect Firebase to see orders here.</div>`; return; }
   const list = orders.filter(o =>
     orderFilter==="all" ? true :
-    orderFilter==="done" ? o.status==="done" : o.status!=="done");
+    orderFilter==="done" ? o.status==="done" :
+    orderFilter==="cancelled" ? o.status==="cancelled" :
+    (o.status!=="done" && o.status!=="cancelled"));
   if(!list.length){
     $("#olist").innerHTML = `<div class="empty">${orders.length ? "No "+orderFilter+" orders." : "No orders yet."}</div>`;
     return;
   }
   $("#olist").innerHTML = list.map(o=>`
     <div class="orow">
-      <span class="st ${o.status==="done"?"st--done":""}">${esc(o.status||"new")}</span>
+      <span class="st ${o.status==="done"?"st--done":o.status==="cancelled"?"st--cxl":""}">${esc(o.status||"new")}</span>
       <b>${esc(o.ref||"—")}</b> · ${esc(o.name||"")} · ${esc(o.phone||"")}
       <div class="orow__items">${esc(o.items||"")}</div>
       <div class="orow__meta">
@@ -478,7 +482,9 @@ function renderO(){
         ${esc(String(o.createdAt||"").replace("T"," ").slice(0,16))}
       </div>
       <div class="orow__act">
-        ${o.status!=="done"?`<button class="mini" data-done="${esc(o._doc)}">Mark done</button>`:""}
+        ${o.status!=="done" && o.status!=="cancelled" ? `<button class="mini" data-done="${esc(o._doc)}">Mark done</button>
+        <button class="mini mini--del" data-cxl="${esc(o._doc)}">Cancel order</button>`:""}
+        ${o.status==="cancelled" ? `<button class="mini" data-restore="${esc(o._doc)}">Restore</button>`:""}
         ${o.phone?`<a class="mini" style="text-decoration:none" href="tel:${esc(o.phone)}">Call</a>`:""}
       </div>
     </div>`).join("");
@@ -552,6 +558,16 @@ document.addEventListener("click", async e=>{
   }
   if(dn){
     try{ await setOrderStatus(dn.dataset.done,"done"); toast("Marked done ✓"); loadO(); }
+    catch(err){ console.error(err); toast("Could not update order."); }
+  }
+  const cx = e.target.closest("[data-cxl]");
+  if(cx && confirm("Cancel this order?")){
+    try{ await setOrderStatus(cx.dataset.cxl,"cancelled"); toast("Order cancelled."); loadO(); }
+    catch(err){ console.error(err); toast("Could not update order."); }
+  }
+  const rs = e.target.closest("[data-restore]");
+  if(rs){
+    try{ await setOrderStatus(rs.dataset.restore,"new"); toast("Order restored."); loadO(); }
     catch(err){ console.error(err); toast("Could not update order."); }
   }
 });
