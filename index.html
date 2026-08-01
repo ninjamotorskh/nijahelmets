@@ -695,10 +695,15 @@ const wrap = v =>
 async function loadProducts(){
   if(!fbOn()) return DEMO;
   try{
-    const r = await fetch(fbUrl(FB.products) + (FB.apiKey ? "&" : "?") + "pageSize=300");
-    if(!r.ok) throw new Error(r.status);
-    const j = await r.json();
-    const rows = (j.documents || []).map(d => {
+    let docs = [], token = "", guard = 0;
+    do{
+      const r = await fetch(fbUrl(FB.products) + (FB.apiKey ? "&" : "?") + "pageSize=300" + (token ? "&pageToken=" + encodeURIComponent(token) : ""));
+      if(!r.ok) throw new Error(r.status);
+      const j = await r.json();
+      docs = docs.concat(j.documents || []);
+      token = j.nextPageToken || "";
+    }while(token && ++guard < 50);
+    const rows = docs.map(d => {
       const f = Object.fromEntries(Object.entries(d.fields || {}).map(([k, v]) => [k, unwrap(v)]));
       f.id = d.name.split("/").pop();
       f.usd = Number(f.usd) || 0;
