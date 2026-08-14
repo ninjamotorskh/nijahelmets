@@ -4,6 +4,13 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>NIJA Helmets — Stock Control</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<script>
+try { document.documentElement.setAttribute("data-theme", localStorage.getItem("nija-stock-theme") === "light" ? "light" : "dark"); }
+catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
+</script>
 <style>
   :root {
     --signal: #F2A413;
@@ -16,24 +23,91 @@
     --text-dim: #8b8b95;
     --text-dimmer: #55555f;
     --success: #22c55e;
+    --success-ink: #04170c;
     --success-bg: #12281a;
     --success-border: #1c3a26;
     --danger: #ef4444;
+    --danger-ink: #2a0808;
     --danger-bg: #2a1416;
     --danger-border: #3a1e20;
+    --chip-hover: #3a3a44;
+    --accent-tint: rgba(242,164,19,0.12);
+    --accent-tint-border: rgba(242,164,19,0.4);
+    --focus-ring: rgba(242,164,19,0.15);
+    --empty-icon: #3a3a44;
+    --helmet-bg: #0c2333; --helmet-fg: #38bdf8; --helmet-bd: #143348;
+    --frame-bg: #10262b; --frame-fg: #2dd4bf; --frame-bd: #17383f;
+    --plastic-box-bg: #2b2113; --plastic-box-fg: #fbbf24; --plastic-box-bd: #3f301b;
+    --aluminum-box-bg: #1a2029; --aluminum-box-fg: #94a3b8; --aluminum-box-bd: #28303c;
+    --leather-bag-bg: #2b1d12; --leather-bag-fg: #fb923c; --leather-bag-bd: #3d2a1a;
+    --mirror-bg: #0c262b; --mirror-fg: #22d3ee; --mirror-bd: #12363d;
+    --phone-holders-bg: #221a2e; --phone-holders-fg: #a78bfa; --phone-holders-bd: #322745;
+    --water-bottle-holders-bg: #181b32; --water-bottle-holders-fg: #818cf8; --water-bottle-holders-bd: #242949;
+    --windshield-bg: #23260f; --windshield-fg: #a3e635; --windshield-bd: #333818;
+    --brake-pads-bg: #2b1616; --brake-pads-fg: #f87171; --brake-pads-bd: #3d2020;
+    --oil-bg: #12261a; --oil-fg: #4ade80; --oil-bd: #1b3826;
+    --accessory-bg: #2a1523; --accessory-fg: #f472b6; --accessory-bd: #3d1f32;
     --radius-sm: 6px;
     --radius: 10px;
     --radius-lg: 16px;
+  }
+  html[data-theme="light"] {
+    --signal: #b45309;
+    --signal-ink: #ffffff;
+    --bg: #f3f4f6;
+    --surface: #ffffff;
+    --surface-2: #eef0f3;
+    --border: #e3e6eb;
+    --text: #1c1f27;
+    --text-dim: #5c6370;
+    --text-dimmer: #9aa2ad;
+    --success: #16a34a;
+    --success-ink: #ffffff;
+    --success-bg: #e8f6ee;
+    --success-border: #bfe8cf;
+    --danger: #dc2626;
+    --danger-ink: #ffffff;
+    --danger-bg: #fdecec;
+    --danger-border: #f6c9c9;
+    --chip-hover: #b9c0c9;
+    --accent-tint: rgba(180,83,9,0.08);
+    --accent-tint-border: rgba(180,83,9,0.4);
+    --focus-ring: rgba(180,83,9,0.18);
+    --empty-icon: #c9ced6;
+
+    --helmet-bg: #e8f3fd; --helmet-fg: #0d6dc4; --helmet-bd: #c3e0f8;
+    --frame-bg: #e2f6f5; --frame-fg: #0d7d75; --frame-bd: #bce7e3;
+    --plastic-box-bg: #fdf2df; --plastic-box-fg: #a16207; --plastic-box-bd: #f6e0b5;
+    --aluminum-box-bg: #eef1f5; --aluminum-box-fg: #475569; --aluminum-box-bd: #d3dae3;
+    --leather-bag-bg: #fdefe2; --leather-bag-fg: #c2410c; --leather-bag-bd: #f8d7bd;
+    --mirror-bg: #e0f6fa; --mirror-fg: #0e7490; --mirror-bd: #b8e6ef;
+    --phone-holders-bg: #f2edfc; --phone-holders-fg: #6d28d9; --phone-holders-bd: #ddd0fa;
+    --water-bottle-holders-bg: #eceefd; --water-bottle-holders-fg: #4338ca; --water-bottle-holders-bd: #cfd4fa;
+    --windshield-bg: #eef7dd; --windshield-fg: #4d7c0f; --windshield-bd: #d5e9b4;
+    --brake-pads-bg: #fdeaea; --brake-pads-fg: #b91c1c; --brake-pads-bd: #f6c6c6;
+    --oil-bg: #e7f7ec; --oil-fg: #15803d; --oil-bd: #bfe6cb;
+    --accessory-bg: #fdecf4; --accessory-fg: #be185d; --accessory-bd: #f9c9de;
   }
   * { box-sizing: border-box; }
   html, body {
     margin: 0;
     background: var(--bg);
     color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+      "Noto Sans Khmer", "Khmer OS Battambang", "Khmer OS", "Leelawadee UI", sans-serif;
     -webkit-font-smoothing: antialiased;
+    transition: background .2s ease, color .2s ease;
   }
-  button, input, select { font-family: inherit; }
+  button, input, select, textarea { font-family: inherit; }
+  html[lang="km"] body { line-height: 1.6; }
+  html[lang="km"] .tab-btn,
+  html[lang="km"] .chip,
+  html[lang="km"] .product-name,
+  html[lang="km"] .pick-name,
+  html[lang="km"] .del-name,
+  html[lang="km"] .imp-name { line-height: 1.7; }
+  html[lang="km"] .row-stock-label,
+  html[lang="km"] .brand-stat-label { line-height: 1.5; }
   #app { max-width: 720px; margin: 0 auto; min-height: 100vh; padding-bottom: 40px; }
 
   .loading, .setup-notice {
@@ -48,23 +122,30 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  .shell { border: 1px solid var(--border); border-radius: var(--radius-lg); margin: 16px; overflow: hidden; background: var(--bg); }
-  @media (max-width: 480px) { .shell { margin: 0; border-radius: 0; border-left: none; border-right: none; } }
+  .shell { border: 1px solid var(--border); border-radius: var(--radius-lg); margin: 16px; overflow: hidden; background: var(--bg); transition: background .2s ease; }
+  html[data-theme="light"] .shell { background: var(--surface); box-shadow: 0 1px 3px rgba(20,30,50,0.06); }
+  @media (max-width: 480px) { .shell { margin: 0; border-radius: 0; border-left: none; border-right: none; box-shadow: none; } }
 
   .header { padding: 20px 20px 0; border-bottom: 1px solid var(--border); }
   .brand { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
   .brand-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
   .brand-mark {
-    width: 36px; height: 36px; flex-shrink: 0; border-radius: var(--radius); background: rgba(242,164,19,0.12);
-    border: 1px solid rgba(242,164,19,0.35); color: var(--signal); display: flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px; flex-shrink: 0; border-radius: var(--radius); background: var(--accent-tint);
+    border: 1px solid var(--accent-tint-border); color: var(--signal); display: flex; align-items: center; justify-content: center;
   }
   .brand-text h1 { font-size: 16px; margin: 0; font-weight: 600; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .brand-text p { font-size: 12px; margin: 1px 0 0; color: var(--text-dim); line-height: 1.2; }
-  .brand-stat { text-align: right; flex-shrink: 0; }
-  .brand-stat-num { font-size: 21px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.1; }
-  .brand-stat-label { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+  .header-btns { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .lang-btn { font-size: 12px; font-weight: 600; letter-spacing: .02em; }
+  .theme-btn {
+    width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text-dim); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: color .15s ease, border-color .15s ease;
+  }
+  .theme-btn:hover { color: var(--text); border-color: var(--chip-hover); }
 
-  .tabs { display: flex; gap: 4px; margin-top: 16px; overflow-x: auto; }
+  .tabs { display: flex; gap: 4px; margin-top: 16px; overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; scroll-behavior: smooth; }
+  .tabs::-webkit-scrollbar { display: none; }
   .tab-btn {
     display: flex; align-items: center; gap: 6px; padding: 10px 12px; font-size: 12px; font-weight: 500;
     background: none; border: none; border-bottom: 2px solid transparent; color: var(--text-dim); cursor: pointer;
@@ -81,8 +162,9 @@
     padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 500; border: 1px solid var(--border);
     background: none; color: var(--text-dim); cursor: pointer; transition: border-color .15s ease, color .15s ease;
   }
-  .chip:hover { border-color: #3a3a44; }
-  .chip.chip-active { background: rgba(242,164,19,0.12); border-color: rgba(242,164,19,0.4); color: var(--signal); }
+  .chip:hover { border-color: var(--chip-hover); }
+  .chip-sort { margin-left: auto; display: inline-flex; align-items: center; gap: 5px; }
+  .chip.chip-active { background: var(--accent-tint); border-color: var(--accent-tint-border); color: var(--signal); }
   .btn { display: inline-flex; align-items: center; gap: 5px; border: none; cursor: pointer; font-weight: 500; transition: filter .15s ease; }
   .btn:hover { filter: brightness(1.08); }
   .btn-primary { background: var(--signal); color: var(--signal-ink); padding: 7px 14px; border-radius: 999px; font-size: 12px; }
@@ -96,7 +178,7 @@
     padding: 9px 12px; font-size: 14px; color: var(--text); outline: none; transition: border-color .15s ease;
   }
   .input::placeholder { color: var(--text-dimmer); }
-  .input:focus { border-color: var(--signal); box-shadow: 0 0 0 3px rgba(242,164,19,0.15); }
+  .input:focus { border-color: var(--signal); box-shadow: 0 0 0 3px var(--focus-ring); }
   .input-search { padding-left: 34px; }
 
   .product-list, .history-list { display: flex; flex-direction: column; gap: 8px; }
@@ -104,16 +186,39 @@
     display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: var(--radius);
     background: var(--surface); border: 1px solid var(--border);
   }
+  html[data-theme="light"] .product-row, html[data-theme="light"] .history-row { background: var(--bg); }
   .product-info { flex: 1; min-width: 0; }
+  .row-thumb { width: 42px; height: 42px; border-radius: var(--radius-sm); object-fit: cover; flex-shrink: 0; background: var(--surface-2); border: 1px solid var(--border); }
+  .row-thumb-placeholder { width: 42px; height: 42px; border-radius: var(--radius-sm); flex-shrink: 0; background: var(--surface-2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--text-dimmer); }
   .product-name-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .product-name { font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
   .cat-tag { font-size: 11px; padding: 2px 7px; border-radius: 5px; border: 1px solid transparent; line-height: 1.5; }
-  .cat-helmet { background: #0c2333; color: #38bdf8; border-color: #143348; }
-  .cat-bag { background: #1e1533; color: #a78bfa; border-color: #2c2049; }
-  .cat-glove { background: #0f2a20; color: #34d399; border-color: #163d2e; }
-  .cat-motors { background: #2a1420; color: #fb7185; border-color: #3d1c2c; }
+  .cat-helmet { background: var(--helmet-bg); color: var(--helmet-fg); border-color: var(--helmet-bd); }
+  .cat-frame { background: var(--frame-bg); color: var(--frame-fg); border-color: var(--frame-bd); }
+  .cat-plastic-box { background: var(--plastic-box-bg); color: var(--plastic-box-fg); border-color: var(--plastic-box-bd); }
+  .cat-aluminum-box { background: var(--aluminum-box-bg); color: var(--aluminum-box-fg); border-color: var(--aluminum-box-bd); }
+  .cat-leather-bag { background: var(--leather-bag-bg); color: var(--leather-bag-fg); border-color: var(--leather-bag-bd); }
+  .cat-mirror { background: var(--mirror-bg); color: var(--mirror-fg); border-color: var(--mirror-bd); }
+  .cat-phone-holders { background: var(--phone-holders-bg); color: var(--phone-holders-fg); border-color: var(--phone-holders-bd); }
+  .cat-water-bottle-holders { background: var(--water-bottle-holders-bg); color: var(--water-bottle-holders-fg); border-color: var(--water-bottle-holders-bd); }
+  .cat-windshield { background: var(--windshield-bg); color: var(--windshield-fg); border-color: var(--windshield-bd); }
+  .cat-brake-pads { background: var(--brake-pads-bg); color: var(--brake-pads-fg); border-color: var(--brake-pads-bd); }
+  .cat-oil { background: var(--oil-bg); color: var(--oil-fg); border-color: var(--oil-bd); }
+  .cat-accessory { background: var(--accessory-bg); color: var(--accessory-fg); border-color: var(--accessory-bd); }
   .low-flag { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; color: var(--danger); }
   .product-meta { font-size: 12px; color: var(--text-dim); margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .product-extra { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  .extra-item {
+    display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 500;
+    color: var(--text); background: var(--surface-2); border: 1px solid var(--border);
+    padding: 3px 8px; border-radius: var(--radius-sm); line-height: 1.4;
+  }
+  .extra-item svg { flex-shrink: 0; color: var(--signal); }
+  .extra-barcode { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: .02em; }
+  .row-stock { flex-shrink: 0; text-align: right; padding: 0 2px; }
+  .row-stock-num { font-size: 20px; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; color: var(--text); }
+  .row-stock-num.low { color: var(--danger); }
+  .row-stock-label { font-size: 10px; color: var(--text-dimmer); margin-top: 1px; white-space: nowrap; }
 
   .row-actions { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
   .icon-btn { background: none; border: none; color: var(--text-dim); padding: 7px; border-radius: var(--radius-sm); cursor: pointer; display: flex; }
@@ -126,7 +231,7 @@
   .btn-no { background: var(--surface-2); color: var(--text-dim); }
 
   .empty-state { text-align: center; padding: 56px 20px; color: var(--text-dim); }
-  .empty-state svg { color: #3a3a44; margin-bottom: 12px; }
+  .empty-state svg { color: var(--empty-icon); margin-bottom: 12px; }
   .empty-title { font-size: 14px; color: var(--text); margin: 0 0 4px; }
   .empty-sub { font-size: 12px; color: var(--text-dimmer); margin: 0 0 16px; max-width: 320px; margin-left: auto; margin-right: auto; }
   .empty-inline { text-align: center; padding: 40px 0; color: var(--text-dim); font-size: 14px; }
@@ -138,6 +243,127 @@
   .form-icon-row svg.icon-down { color: var(--danger); }
   .form-group { margin-bottom: 12px; }
   .form-group label { display: block; font-size: 12px; color: var(--text-dim); margin-bottom: 5px; }
+  .row-thumb-btn {
+    position: relative; padding: 0; border: none; background: none; cursor: pointer;
+    flex-shrink: 0; display: block; line-height: 0; border-radius: var(--radius-sm);
+  }
+  .row-thumb-btn:hover .row-thumb { border-color: var(--signal); }
+  .scan-wrap { position: relative; }
+  /* 44px keeps the scan target comfortably tappable on a phone. */
+  .scan-btn {
+    position: absolute; right: 5px; top: 50%; transform: translateY(-50%);
+    width: 44px; height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--border); background: var(--surface-2); color: var(--signal);
+    cursor: pointer; border-radius: var(--radius); padding: 0;
+    transition: background .15s ease, border-color .15s ease;
+  }
+  .scan-btn:hover, .scan-btn:active { background: var(--accent-tint); border-color: var(--accent-tint-border); }
+  /* The delete box is a tall textarea, so pin its button to the top instead. */
+  .del-input ~ .scan-btn { top: 6px; transform: none; }
+  .input-scan { padding-right: 58px; padding-top: 12px; padding-bottom: 12px; }
+  .del-input.input-scan { padding-top: 10px; }
+
+  .scan-overlay {
+    position: fixed; inset: 0; z-index: 110; background: rgba(0,0,0,.94);
+    display: flex; flex-direction: column;
+  }
+  .scan-bar {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 12px 14px; color: #fff; flex-shrink: 0;
+  }
+  .scan-title { font-size: 14px; font-weight: 500; }
+  .scan-stage {
+    flex: 1; min-height: 0; position: relative; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .scan-video { width: 100%; height: 100%; object-fit: cover; }
+  .scan-frame {
+    position: absolute; width: min(74vw, 320px); height: min(42vw, 190px);
+    border: 2px solid var(--signal); border-radius: var(--radius);
+    box-shadow: 0 0 0 9999px rgba(0,0,0,.42); pointer-events: none;
+  }
+  .scan-msg {
+    color: rgba(255,255,255,.85); font-size: 13px; text-align: center;
+    padding: 14px 20px 24px; margin: 0; line-height: 1.5; flex-shrink: 0;
+  }
+
+  .lb-overlay {
+    position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,.92);
+    display: flex; flex-direction: column; animation: lbIn .15s ease;
+  }
+  @keyframes lbIn { from { opacity: 0; } to { opacity: 1; } }
+  .lb-bar {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 12px 14px; color: #fff; flex-shrink: 0;
+  }
+  .lb-title { font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lb-close {
+    width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%; border: none;
+    background: rgba(255,255,255,.12); color: #fff; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .lb-close:hover { background: rgba(255,255,255,.22); }
+  .lb-stage {
+    flex: 1; min-height: 0; position: relative;
+    display: flex; align-items: center; justify-content: center; padding: 0 8px;
+  }
+  .lb-img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: var(--radius-sm); }
+  .lb-nav {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    width: 42px; height: 42px; border-radius: 50%; border: none;
+    background: rgba(255,255,255,.12); color: #fff; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .lb-nav:hover { background: rgba(255,255,255,.22); }
+  .lb-prev { left: 10px; }
+  .lb-next { right: 10px; }
+  .lb-counter { text-align: center; color: rgba(255,255,255,.75); font-size: 12px; padding: 8px 0 4px; font-variant-numeric: tabular-nums; }
+  .lb-strip {
+    display: flex; gap: 8px; padding: 10px 14px 18px; overflow-x: auto;
+    justify-content: center; flex-shrink: 0; scrollbar-width: none;
+  }
+  .lb-strip::-webkit-scrollbar { display: none; }
+  .lb-thumb {
+    width: 54px; height: 54px; flex-shrink: 0; padding: 0; cursor: pointer;
+    border-radius: var(--radius-sm); overflow: hidden; border: 2px solid transparent;
+    background: rgba(255,255,255,.08); opacity: .55; transition: opacity .15s ease;
+  }
+  .lb-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .lb-thumb:hover { opacity: .85; }
+  .lb-thumb-on { border-color: var(--signal); opacity: 1; }
+  @media (max-width: 560px) {
+    .lb-nav { width: 36px; height: 36px; }
+    .lb-strip { justify-content: flex-start; }
+  }
+
+  .photo-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+  .photo-cell { position: relative; width: 84px; height: 84px; flex-shrink: 0; }
+  .photo-thumb {
+    width: 100%; height: 100%; padding: 0; border-radius: var(--radius); overflow: hidden;
+    border: 1px solid var(--border); background: var(--surface-2); cursor: pointer; display: block;
+  }
+  .photo-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .photo-cell:first-child .photo-thumb { border-color: var(--signal); }
+  .photo-thumb:hover { border-color: var(--signal); }
+  .photo-main-tag {
+    position: absolute; left: 4px; bottom: 4px; padding: 1px 6px; border-radius: 4px;
+    background: var(--signal); color: var(--signal-ink); font-size: 10px; font-weight: 600; pointer-events: none;
+  }
+  .photo-box {
+    width: 84px; height: 84px; border-radius: var(--radius); border: 1px dashed var(--border);
+    background: var(--surface); display: flex; align-items: center; justify-content: center; flex-direction: column;
+    gap: 4px; cursor: pointer; overflow: hidden; color: var(--text-dimmer); text-align: center; flex-shrink: 0;
+  }
+  .photo-box:hover { border-color: var(--chip-hover); color: var(--text-dim); }
+  .photo-box span { font-size: 10px; }
+  .photo-file-input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+  .photo-remove {
+    position: absolute; top: -6px; right: -6px; width: 20px; height: 20px; border-radius: 50%;
+    background: var(--danger); color: var(--danger-ink); border: 2px solid var(--bg); display: flex;
+    align-items: center; justify-content: center; cursor: pointer; padding: 0; z-index: 1;
+  }
+  .photo-processing { font-size: 12px; color: var(--text-dim); margin-top: 6px; }
   .hint { font-size: 12px; color: var(--text-dimmer); margin: 5px 0 0; font-variant-numeric: tabular-nums; }
   .form-error { font-size: 12px; color: var(--danger); margin: 0 0 12px; }
   .muted { color: var(--text-dim); font-size: 13px; }
@@ -146,8 +372,8 @@
 
   .submit-btn { width: 100%; padding: 11px; border: none; border-radius: var(--radius); font-size: 14px; font-weight: 600; cursor: pointer; transition: filter .15s ease; }
   .submit-btn:hover { filter: brightness(1.1); }
-  .submit-in { background: var(--success); color: #04170c; }
-  .submit-out { background: var(--danger); color: #2a0808; }
+  .submit-in { background: var(--success); color: var(--success-ink); }
+  .submit-out { background: var(--danger); color: var(--danger-ink); }
 
   .history-icon { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .history-icon-in { background: var(--success-bg); color: var(--success); }
@@ -166,11 +392,242 @@
   .toast {
     position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(10px);
     background: var(--surface-2); border: 1px solid var(--border); color: var(--text);
-    padding: 10px 18px; border-radius: 999px; font-size: 13px; box-shadow: 0 8px 24px rgba(0,0,0,.4);
+    padding: 10px 18px; border-radius: 999px; font-size: 13px; box-shadow: 0 8px 24px rgba(0,0,0,.35);
     opacity: 0; pointer-events: none; transition: opacity .2s ease, transform .2s ease; z-index: 60; max-width: 90vw;
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
   .toast.toast-show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .hist-summary { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .hist-net { font-size: 12px; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+
+  .dup-page { max-width: 520px; }
+  .dup-ok {
+    display: flex; align-items: center; gap: 8px; padding: 10px 12px; margin-bottom: 16px;
+    background: var(--success-bg); border: 1px solid var(--success-border); border-radius: var(--radius);
+    font-size: 12px; color: var(--success); line-height: 1.5;
+  }
+  .dup-section { margin-bottom: 22px; }
+  .dup-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .dup-head h3 { font-size: 13px; font-weight: 600; margin: 0; }
+  .dup-badge {
+    font-size: 11px; font-weight: 600; padding: 1px 8px; border-radius: 999px;
+    background: var(--surface-2); color: var(--text-dim);
+  }
+  .dup-badge-issue { background: var(--danger-bg); color: var(--danger); }
+  .dup-empty { font-size: 12px; color: var(--text-dimmer); margin: 0; }
+  .dup-group {
+    border: 1px solid var(--border); border-radius: var(--radius);
+    overflow: hidden; margin-bottom: 8px; background: var(--surface);
+  }
+  html[data-theme="light"] .dup-group { background: var(--bg); }
+  .dup-group-issue { border-color: var(--danger-border); }
+  .dup-value {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 8px 10px; background: var(--surface-2); border-bottom: 1px solid var(--border);
+  }
+  .dup-group-issue .dup-value { background: var(--danger-bg); border-bottom-color: var(--danger-border); }
+  .dup-value-text {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .dup-count { font-size: 11px; color: var(--text-dim); white-space: nowrap; flex-shrink: 0; }
+  .dup-items { display: flex; flex-direction: column; }
+  .dup-item {
+    display: flex; align-items: center; gap: 10px; padding: 8px 10px; width: 100%; text-align: left;
+    background: none; border: none; border-top: 1px solid var(--border); cursor: pointer; color: var(--text);
+  }
+  .dup-item:first-child { border-top: none; }
+  .dup-item:hover { background: var(--surface-2); }
+  .dup-item .row-thumb, .dup-item .row-thumb-placeholder { width: 32px; height: 32px; }
+  .dup-item-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .dup-item-name { font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dup-item-meta { font-size: 11px; color: var(--text-dim); }
+  .dup-item-edit { color: var(--text-dimmer); flex-shrink: 0; display: flex; }
+  .dup-item:hover .dup-item-edit { color: var(--signal); }
+  .dup-note { font-size: 11px; color: var(--text-dimmer); margin: -12px 0 0; line-height: 1.5; }
+
+  .cat-select { width: auto; min-width: 150px; max-width: 60%; flex: 0 1 auto; padding-right: 30px; }
+  .pick-search { margin-bottom: 8px; }
+  .pick-list { display: flex; flex-direction: column; gap: 6px; }
+  .pick-row {
+    display: flex; align-items: center; gap: 10px; padding: 8px 10px; width: 100%; text-align: left;
+    border-radius: var(--radius-sm); background: var(--surface); border: 1px solid var(--border);
+    cursor: pointer; color: var(--text); transition: border-color .15s ease;
+  }
+  html[data-theme="light"] .pick-row { background: var(--bg); }
+  .pick-row:hover { border-color: var(--signal); }
+  .pick-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .pick-name { font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pick-meta { font-size: 11px; color: var(--text-dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pick-stock { flex-shrink: 0; font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .pick-stock.low { color: var(--danger); }
+  .picked-row {
+    display: flex; align-items: center; gap: 10px; padding: 10px;
+    border-radius: var(--radius); background: var(--accent-tint); border: 1px solid var(--accent-tint-border);
+  }
+  .picked-info { flex: 1; min-width: 0; }
+  .picked-name { font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .picked-meta { font-size: 11px; color: var(--text-dim); margin-top: 2px; font-variant-numeric: tabular-nums; }
+
+  .import-page { max-width: 480px; }
+  .import-drop {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+    padding: 24px 16px; border: 1px dashed var(--border); border-radius: var(--radius);
+    background: var(--surface); color: var(--text-dim); cursor: pointer; text-align: center;
+    transition: border-color .15s ease, color .15s ease; margin-bottom: 14px;
+  }
+  html[data-theme="light"] .import-drop { background: var(--bg); }
+  .import-drop:hover { border-color: var(--signal); color: var(--text); }
+  .import-drop svg { color: var(--signal); }
+  .import-drop-title { font-size: 14px; font-weight: 500; color: var(--text); word-break: break-all; }
+  .import-drop-sub { font-size: 11px; color: var(--text-dimmer); }
+  .import-legend { font-size: 12px; color: var(--text-dim); line-height: 1.6; }
+  .import-legend p { margin: 0 0 4px; }
+  .import-legend ol { margin: 0 0 8px; padding-left: 20px; }
+  .import-legend-note { color: var(--text-dimmer); }
+  .import-summary { display: flex; gap: 8px; margin-bottom: 10px; }
+  .imp-pill { font-size: 12px; font-weight: 500; padding: 3px 10px; border-radius: 999px; border: 1px solid transparent; }
+  .imp-pill-ok { background: var(--success-bg); color: var(--success); border-color: var(--success-border); }
+  .imp-pill-bad { background: var(--danger-bg); color: var(--danger); border-color: var(--danger-border); }
+  .imp-example { max-width: 640px; }
+  .imp-example-title { font-size: 13px; font-weight: 600; margin: 0 0 10px; }
+  .imp-table {
+    border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden;
+    background: var(--surface); font-variant-numeric: tabular-nums;
+  }
+  html[data-theme="light"] .imp-table { background: var(--bg); }
+  .imp-tr {
+    display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, .6fr) minmax(0, 1fr);
+    gap: 12px; padding: 9px 12px; border-top: 1px solid var(--border); font-size: 13px;
+  }
+  .imp-tr:first-child { border-top: none; }
+  .imp-tr span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .imp-th { background: var(--surface-2); font-size: 11px; font-weight: 600; color: var(--text-dim); }
+  .imp-dim { color: var(--text-dimmer); }
+
+  .imp-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; max-height: 420px; overflow-y: auto; }
+  .imp-row {
+    display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: var(--radius-sm);
+    background: var(--surface); border: 1px solid var(--border);
+  }
+  html[data-theme="light"] .imp-row { background: var(--bg); }
+  .imp-row-bad { background: var(--danger-bg); border-color: var(--danger-border); }
+  .imp-num {
+    flex-shrink: 0; min-width: 22px; font-size: 11px; color: var(--text-dimmer);
+    font-variant-numeric: tabular-nums; text-align: right;
+  }
+  .imp-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .imp-name { font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .imp-meta { font-size: 11px; color: var(--text-dim); overflow: hidden; text-overflow: ellipsis; }
+  .imp-row-bad .imp-meta { color: var(--danger); }
+  .imp-qty { flex-shrink: 0; font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; display: flex; align-items: center; }
+  .imp-row-bad .imp-qty { color: var(--danger); }
+
+  .delete-page { max-width: 480px; }
+  .del-input { resize: vertical; min-height: 60px; line-height: 1.5; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .del-summary { font-size: 12px; color: var(--text-dim); margin: 0 0 10px; }
+  .notfound-box {
+    display: flex; gap: 8px; align-items: flex-start; padding: 10px 12px; margin-bottom: 12px;
+    background: var(--danger-bg); border: 1px solid var(--danger-border); border-radius: var(--radius);
+    font-size: 12px; color: var(--danger); line-height: 1.5;
+  }
+  .notfound-box svg { flex-shrink: 0; margin-top: 2px; }
+  .del-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+  .del-row {
+    display: flex; align-items: center; gap: 10px; padding: 10px; width: 100%; text-align: left;
+    border-radius: var(--radius); background: var(--surface); border: 1px solid var(--border);
+    cursor: pointer; color: var(--text); font-size: 14px; transition: border-color .15s ease, background .15s ease;
+  }
+  html[data-theme="light"] .del-row { background: var(--bg); }
+  .del-row:hover { border-color: var(--chip-hover); }
+  .del-row-on { border-color: var(--danger-border); background: var(--danger-bg); }
+  .del-check {
+    width: 20px; height: 20px; flex-shrink: 0; border-radius: 5px; border: 1.5px solid var(--border);
+    display: flex; align-items: center; justify-content: center; color: #fff;
+  }
+  .del-check.on { background: var(--danger); border-color: var(--danger); }
+  .del-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+  .del-name { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .del-meta { font-size: 11px; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+  .danger-zone {
+    padding: 14px; border-radius: var(--radius); background: var(--danger-bg); border: 1px solid var(--danger-border);
+  }
+  .danger-zone p { margin: 0 0 12px; font-size: 13px; line-height: 1.5; color: var(--text); }
+  .btn-danger { background: var(--danger); color: var(--danger-ink); }
+  .submit-btn[disabled], .btn[disabled] { opacity: .5; cursor: not-allowed; filter: none; }
+
+  @media (max-width: 560px) {
+    .product-row { gap: 10px; padding: 10px; align-items: flex-start; }
+    .product-name { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.3; }
+    .row-stock { padding-top: 2px; }
+    .row-actions { flex-wrap: wrap; justify-content: flex-end; max-width: 76px; }
+    .icon-btn { padding: 6px; }
+    .content { padding: 16px; }
+  }
+
+  /* Two-pane layouts collapse to a single column on small screens. */
+  .form-col, .split-side, .split-main { min-width: 0; }
+  .dup-groups { display: block; }
+
+  /* Desktop: fill the window and use the width for side-by-side working
+     panes, rather than stretching single inputs across the screen. */
+  @media (min-width: 1024px) {
+    #app { max-width: none; padding-bottom: 0; }
+    .shell {
+      margin: 0; border-radius: 0; border-left: none; border-right: none; border-top: none;
+      min-height: 100vh; box-shadow: none;
+    }
+    html[data-theme="light"] .shell { box-shadow: none; }
+    .header { padding: 20px 32px 0; }
+    .content { padding: 24px 32px 40px; }
+
+    .product-list {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(460px, 1fr));
+      gap: 10px; align-items: start;
+    }
+    /* History stays a single column: a grid would run left-to-right then wrap,
+       which scrambles the date order. Capped so rows stay readable. */
+    .history-list { max-width: 1100px; }
+    .hist-summary, .history-list, .filter-row, .search-wrap { max-width: 1100px; }
+
+    /* Stock In/Out and the product form: two working columns. */
+    .stock-form, .product-form-page form {
+      max-width: 1000px; display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 0 36px; align-items: start;
+    }
+    .stock-form { max-width: 940px; }
+    .product-form-page { max-width: none; }
+    .form-span { grid-column: 1 / -1; max-width: 420px; }
+
+    /* Delete and file import: controls on the left, results on the right. */
+    .split {
+      display: grid; grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
+      gap: 36px; align-items: start;
+    }
+    .delete-page, .import-page { max-width: 1400px; }
+    .del-input { min-height: 160px; }
+    .imp-list, .del-list { max-height: none; }
+    .del-list {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 8px;
+    }
+
+    /* Duplicates: the three checks run side by side as columns, each keeping
+       its own groups stacked so related rows stay together. */
+    .dup-page { max-width: none; }
+    .dup-cols {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 12px 32px; align-items: start;
+    }
+    .dup-section { margin-bottom: 8px; }
+    .dup-groups { display: block; }
+    .dup-note { grid-column: 1 / -1; margin-top: 4px; }
+  }
+
+  @media (min-width: 1600px) {
+    .product-list { grid-template-columns: repeat(auto-fill, minmax(520px, 1fr)); }
+  }
 
   input:focus-visible, select:focus-visible, button:focus-visible {
     outline: 2px solid var(--signal); outline-offset: 2px;
@@ -202,8 +659,41 @@ const FIREBASE_NOT_CONFIGURED = !firebaseConfig.projectId;
 const firebaseApp = initializeApp(firebaseConfig);
 const db = getFirestore(firebaseApp);
 
-const CATEGORIES = ["Helmet", "Bag", "Glove", "Motors"];
-const CATEGORY_CLASS = { Helmet: "cat-helmet", Bag: "cat-bag", Glove: "cat-glove", Motors: "cat-motors" };
+const CATEGORIES = [
+  "Helmet", "Frame", "Plastic box", "Aluminum box", "Leather bag", "Mirror",
+  "Phone holders", "Water bottle holders", "Windshield", "Brake Pads", "Oil", "Accessory",
+];
+// Stored value stays English; only the label changes with language.
+const CATEGORY_LABELS = {
+  "Helmet": "\u1798\u17bd\u1780\u179f\u17bb\u179c\u178f\u17d2\u178f\u17b7\u1797\u17b6\u1796",
+  "Frame": "\u1780\u17b6\u1784\u1798\u17c9\u17bc\u178f\u17bc",
+  "Plastic box": "\u1792\u17bb\u1784\u1787\u17d0\u179a",
+  "Aluminum box": "\u1792\u17bb\u1784\u17a2\u17ca\u17b8\u178e\u17bb\u1780",
+  "Leather bag": "\u1780\u17b6\u1794\u17bc\u1794\u179f\u17d2\u1794\u17c2\u1780",
+  "Mirror": "\u1780\u1789\u17d2\u1785\u1780\u17cb\u179b\u17c1\u1784",
+  "Phone holders": "\u1787\u17be\u1784\u1785\u17b6\u1794\u17cb\u1791\u17bc\u179a\u179f\u17d0\u1796\u17d2\u1791",
+  "Water bottle holders": "\u1787\u17be\u1784\u1785\u17b6\u1794\u17cb\u1780\u17c2\u179c\u1791\u17b9\u1780",
+  "Windshield": "\u179a\u1794\u17b6\u17c6\u1784\u1781\u17d2\u1799\u179b\u17cb",
+  "Brake Pads": "ស្បែកហ្វ្រាំង",
+  "Oil": "\u1794\u17d2\u179a\u17c1\u1784\u1798\u17c9\u17b6\u179f\u17ca\u17b8\u1793",
+  "Accessory": "\u1782\u17d2\u179a\u17bf\u1784\u179b\u17c1\u1784",
+};
+// Every photo for a product, tolerating older records that only have `photo`.
+function scanBtn(field) {
+  return '<button type="button" class="scan-btn" data-action="scan" data-scan-field="' + field +
+    '" title="' + escapeHtml(t("scanBarcode")) + '" aria-label="' + escapeHtml(t("scanBarcode")) + '">' +
+    icon("scan", 24) + "</button>";
+}
+
+function photosOf(p) {
+  if (!p) return [];
+  if (Array.isArray(p.photos) && p.photos.length) return p.photos;
+  return p.photo ? [p.photo] : [];
+}
+
+function catSlug(cat) {
+  return "cat-" + String(cat || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
 
 const ICONS = {
   box: '<path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4a2 2 0 0 0 1-1.73Z"/><polyline points="3.29,7 12,12 20.71,7"/><line x1="12" y1="22" x2="12" y2="12"/>',
@@ -217,6 +707,20 @@ const ICONS = {
   pencil: '<path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
   plus: '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
   inbox: '<polyline points="22,12 16,12 14,15 10,15 8,12 2,12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z"/>',
+  camera: '<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3Z"/><circle cx="12" cy="13" r="3.5"/>',
+  tag: '<path d="M12 2H2v10l9.29 9.29a1 1 0 0 0 1.42 0l8.58-8.58a1 1 0 0 0 0-1.42Z"/><circle cx="6.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/>',
+  pin: '<path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12Z"/><circle cx="12" cy="10" r="2.5"/>',
+  barcode: '<line x1="3" y1="5" x2="3" y2="19"/><line x1="6" y1="5" x2="6" y2="19"/><line x1="9" y1="5" x2="9" y2="19"/><line x1="13" y1="5" x2="13" y2="19"/><line x1="16" y1="5" x2="16" y2="19"/><line x1="20" y1="5" x2="20" y2="19"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="6.34" y2="6.34"/><line x1="17.66" y1="17.66" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="6.34" y2="17.66"/><line x1="17.66" y1="6.34" x2="19.07" y2="4.93"/>',
+  moon: '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/>',
+  check: '<polyline points="4,12 9,17 20,6"/>',
+  sortDesc: '<line x1="4" y1="6" x2="16" y2="6"/><line x1="4" y1="12" x2="12" y2="12"/><line x1="4" y1="18" x2="8" y2="18"/>',
+  sortAsc: '<line x1="4" y1="6" x2="8" y2="6"/><line x1="4" y1="12" x2="12" y2="12"/><line x1="4" y1="18" x2="16" y2="18"/>',
+  scan: '<path d="M4 8V6a2 2 0 0 1 2-2h2"/><path d="M16 4h2a2 2 0 0 1 2 2v2"/><path d="M20 16v2a2 2 0 0 1-2 2h-2"/><path d="M8 20H6a2 2 0 0 1-2-2v-2"/><line x1="8" y1="9" x2="8" y2="15"/><line x1="11" y1="9" x2="11" y2="15"/><line x1="14" y1="9" x2="14" y2="15"/><line x1="16.5" y1="9" x2="16.5" y2="15"/>',
+  chevronLeft: '<polyline points="15,4 7,12 15,20"/>',
+  chevronRight: '<polyline points="9,4 17,12 9,20"/>',
+  copy: '<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
+  upload: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,9 12,4 17,9"/><line x1="12" y1="4" x2="12" y2="16"/>',
 };
 function icon(name, size, extraClass) {
   return '<svg class="' + (extraClass || '') + '" width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICONS[name] || '') + '</svg>';
@@ -231,15 +735,31 @@ const state = {
   categoryFilter: "All",
   search: "",
   historyFilter: "all",
+  historySearch: "",
+  historySort: "desc",
   returnTab: "overview",
   editingProductId: null,
-  confirmDeleteId: null,
+  deleteQuery: "",
+  deleteSelected: {},
+  deleteConfirming: false,
+  deleteError: "",
+  deleteBusy: false,
+  inMode: "single",
+  outMode: "single",
+  importFor: null,
+  importRows: [],
+  importFileName: "",
+  importParsing: false,
+  importApplying: false,
+  importError: "",
   modalError: "",
   inProductId: "",
+  inSearch: "",
   inQty: "",
   inNote: "",
   inError: "",
   outProductId: "",
+  outSearch: "",
   outQty: "",
   outNote: "",
   outError: "",
@@ -247,6 +767,16 @@ const state = {
   newCategory: CATEGORIES[0],
   newStock: "",
   newThreshold: "5",
+  newPhotos: [],
+  newProductId: "",
+  newBarcode: "",
+  newPrice: "",
+  newLocation: "",
+  photoProcessing: false,
+  lightboxProductId: null,
+  lightboxIndex: 0,
+  theme: "dark",
+  lang: "kh",
 };
 
 function escapeHtml(str) {
@@ -258,27 +788,731 @@ function escapeHtml(str) {
 function formatDate(ts) {
   if (!ts) return "";
   const d = new Date(ts);
-  return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) +
-    " \u00b7 " + d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+  return d.toLocaleDateString(localeTag(), { day: "2-digit", month: "short", year: "numeric" }) +
+    " \u00b7 " + d.toLocaleTimeString(localeTag(), { hour: "2-digit", minute: "2-digit" });
 }
 
 function describeError(err) {
   const code = err && err.code ? String(err.code) : "";
   if (code.indexOf("permission-denied") !== -1) {
-    return "Blocked by Firestore security rules \u2014 add a rule allowing read/write on stock_products and stock_transactions.";
+    return t("errPermission");
   }
   if (code.indexOf("unauthenticated") !== -1) {
-    return "Firestore rejected this as unauthenticated \u2014 check your security rules.";
+    return t("errUnauth");
   }
   if (code) {
-    return "Could not save (" + code + "). Open the browser console (F12) for details.";
+    return t("errCodePrefix") + code + t("errCodeSuffix");
   }
-  return "Could not save. Check your connection.";
+  return t("errSaveGeneric");
 }
 
-function totalUnits() {
-  return state.products.reduce((sum, p) => sum + p.stock, 0);
+function formatRelativeTime(ts) {
+  if (!ts) return "";
+  const diff = Date.now() - ts;
+  const min = 60000, hr = 3600000, day = 86400000;
+  if (diff < min) return t("justNow");
+  if (diff < hr) return Math.floor(diff / min) + t("minAgo");
+  if (diff < day) return Math.floor(diff / hr) + t("hrAgo");
+  if (diff < day * 30) return Math.floor(diff / day) + t("dayAgo");
+  const d = new Date(ts);
+  return d.toLocaleDateString(localeTag(), { day: "2-digit", month: "short" });
 }
+
+function calcResizedDimensions(width, height, maxDim) {
+  if (width <= maxDim && height <= maxDim) return { width: width, height: height };
+  if (width >= height) {
+    return { width: maxDim, height: Math.max(1, Math.round(height * maxDim / width)) };
+  }
+  return { width: Math.max(1, Math.round(width * maxDim / height)), height: maxDim };
+}
+
+function resizeImageToBase64(file, maxDim, quality) {
+  return new Promise((resolve, reject) => {
+    if (!file || !file.type || file.type.indexOf("image/") !== 0) {
+      reject(new Error("Please choose an image file."));
+      return;
+    }
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("Could not read that file."));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error("Could not read that image."));
+      img.onload = () => {
+        try {
+          const size = calcResizedDimensions(img.naturalWidth || img.width, img.naturalHeight || img.height, maxDim);
+          const canvas = document.createElement("canvas");
+          canvas.width = size.width;
+          canvas.height = size.height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, size.width, size.height);
+          resolve(canvas.toDataURL("image/jpeg", quality));
+        } catch (err) {
+          reject(err);
+        }
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+const MAX_PHOTOS = 6;
+// Firestore caps a document at 1MB. Photos are stored inside the product
+// document, so keep well clear of that ceiling.
+const PHOTO_BUDGET = 700000;
+
+function totalPhotoBytes(list) {
+  let n = 0;
+  for (let i = 0; i < list.length; i++) n += list[i].length;
+  return n;
+}
+
+async function handlePhotoSelect(fileList) {
+  const files = Array.prototype.slice.call(fileList || []);
+  if (!files.length) return;
+  state.photoProcessing = true;
+  state.modalError = "";
+  render();
+
+  for (let i = 0; i < files.length; i++) {
+    if (state.newPhotos.length >= MAX_PHOTOS) {
+      state.modalError = t("maxPhotos").replace("{n}", MAX_PHOTOS);
+      break;
+    }
+    try {
+      const data = await resizeImageToBase64(files[i], 480, 0.72);
+      if (totalPhotoBytes(state.newPhotos) + data.length > PHOTO_BUDGET) {
+        state.modalError = t("photosTooLarge");
+        break;
+      }
+      state.newPhotos.push(data);
+    } catch (err) {
+      console.error(err);
+      state.modalError = err && err.message ? err.message : t("photoFailed");
+      break;
+    }
+  }
+
+  state.photoProcessing = false;
+  render();
+}
+
+function parseIdTerms(raw) {
+  const parts = String(raw || "").split(/[\s,;]+/);
+  const seen = {};
+  const out = [];
+  for (let i = 0; i < parts.length; i++) {
+    const t = parts[i].trim();
+    if (!t) continue;
+    const key = t.toLowerCase();
+    if (seen[key]) continue;
+    seen[key] = true;
+    out.push(t);
+  }
+  return out;
+}
+
+function matchIdTerms(terms) {
+  const matched = [];
+  const seenIds = {};
+  const notFound = [];
+  for (let i = 0; i < terms.length; i++) {
+    const term = terms[i].toLowerCase();
+    const hits = state.products.filter(p =>
+      (p.productId || "").toLowerCase() === term ||
+      (p.barcode || "").toLowerCase() === term
+    );
+    if (hits.length === 0) {
+      notFound.push(terms[i]);
+      continue;
+    }
+    for (let j = 0; j < hits.length; j++) {
+      if (!seenIds[hits[j].id]) {
+        seenIds[hits[j].id] = true;
+        matched.push(hits[j]);
+      }
+    }
+  }
+  return { matched: matched, notFound: notFound };
+}
+
+// ---------------- spreadsheet reading (offline, no CDN) ----------------
+// .xlsx is a ZIP of XML. We read the ZIP central directory ourselves and
+// inflate entries with DecompressionStream, so nothing has to load remotely.
+
+function zipU16(dv, off) { return dv.getUint16(off, true); }
+function zipU32(dv, off) { return dv.getUint32(off, true); }
+
+function openZip(arrayBuffer) {
+  const bytes = new Uint8Array(arrayBuffer);
+  const dv = new DataView(arrayBuffer);
+  let eocd = -1;
+  const lowest = Math.max(0, bytes.length - 66000);
+  for (let i = bytes.length - 22; i >= lowest; i--) {
+    if (zipU32(dv, i) === 0x06054b50) { eocd = i; break; }
+  }
+  if (eocd < 0) throw new Error("That doesn't look like a valid .xlsx file.");
+  const count = zipU16(dv, eocd + 10);
+  const cdOff = zipU32(dv, eocd + 16);
+  if (cdOff === 0xffffffff) throw new Error("This .xlsx is too large to read here. Please save it as CSV instead.");
+  const files = {};
+  let p = cdOff;
+  for (let i = 0; i < count; i++) {
+    if (p + 46 > bytes.length || zipU32(dv, p) !== 0x02014b50) break;
+    const method = zipU16(dv, p + 10);
+    const compSize = zipU32(dv, p + 20);
+    const nameLen = zipU16(dv, p + 28);
+    const extraLen = zipU16(dv, p + 30);
+    const commentLen = zipU16(dv, p + 32);
+    const localOff = zipU32(dv, p + 42);
+    const name = new TextDecoder().decode(bytes.subarray(p + 46, p + 46 + nameLen));
+    files[name] = { method: method, compSize: compSize, localOff: localOff };
+    p += 46 + nameLen + extraLen + commentLen;
+  }
+  return { bytes: bytes, dv: dv, files: files };
+}
+
+async function readZipText(zip, name) {
+  const e = zip.files[name];
+  if (!e) return null;
+  if (zipU32(zip.dv, e.localOff) !== 0x04034b50) throw new Error("This .xlsx file appears to be damaged.");
+  const nameLen = zipU16(zip.dv, e.localOff + 26);
+  const extraLen = zipU16(zip.dv, e.localOff + 28);
+  const start = e.localOff + 30 + nameLen + extraLen;
+  const chunk = zip.bytes.subarray(start, start + e.compSize);
+  if (e.method === 0) return new TextDecoder().decode(chunk);
+  if (e.method !== 8) throw new Error("Unsupported compression inside the .xlsx file.");
+  if (typeof DecompressionStream === "undefined") {
+    throw new Error("This browser can't open .xlsx files. Please save the sheet as CSV instead.");
+  }
+  const stream = new Blob([chunk]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+  const buf = await new Response(stream).arrayBuffer();
+  return new TextDecoder().decode(buf);
+}
+
+function colIndexFromRef(ref) {
+  let n = 0;
+  for (let i = 0; i < ref.length; i++) {
+    const c = ref.charCodeAt(i);
+    if (c >= 65 && c <= 90) n = n * 26 + (c - 64);
+    else if (c >= 97 && c <= 122) n = n * 26 + (c - 96);
+    else break;
+  }
+  return n - 1;
+}
+
+function parseSharedStrings(xml) {
+  if (!xml) return [];
+  const doc = new DOMParser().parseFromString(xml, "application/xml");
+  const sis = doc.getElementsByTagName("si");
+  const out = [];
+  for (let i = 0; i < sis.length; i++) {
+    const ts = sis[i].getElementsByTagName("t");
+    let s = "";
+    for (let j = 0; j < ts.length; j++) {
+      if (ts[j].parentNode && ts[j].parentNode.nodeName === "rPh") continue;
+      s += ts[j].textContent;
+    }
+    out.push(s);
+  }
+  return out;
+}
+
+function parseSheetXml(xml, shared) {
+  const doc = new DOMParser().parseFromString(xml, "application/xml");
+  const rowEls = doc.getElementsByTagName("row");
+  const rows = [];
+  for (let i = 0; i < rowEls.length; i++) {
+    const cells = rowEls[i].getElementsByTagName("c");
+    const arr = [];
+    for (let j = 0; j < cells.length; j++) {
+      const c = cells[j];
+      const ref = c.getAttribute("r") || "";
+      let idx = ref ? colIndexFromRef(ref) : j;
+      if (idx < 0) idx = j;
+      const t = c.getAttribute("t");
+      let val = "";
+      if (t === "inlineStr") {
+        const ts = c.getElementsByTagName("t");
+        for (let k = 0; k < ts.length; k++) val += ts[k].textContent;
+      } else {
+        const v = c.getElementsByTagName("v")[0];
+        const raw = v ? v.textContent : "";
+        if (t === "s") {
+          const si = parseInt(raw, 10);
+          val = (si >= 0 && si < shared.length) ? shared[si] : "";
+        } else {
+          val = raw;
+        }
+      }
+      arr[idx] = val;
+    }
+    rows.push(arr);
+  }
+  return rows;
+}
+
+async function parseXlsx(arrayBuffer) {
+  const zip = openZip(arrayBuffer);
+  let sheetName = null;
+  if (zip.files["xl/worksheets/sheet1.xml"]) {
+    sheetName = "xl/worksheets/sheet1.xml";
+  } else {
+    const names = Object.keys(zip.files)
+      .filter(n => /^xl\/worksheets\/.*\.xml$/.test(n))
+      .sort();
+    sheetName = names[0] || null;
+  }
+  if (!sheetName) throw new Error("No worksheet found inside that .xlsx file.");
+  const shared = parseSharedStrings(await readZipText(zip, "xl/sharedStrings.xml"));
+  const sheetXml = await readZipText(zip, sheetName);
+  if (!sheetXml) throw new Error("Could not read the worksheet.");
+  return parseSheetXml(sheetXml, shared);
+}
+
+function parseCsv(text) {
+  if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+  const rows = [];
+  let row = [], field = "", inQuotes = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (inQuotes) {
+      if (ch === '"') {
+        if (text[i + 1] === '"') { field += '"'; i++; }
+        else inQuotes = false;
+      } else field += ch;
+    } else if (ch === '"') {
+      inQuotes = true;
+    } else if (ch === "," || ch === "\t" || ch === ";") {
+      row.push(field); field = "";
+    } else if (ch === "\n") {
+      row.push(field); rows.push(row); row = []; field = "";
+    } else if (ch !== "\r") {
+      field += ch;
+    }
+  }
+  if (field.length || row.length) { row.push(field); rows.push(row); }
+  return rows;
+}
+
+function readFileAsArrayBuffer(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onerror = () => reject(new Error("Could not read that file."));
+    r.onload = () => resolve(r.result);
+    r.readAsArrayBuffer(file);
+  });
+}
+
+function readFileAsText(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onerror = () => reject(new Error("Could not read that file."));
+    r.onload = () => resolve(r.result);
+    r.readAsText(file);
+  });
+}
+
+async function parseSpreadsheetFile(file) {
+  const name = (file.name || "").toLowerCase();
+  if (name.endsWith(".csv") || name.endsWith(".txt") || name.endsWith(".tsv")) {
+    return parseCsv(await readFileAsText(file));
+  }
+  if (name.endsWith(".xlsx")) {
+    return parseXlsx(await readFileAsArrayBuffer(file));
+  }
+  if (name.endsWith(".xls")) {
+    throw new Error("Old .xls files aren't supported. Save as .xlsx or .csv and try again.");
+  }
+  return parseXlsx(await readFileAsArrayBuffer(file));
+}
+
+// Turns raw spreadsheet rows into validated import rows.
+// Columns: 1 = product ID or barcode, 2 = quantity, 3 = note (optional).
+function buildImportRows(rawRows, mode) {
+  let start = 0;
+  if (rawRows.length) {
+    const firstQty = Number(String(rawRows[0][1] === undefined ? "" : rawRows[0][1]).trim());
+    if (!(firstQty > 0)) start = 1; // row 1 is a header
+  }
+  const out = [];
+  const runningOut = {};
+  for (let i = start; i < rawRows.length; i++) {
+    const r = rawRows[i] || [];
+    const idRaw = String(r[0] === undefined ? "" : r[0]).trim();
+    const qtyRaw = String(r[1] === undefined ? "" : r[1]).trim();
+    const note = String(r[2] === undefined ? "" : r[2]).trim();
+    if (!idRaw && !qtyRaw) continue;
+
+    const entry = { rowNum: i + 1, idRaw: idRaw, qty: 0, note: note, product: null, ok: false, message: "" };
+    const qtyNum = Number(qtyRaw);
+
+    if (!idRaw) {
+      entry.message = t("impMissingId");
+    } else {
+      const key = idRaw.toLowerCase();
+      entry.product = state.products.find(p =>
+        (p.productId || "").toLowerCase() === key ||
+        (p.barcode || "").toLowerCase() === key
+      ) || null;
+      if (!entry.product) entry.message = t("impNoMatch") + " \u201c" + idRaw + "\u201d";
+    }
+
+    if (!entry.message) {
+      if (!qtyRaw) entry.message = t("impMissingQty");
+      else if (!isFinite(qtyNum) || qtyNum <= 0 || Math.floor(qtyNum) !== qtyNum) {
+        entry.message = t("impWholeNumber");
+      } else {
+        entry.qty = qtyNum;
+      }
+    }
+
+    // For stock out, respect what earlier rows in the same file already took.
+    if (!entry.message && mode === "out") {
+      const used = runningOut[entry.product.id] || 0;
+      const left = entry.product.stock - used;
+      if (entry.qty > left) {
+        entry.message = used > 0
+          ? t("impOnly") + " " + left + " " + t("impOnlyLeftAfter")
+          : t("impOnly") + " " + entry.product.stock + " " + t("inStock");
+      } else {
+        runningOut[entry.product.id] = used + entry.qty;
+      }
+    }
+
+    entry.ok = !entry.message;
+    out.push(entry);
+  }
+  return out;
+}
+
+// ---------------- language ----------------
+// IMPORTANT: category values stay English in Firestore. Only labels translate,
+// so switching language never rewrites stored data.
+const I18N = {
+  en: {
+    appSub: "Stock Control",
+    loading: "Loading stock\u2026",
+    setupTitle: "Firebase setup needed",
+    tabOverview: "Overview", tabIn: "Stock In", tabOut: "Stock Out",
+    tabHistory: "History", tabDelete: "Delete", tabDuplicates: "Duplicates",
+    dupIdSection: "Duplicate Product IDs",
+    dupBarcodeSection: "Duplicate Barcodes",
+    dupLocationSection: "Shared Locations",
+    dupLocationNote: "Not a problem \u2014 just products stored in the same place.",
+    dupNoneTitle: "No duplicates found",
+    dupNoneSub: "Every product ID and barcode is unique.",
+    dupNoneIds: "No duplicate product IDs.",
+    dupNoneBarcodes: "No duplicate barcodes.",
+    dupNoneLocations: "No shared locations.",
+    dupItems: "products share this",
+    dupCheckWord: "Check",
+    all: "All",
+    allCategories: "All",
+    addProduct: "Add Product", editProduct: "Edit Product",
+    searchProducts: "Search name, ID, or barcode\u2026",
+    noProductsTitle: "No products yet",
+    noProductsSub: "Add your first product to start tracking stock.",
+    noMatch: "No products match your search.",
+    inStock: "in stock", reorderAt: "reorder at", updated: "updated", low: "Low",
+    stockInTitle: "Stock In \u2014 Supplier Delivery",
+    stockOutTitle: "Stock Out \u2014 Customer Sale",
+    addProductFirst: "Add a product first.", addOneNow: "Add one now",
+    modeSingle: "One item", modeImport: "From file",
+    product: "Product", quantity: "Quantity",
+    supplierNote: "Supplier / note (optional)", customerNote: "Customer / note (optional)",
+    supplierEg: "e.g. ABC Trading", customerEg: "e.g. Mr. Dara",
+    addStock: "Add Stock", removeStock: "Remove Stock",
+    pickerSearch: "Search or scan name, ID, barcode\u2026",
+    noProductMatchesThat: "No product matches that.",
+    change: "Change", noId: "no ID",
+    moreKeepTyping: "more \u2014 keep typing to narrow it down.",
+    currentlyInStock: "currently in stock",
+    chooseFile: "Choose a file", fileTypes: ".xlsx or .csv \u00b7 tap to browse",
+    readingFile: "Reading file\u2026",
+    columnOrder: "Column order:",
+    fileExampleTitle: "Your file should look like this",
+    fileExampleNote: "Column headings are optional \u2014 only the order matters.",
+    colId: "Product ID or barcode", colQty: "Quantity", colNote: "Note (optional)",
+    headerSkipped: "A header row is skipped automatically.",
+    downloadTemplate: "Download a template",
+    ready: "ready", skipped: "skipped",
+    showingFirst: "Showing the first 200 of", rowsWord: "rows.",
+    nothingToApply: "Nothing to apply", applying: "Applying\u2026",
+    addStockForRows: "Add stock for", removeStockForRows: "Remove stock for",
+    rowOne: "row", rowMany: "rows",
+    noDataRows: "No data rows found. Column 1 should be the product ID or barcode, column 2 the quantity.",
+    noActivityTitle: "No activity yet",
+    noActivitySub: "Stock in and out transactions will appear here.",
+    searchHistory: "Search product, ID, barcode, or note\u2026",
+    sortNewest: "Newest first", sortOldest: "Oldest first",
+    noMatchingActivity: "No matching activity.",
+    netWord: "net", recordOne: "record", recordMany: "records",
+    inWord: "in", outWord: "out",
+    deleteTitle: "Delete Products",
+    deleteIdsLabel: "Product IDs or barcodes",
+    deleteIdsPlaceholder: "e.g. 9500001, 9500002",
+    deleteBrowseHint: "Tap a product to select it for deletion.",
+    deleteIdsHint: "Paste IDs to select several at once, or just tap products on the right.",
+    nothingToDeleteTitle: "Nothing to delete yet",
+    nothingToDeleteSub: "Enter one or more Product IDs or barcodes above. Separate them with commas, spaces, or new lines.",
+    notFoundLabel: "not found:", noMatchingProducts: "No matching products.",
+    foundOf: "Found", ofWord: "of", tapRowToToggle: "tap a row to include or exclude it",
+    selectAtLeastOne: "Select at least one product",
+    deleteSelected: "Delete", selectedWord: "selected",
+    permanentlyDelete: "Permanently delete", productOne: "product", productMany: "products",
+    cannotBeUndone: "This cannot be undone. Stock history stays in the History tab.",
+    cancel: "Cancel", yesDelete: "Yes, delete", deleting: "Deleting\u2026",
+    close: "Close",
+    scanBarcode: "Scan barcode",
+    scanTitle: "Scan a barcode",
+    scanHint: "Point the camera at the barcode",
+    scanUnsupported: "This browser can't scan barcodes. Try Chrome on Android, or type the code.",
+    scanNoCamera: "No camera available. Check the site is opened over https and try again.",
+    scanDenied: "Camera permission was blocked. Allow camera access for this site, then try again.",
+    scanInsecure: "The camera only works on the live web address. Open the app from your https:// link instead of a downloaded file.",
+    photo: "Photo", photosLabel: "Photos", addPhoto: "Add photo", removePhoto: "Remove photo",
+    mainPhoto: "Main", makeMain: "Set as main photo",
+    mainPhotoHint: "The first photo is used as the product thumbnail. Tap another to make it the main one.",
+    maxPhotos: "Maximum {n} photos.",
+    photosTooLarge: "These photos are too large to store together. Remove one and try again.",
+    photoFailed: "Could not process that image.",
+    processingImage: "Processing image\u2026",
+    name: "Name", category: "Category",
+    productIdLabel: "Product ID", productIdEg: "e.g. HLM-014 (optional)",
+    barcodeLabel: "Barcode", barcodeEg: "Scan or type (optional)",
+    priceLabel: "Price (USD)", locationLabel: "Location", locationEg: "e.g. Shelf A2 (optional)",
+    startingStock: "Starting stock", lowStockAlertAt: "Low stock alert at",
+    nameEg: "e.g. AGV K1 Matte Black M",
+    save: "Save", back: "Back",
+    switchToLight: "Switch to light mode", switchToDark: "Switch to dark mode",
+    switchToEnglish: "English", switchToKhmer: "\u1781\u17d2\u1798\u17c2\u179a",
+    errNameRequired: "Product name is required.",
+    errChooseProduct: "Choose a product.",
+    errQtyPositive: "Enter a quantity greater than 0.",
+    errOnly: "Only", errInStock: "in stock.",
+    errSaveGeneric: "Could not save. Check your connection.",
+    errPermission: "Blocked by Firestore security rules \u2014 add a rule allowing read/write on stock_products and stock_transactions.",
+    errUnauth: "Firestore rejected this as unauthenticated \u2014 check your security rules.",
+    errCodePrefix: "Could not save (", errCodeSuffix: "). Open the browser console (F12) for details.",
+    toastAdded: "Added", toastUpdated: "Updated", toastDeleted: "Deleted",
+    toastStockedIn: "Stocked in", toastStockedOut: "Stocked out",
+    initialStock: "Initial stock", importedFrom: "Imported from",
+    impMissingId: "Missing product ID", impMissingQty: "Missing quantity",
+    impNoMatch: "No product matches", impWholeNumber: "Quantity must be a whole number above 0",
+    impOnlyLeftAfter: "left after earlier rows in this file", impOnly: "Only",
+    appliedOf: "Applied", rowsOf: "rows.",
+    justNow: "just now", minAgo: "m ago", hrAgo: "h ago", dayAgo: "d ago",
+  },
+  kh: {
+    appSub: "គ្រប់គ្រងស្តុក",
+    loading: "កំពុងផ្ទុកស្តុក…",
+    setupTitle: "ត្រូវការដំឡើង Firebase",
+    tabOverview: "ទិដ្ឋភាពរួម",
+    tabIn: "ចូលស្តុក",
+    tabOut: "ចេញស្តុក",
+    tabHistory: "ប្រវត្តិ",
+    tabDelete: "លុប",
+    tabDuplicates: "ស្ទួន",
+    dupIdSection: "លេខសម្គាល់ទំនិញស្ទួន",
+    dupBarcodeSection: "បាកូដស្ទួន",
+    dupLocationSection: "ទីតាំងដូចគ្នា",
+    dupLocationNote: "មិនមែនជាបញ្ហាទេ — គ្រាន់តែជាទំនិញដាក់នៅកន្លែងតែមួយ។",
+    dupNoneTitle: "រកមិនឃើញទិន្នន័យស្ទួន",
+    dupNoneSub: "លេខសម្គាល់ និងបាកូដទាំងអស់មិនស្ទួនគ្នាទេ។",
+    dupNoneIds: "គ្មានលេខសម្គាល់ស្ទួន។",
+    dupNoneBarcodes: "គ្មានបាកូដស្ទួន។",
+    dupNoneLocations: "គ្មានទីតាំងដូចគ្នា។",
+    dupItems: "ទំនិញប្រើដូចគ្នា",
+    dupCheckWord: "ពិនិត្យ",
+    all: "ទាំងអស់",
+    allCategories: "គ្រប់ប្រភេទទាំងអស់",
+    addProduct: "បន្ថែមទំនិញ",
+    editProduct: "កែសម្រួលទំនិញ",
+    searchProducts: "ស្វែងរកឈ្មោះ លេខសម្គាល់ ឬបាកូដ…",
+    noProductsTitle: "មិនទាន់មានទំនិញ",
+    noProductsSub: "បន្ថែមទំនិញដំបូងរបស់អ្នក ដើម្បីចាប់ផ្តើមតាមដានស្តុក។",
+    noMatch: "មិនមានទំនិញត្រូវនឹងការស្វែងរក។",
+    inStock: "ក្នុងស្តុក",
+    reorderAt: "បញ្ជាទិញនៅ",
+    updated: "ធ្វើបច្ចុប្បន្នភាព",
+    low: "ទាប",
+    stockInTitle: "ចូលស្តុក — ទំនិញពីអ្នកផ្គត់ផ្គង់",
+    stockOutTitle: "ចេញស្តុក — លក់ឲ្យអតិថិជន",
+    addProductFirst: "សូមបន្ថែមទំនិញជាមុនសិន។",
+    addOneNow: "បន្ថែមឥឡូវនេះ",
+    modeSingle: "មួយមុខ",
+    modeImport: "ពីឯកសារ",
+    product: "ទំនិញ",
+    quantity: "បរិមាណ",
+    supplierNote: "អ្នកផ្គត់ផ្គង់ / កំណត់ចំណាំ (ស្រេចចិត្ត)",
+    customerNote: "អតិថិជន / កំណត់ចំណាំ (ស្រេចចិត្ត)",
+    supplierEg: "ឧ. ABC Trading",
+    customerEg: "ឧ. លោក ដារ៉ា",
+    addStock: "បន្ថែមស្តុក",
+    removeStock: "ដកស្តុក",
+    pickerSearch: "ស្វែងរក ឬស្កែនបាកូដ…",
+    noProductMatchesThat: "មិនមានទំនិញត្រូវគ្នា។",
+    change: "ប្តូរ",
+    noId: "គ្មានលេខសម្គាល់",
+    moreKeepTyping: "ទៀត — សូមវាយបន្តដើម្បីស្វែងរកលម្អិត។",
+    currentlyInStock: "មានក្នុងស្តុកបច្ចុប្បន្ន",
+    chooseFile: "ជ្រើសរើសឯកសារ",
+    fileTypes: ".xlsx ឬ .csv · ចុចដើម្បីរក",
+    readingFile: "កំពុងអានឯកសារ…",
+    columnOrder: "លំដាប់ជួរឈរ៖",
+    fileExampleTitle: "ឯកសាររបស់អ្នកគួរមានទម្រង់បែបនេះ",
+    fileExampleNote: "ចំណងជើងជួរឈរជាជម្រើស — សំខាន់តែលំដាប់ប៉ុណ្ណោះ។",
+    colId: "លេខសម្គាល់ទំនិញ ឬបាកូដ",
+    colQty: "បរិមាណ",
+    colNote: "កំណត់ចំណាំ (ស្រេចចិត្ត)",
+    headerSkipped: "ជួរក្បាលត្រូវបានរំលងដោយស្វ័យប្រវត្តិ។",
+    downloadTemplate: "ទាញយកគំរូ",
+    ready: "រួចរាល់",
+    skipped: "បានរំលង",
+    showingFirst: "បង្ហាញ 200 ដំបូងនៃ",
+    rowsWord: "ជួរ។",
+    nothingToApply: "គ្មានអ្វីដើម្បីអនុវត្ត",
+    applying: "កំពុងអនុវត្ត…",
+    addStockForRows: "បន្ថែមស្តុកសម្រាប់",
+    removeStockForRows: "ដកស្តុកសម្រាប់",
+    rowOne: "ជួរ",
+    rowMany: "ជួរ",
+    noDataRows: "រកមិនឃើញទិន្នន័យ។ ជួរឈរទី ១ គឺលេខសម្គាល់ ឬបាកូដ និងទី ២ គឺបរិមាណ។",
+    noActivityTitle: "មិនទាន់មានសកម្មភាព",
+    noActivitySub: "ប្រតិបត្តិការចូល និងចេញស្តុកនឹងបង្ហាញនៅទីនេះ។",
+    searchHistory: "ស្វែងរកទំនិញ លេខសម្គាល់ ឬកំណត់ចំណាំ…",
+    sortNewest: "ថ្មីមុនគេ",
+    sortOldest: "ចាស់មុនគេ",
+    noMatchingActivity: "មិនមានសកម្មភាពត្រូវគ្នា។",
+    netWord: "សុទ្ធ",
+    recordOne: "កំណត់ត្រា",
+    recordMany: "កំណត់ត្រា",
+    inWord: "ចូល",
+    outWord: "ចេញ",
+    deleteTitle: "លុបទំនិញ",
+    deleteIdsLabel: "លេខសម្គាល់ទំនិញ ឬបាកូដ",
+    deleteIdsPlaceholder: "ឧ. 9500001, 9500002",
+    deleteBrowseHint: "ចុចលើទំនិញ ដើម្បីជ្រើសរើសសម្រាប់លុប។",
+    deleteIdsHint: "បញ្ចូលលេខសម្គាល់ ដើម្បីជ្រើសច្រើនក្នុងពេលតែមួយ ឬចុចលើទំនិញនៅខាងស្តាំ។",
+    nothingToDeleteTitle: "មិនទាន់មានអ្វីលុប",
+    nothingToDeleteSub: "បញ្ចូលលេខសម្គាល់ បាកូដមួយឬច្រើនខាងលើ បំបែកដោយសញ្ញាក្បៀស ដកឃ្លា ឬចុះបន្ទាត់ថ្មី",
+    notFoundLabel: "រកមិនឃើញ៖",
+    noMatchingProducts: "មិនមានទំនិញត្រូវគ្នា។",
+    foundOf: "រកឃើញ",
+    ofWord: "ក្នុងចំណោម",
+    tapRowToToggle: "ចុចជួរដើម្បីបញ្ចូល ឬដកចេញ",
+    selectAtLeastOne: "សូមជ្រើសយ៉ាងហោចមួយទំនិញ",
+    deleteSelected: "លុប",
+    selectedWord: "ដែលបានជ្រើស",
+    permanentlyDelete: "លុបជាអចិន្ត្រៃយ៍",
+    productOne: "ទំនិញ",
+    productMany: "ទំនិញ",
+    cannotBeUndone: "មិនអាចយកមកវិញបានទេ។ ប្រវត្តិស្តុកនៅតែមានក្នុងផ្ទាំងប្រវត្តិ។",
+    cancel: "បោះបង់",
+    yesDelete: "យល់ព្រម លុប",
+    deleting: "កំពុងលុប…",
+    close: "បិទ",
+    scanBarcode: "ស្កែនបាកូដ",
+    scanTitle: "ស្កែនបាកូដ",
+    scanHint: "តម្រង់កាមេរ៉ាទៅលើបាកូដ",
+    scanUnsupported: "កម្មវិធីរុករកនេះមិនអាចស្កែនបាកូដបានទេ។ សូមប្រើ Chrome លើ Android ឬវាយលេខដោយដៃ។",
+    scanNoCamera: "រកមិនឃើញកាមេរ៉ា។ សូមពិនិត្យថាគេហទំព័របើកតាម https រួចព្យាយាមម្តងទៀត។",
+    scanDenied: "កាមេរ៉ាត្រូវបានបិទ។ សូមអនុញ្ញាតឲ្យប្រើកាមេរ៉ាសម្រាប់គេហទំព័រនេះ រួចព្យាយាមម្តងទៀត។",
+    scanInsecure: "កាមេរ៉ាដំណើរការតែលើអាសយដ្ឋានគេហទំព័រពិតប្រាកដប៉ុណ្ណោះ។ សូមបើកកម្មវិធីតាមតំណ https:// ជំនួសឯកសារដែលបានទាញយក។",
+    photo: "រូបភាព",
+    photosLabel: "រូបភាព",
+    addPhoto: "បន្ថែមរូប",
+    removePhoto: "លុបរូប",
+    mainPhoto: "រូបចម្បង",
+    makeMain: "កំណត់ជារូបចម្បង",
+    mainPhotoHint: "រូបទី១ ត្រូវប្រើជារូបតំណាងទំនិញ។ ចុចរូបផ្សេង ដើម្បីប្តូរជារូបចម្បង។",
+    maxPhotos: "អតិបរមា {n} រូប។",
+    photosTooLarge: "រូបភាពទាំងនេះធំពេកមិនអាចរក្សាទុករួមគ្នាបានទេ។ សូមលុបចេញមួយ រួចព្យាយាមម្តងទៀត។",
+    photoFailed: "មិនអាចដំណើរការរូបភាពនេះបានទេ។",
+    processingImage: "កំពុងដំណើរការរូបភាព…",
+    name: "ឈ្មោះ",
+    category: "ប្រភេទ",
+    productIdLabel: "លេខសម្គាល់ទំនិញ",
+    productIdEg: "ឧ. HLM-014 (ស្រេចចិត្ត)",
+    barcodeLabel: "បាកូដ",
+    barcodeEg: "ស្កែនបាកូដអីវ៉ាន់",
+    priceLabel: "តម្លៃ (ដុល្លារ)",
+    locationLabel: "ទីតាំង",
+    locationEg: "ឧ. Shelf A2 (ស្រេចចិត្ត)",
+    startingStock: "ស្តុកចាប់ផ្តើម",
+    lowStockAlertAt: "ជូនដំណឹងស្តុកតិចនៅ",
+    nameEg: "ឧ. AGV K1 Matte Black M",
+    save: "រក្សាទុក",
+    back: "ត្រឡប់",
+    switchToLight: "ប្តូរទៅមុខងារភ្លឺ",
+    switchToDark: "ប្តូរទៅមុខងារងងឹត",
+    switchToEnglish: "English",
+    switchToKhmer: "ខ្មែរ",
+    errNameRequired: "ត្រូវបញ្ចូលឈ្មោះទំនិញ។",
+    errChooseProduct: "សូមជ្រើសរើសទំនិញ។",
+    errQtyPositive: "សូមបញ្ចូលបរិមាណធំជាង 0។",
+    errOnly: "មានតែ",
+    errInStock: "ក្នុងស្តុក។",
+    errSaveGeneric: "មិនអាចរក្សាទុកបានទេ។ សូមពិនិត្យអ៊ីនធឺណិត។",
+    errPermission: "ត្រូវបានទប់ស្កាត់ដោយច្បាប់សុវត្ថិភាព Firestore — សូមបន្ថែមច្បាប់អនុញ្ញាត read/write លើ stock_products និង stock_transactions។",
+    errUnauth: "Firestore បានបដិសេធការស្នើសុំនេះ — សូមពិនិត្យច្បាប់សុវត្ថិភាព។",
+    errCodePrefix: "មិនអាចរក្សាទុកបាន (",
+    errCodeSuffix: ")។ សូមមើល console ក្នុងកម្មវិធីរុករក (F12)។",
+    toastAdded: "បានបន្ថែម",
+    toastUpdated: "បានធ្វើបច្ចុប្បន្នភាព",
+    toastDeleted: "បានលុប",
+    toastStockedIn: "បានចូលស្តុក",
+    toastStockedOut: "បានចេញស្តុក",
+    initialStock: "ស្តុកដើម",
+    importedFrom: "នាំចូលពី",
+    impMissingId: "ខ្វះលេខសម្គាល់ទំនិញ",
+    impMissingQty: "ខ្វះបរិមាណ",
+    impNoMatch: "មិនមានទំនិញត្រូវនឹង",
+    impWholeNumber: "បរិមាណត្រូវតែជាចំនួនគត់ធំជាង 0",
+    impOnlyLeftAfter: "នៅសល់បន្ទាប់ពីជួរមុនក្នុងឯកសារនេះ",
+    impOnly: "មានតែ",
+    appliedOf: "បានអនុវត្ត",
+    rowsOf: "ជួរ។",
+    justNow: "អម្បាញ់មិញ",
+    minAgo: " នាទីមុន",
+    hrAgo: " ម៉ោងមុន",
+    dayAgo: " ថ្ងៃមុន",
+  },
+};
+
+function t(key) {
+  const dict = I18N[state.lang] || I18N.en;
+  const v = dict[key];
+  if (v !== undefined) return v;
+  const fb = I18N.en[key];
+  return fb !== undefined ? fb : key;
+}
+
+const SYS_NOTE_INITIAL = "Initial stock";
+const SYS_NOTE_IMPORT_PREFIX = "Imported from ";
+
+// System-generated notes are stored in English so they never depend on the
+// language the entry was made in. User-typed notes pass through untouched.
+function displayNote(note) {
+  if (!note) return "";
+  if (note === SYS_NOTE_INITIAL) return t("initialStock");
+  if (note.indexOf(SYS_NOTE_IMPORT_PREFIX) === 0) {
+    return t("importedFrom") + " " + note.slice(SYS_NOTE_IMPORT_PREFIX.length);
+  }
+  return note;
+}
+
+function catLabel(cat) {
+  if (state.lang === "kh") {
+    const kh = CATEGORY_LABELS[cat];
+    if (kh) return kh;
+  }
+  return cat;
+}
+
+function localeTag() { return state.lang === "kh" ? "km-KH" : "en-GB"; }
+
 function lowStockCount() {
   return state.products.filter(p => p.stock <= p.threshold).length;
 }
@@ -306,32 +1540,57 @@ function render() {
       }
     }
   }
+  scrollActiveTabIntoView(appEl);
+}
+
+// The tab strip scrolls sideways on narrow screens, so the selected tab can end
+// up off-screen. Nudge the strip just far enough to reveal it.
+function scrollActiveTabIntoView(appEl) {
+  try {
+    const tabsEl = appEl.querySelector(".tabs");
+    if (!tabsEl) return;
+    const activeEl = tabsEl.querySelector(".tab-btn.active");
+    if (!activeEl || !tabsEl.clientWidth) return;
+    const pad = 12;
+    const left = activeEl.offsetLeft;
+    const right = left + activeEl.offsetWidth;
+    const viewLeft = tabsEl.scrollLeft;
+    const viewRight = viewLeft + tabsEl.clientWidth;
+    if (left < viewLeft) {
+      tabsEl.scrollLeft = Math.max(0, left - pad);
+    } else if (right > viewRight) {
+      tabsEl.scrollLeft = right - tabsEl.clientWidth + pad;
+    }
+  } catch (err) { /* layout not measurable */ }
 }
 
 function renderAppHTML() {
   if (FIREBASE_NOT_CONFIGURED) {
     return (
       '<div class="setup-notice">' +
-        "<h2>Firebase setup needed</h2>" +
+        "<h2>" + t("setupTitle") + "</h2>" +
         "<p>Open this file and paste your Firebase config near the top of the &lt;script&gt; tag \u2014 the same one from your index.html or manage.html if you want this synced with your existing nija-helmets project.</p>" +
       "</div>"
     );
   }
   if (!state.productsLoaded || !state.transactionsLoaded) {
-    return '<div class="loading"><span class="spinner"></span> Loading stock\u2026</div>';
+    return '<div class="loading"><span class="spinner"></span> ' + t("loading") + '</div>';
   }
   let body = "";
   if (state.tab === "overview") body = renderOverview();
   else if (state.tab === "in") body = renderStockForm("in");
   else if (state.tab === "out") body = renderStockForm("out");
   else if (state.tab === "history") body = renderHistory();
+  else if (state.tab === "delete") body = renderDeleteTab();
+  else if (state.tab === "duplicates") body = renderDuplicatesTab();
   else if (state.tab === "product-form") body = renderProductForm();
 
   return (
     '<div class="shell">' +
       renderHeader() +
       '<div class="content">' + body + "</div>" +
-    "</div>"
+    "</div>" +
+    (state.lightboxProductId ? renderLightbox() : "")
   );
 }
 
@@ -343,12 +1602,16 @@ function renderHeader() {
           '<div class="brand-mark">' + icon("box", 18) + "</div>" +
           '<div class="brand-text">' +
             "<h1>NIJA Helmets</h1>" +
-            "<p>Stock Control</p>" +
+            t("appSub") +
           "</div>" +
         "</div>" +
-        '<div class="brand-stat">' +
-          '<div class="brand-stat-num">' + totalUnits() + "</div>" +
-          '<div class="brand-stat-label">units in stock</div>' +
+        '<div class="header-btns">' +
+        '<button type="button" class="theme-btn lang-btn" data-action="toggle-lang" title="' + escapeHtml(state.lang === "kh" ? "Switch to English" : "\u1794\u17d2\u178a\u17bc\u179a\u1791\u17c5\u1797\u17b6\u179f\u17b6\u1781\u17d2\u1798\u17c2\u179a") + '">' +
+          (state.lang === "kh" ? "EN" : "\u1781\u17d2\u1798\u17c2\u179a") +
+        "</button>" +
+        '<button type="button" class="theme-btn" data-action="toggle-theme" title="' + escapeHtml(state.theme === "dark" ? t("switchToLight") : t("switchToDark")) + '">' +
+          icon(state.theme === "dark" ? "sun" : "moon", 16) +
+        "</button>" +
         "</div>" +
       "</div>" +
       (state.tab === "product-form" ? "" : renderTabsInner()) +
@@ -358,18 +1621,22 @@ function renderHeader() {
 
 function renderTabsInner() {
   const tabs = [
-    { id: "overview", label: "Overview", icon: "box" },
-    { id: "in", label: "Stock In", icon: "up" },
-    { id: "out", label: "Stock Out", icon: "down" },
-    { id: "history", label: "History", icon: "history" },
+    { id: "overview", label: t("tabOverview"), icon: "box" },
+    { id: "in", label: t("tabIn"), icon: "up" },
+    { id: "out", label: t("tabOut"), icon: "down" },
+    { id: "history", label: t("tabHistory"), icon: "history" },
+    { id: "duplicates", label: t("tabDuplicates"), icon: "copy" },
+    { id: "delete", label: t("tabDelete"), icon: "trash" },
   ];
   const low = lowStockCount();
+  const dupCount = duplicateIssueCount();
   return (
     '<div class="tabs">' +
       tabs.map(t =>
         '<button type="button" class="tab-btn' + (state.tab === t.id ? " active" : "") + '" data-action="set-tab" data-tab="' + t.id + '">' +
           icon(t.icon, 14) + " " + t.label +
           (t.id === "overview" && low > 0 ? '<span class="tab-badge">' + low + "</span>" : "") +
+          (t.id === "duplicates" && dupCount > 0 ? '<span class="tab-badge">' + dupCount + "</span>" : "") +
         "</button>"
       ).join("") +
     "</div>"
@@ -379,61 +1646,131 @@ function renderTabsInner() {
 function renderOverview() {
   const filtered = state.products
     .filter(p => state.categoryFilter === "All" || p.category === state.categoryFilter)
-    .filter(p => p.name.toLowerCase().includes(state.search.toLowerCase()))
+    .filter(p => {
+      const q = state.search.toLowerCase();
+      if (!q) return true;
+      return p.name.toLowerCase().includes(q) ||
+        (p.productId || "").toLowerCase().includes(q) ||
+        (p.barcode || "").toLowerCase().includes(q);
+    })
     .sort((a, b) => a.name.localeCompare(b.name));
 
-  const chips = ["All"].concat(CATEGORIES).map(c =>
-    '<button type="button" class="chip' + (state.categoryFilter === c ? " chip-active" : "") + '" data-action="set-category" data-category="' + c + '">' + c + "</button>"
-  ).join("");
+  // Category filter as a dropdown -- nine chips wrapped onto two rows on a phone.
+  // Counts come from the full product list, not the filtered one.
+  const counts = {};
+  for (let i = 0; i < state.products.length; i++) {
+    const cat = state.products[i].category;
+    counts[cat] = (counts[cat] || 0) + 1;
+  }
+  // Products saved under a category that has since been retired must stay
+  // reachable, so append any leftover values found in the data.
+  const extraCats = [];
+  for (const cat in counts) {
+    if (CATEGORIES.indexOf(cat) === -1 && extraCats.indexOf(cat) === -1) extraCats.push(cat);
+  }
+  extraCats.sort();
+
+  const chips =
+    '<select id="categoryFilter" data-field="categoryFilter" class="input cat-select">' +
+      ["All"].concat(CATEGORIES, extraCats).map(c => {
+        const n = c === "All" ? state.products.length : (counts[c] || 0);
+        return '<option value="' + c + '"' + (state.categoryFilter === c ? " selected" : "") + ">" +
+          escapeHtml(c === "All" ? t("allCategories") : catLabel(c)) + " (" + n + ")" +
+        "</option>";
+      }).join("") +
+    "</select>";
 
   let listHtml;
   if (state.products.length === 0) {
     listHtml = renderEmptyState();
   } else if (filtered.length === 0) {
-    listHtml = '<div class="empty-inline">No products match your search.</div>';
+    listHtml = '<div class="empty-inline">' + t("noMatch") + "</div>";
   } else {
     listHtml = '<div class="product-list">' + filtered.map(renderProductRow).join("") + "</div>";
   }
 
   return (
     '<div class="filter-row">' + chips +
-      '<button type="button" class="btn btn-primary chip-add" data-action="open-add-modal">' + icon("plus", 13) + " Add Product</button>" +
+      '<button type="button" class="btn btn-primary chip-add" data-action="open-add-modal">' + icon("plus", 13) + " " + t("addProduct") + "</button>" +
     "</div>" +
     '<div class="search-wrap">' +
       '<span class="search-icon">' + icon("search", 15) + "</span>" +
-      '<input id="search" data-field="search" value="' + escapeHtml(state.search) + '" placeholder="Search products\u2026" class="input input-search" />' +
+      '<input id="search" data-field="search" value="' + escapeHtml(state.search) + '" placeholder="' + escapeHtml(t("searchProducts")) + '" class="input input-search input-scan" />' +
+      scanBtn("search") +
     "</div>" +
     listHtml
   );
 }
 
+function renderLightbox() {
+  const p = state.products.find(x => x.id === state.lightboxProductId);
+  if (!p) return "";
+  const pics = photosOf(p);
+  if (!pics.length) return "";
+  const i = Math.min(Math.max(state.lightboxIndex, 0), pics.length - 1);
+  const many = pics.length > 1;
+
+  const strip = many
+    ? '<div class="lb-strip">' + pics.map((src, n) =>
+        '<button type="button" class="lb-thumb' + (n === i ? " lb-thumb-on" : "") + '" data-action="lightbox-pick" data-index="' + n + '">' +
+          '<img src="' + src + '" alt="" />' +
+        "</button>").join("") + "</div>"
+    : "";
+
+  return (
+    '<div class="lb-overlay" data-action="close-lightbox">' +
+      '<div class="lb-bar">' +
+        '<span class="lb-title">' + escapeHtml(p.name) + "</span>" +
+        '<button type="button" class="lb-close" data-action="close-lightbox" title="' + escapeHtml(t("close")) + '">' + icon("x", 18) + "</button>" +
+      "</div>" +
+      '<div class="lb-stage">' +
+        (many ? '<button type="button" class="lb-nav lb-prev" data-action="lightbox-prev">' + icon("chevronLeft", 22) + "</button>" : "") +
+        '<img class="lb-img" src="' + pics[i] + '" alt="" />' +
+        (many ? '<button type="button" class="lb-nav lb-next" data-action="lightbox-next">' + icon("chevronRight", 22) + "</button>" : "") +
+      "</div>" +
+      (many ? '<div class="lb-counter">' + (i + 1) + " / " + pics.length + "</div>" : "") +
+      strip +
+    "</div>"
+  );
+}
+
 function renderProductRow(p) {
   const low = p.stock <= p.threshold;
-  const confirming = state.confirmDeleteId === p.id;
+  const updated = formatRelativeTime(p.updatedAt || p.createdAt);
+  const pics = photosOf(p);
+  const thumb = pics.length
+    ? '<button type="button" class="row-thumb-btn" data-action="open-lightbox" data-id="' + p.id + '">' +
+        '<img class="row-thumb" src="' + pics[0] + '" alt="" />' +
+      "</button>"
+    : '<div class="row-thumb-placeholder">' + icon("camera", 16) + "</div>";
   return (
     '<div class="product-row">' +
+      thumb +
       '<div class="product-info">' +
         '<div class="product-name-row">' +
           '<span class="product-name">' + escapeHtml(p.name) + "</span>" +
-          '<span class="cat-tag ' + (CATEGORY_CLASS[p.category] || "") + '">' + escapeHtml(p.category) + "</span>" +
-          (low ? '<span class="low-flag">' + icon("alert", 12) + " Low</span>" : "") +
+          '<span class="cat-tag ' + catSlug(p.category) + '">' + escapeHtml(catLabel(p.category)) + "</span>" +
+          (low ? '<span class="low-flag">' + icon("alert", 12) + " " + t("low") + "</span>" : "") +
         "</div>" +
-        '<div class="product-meta">' + p.stock + " in stock \u00b7 reorder at " + p.threshold + "</div>" +
+        '<div class="product-meta">' + t("reorderAt") + " " + p.threshold +
+          (updated ? " \u00b7 " + t("updated") + " " + updated : "") +
+        "</div>" +
+        (p.location || p.barcode ?
+          '<div class="product-extra">' +
+            (p.location ? '<span class="extra-item">' + icon("pin", 12) + escapeHtml(p.location) + "</span>" : "") +
+            (p.barcode ? '<span class="extra-item extra-barcode">' + icon("barcode", 12) + escapeHtml(p.barcode) + "</span>" : "") +
+          "</div>" : ""
+        ) +
       "</div>" +
-      (confirming ?
-        '<div class="confirm-row">' +
-          '<span class="muted">Delete?</span>' +
-          '<button type="button" class="btn-yes" data-action="confirm-delete" data-id="' + p.id + '">Yes</button>' +
-          '<button type="button" class="btn-no" data-action="cancel-delete">No</button>' +
-        "</div>"
-        :
-        '<div class="row-actions">' +
-          '<button type="button" class="icon-btn icon-btn-up" title="Stock in" data-action="quick-in" data-id="' + p.id + '">' + icon("up", 14) + "</button>" +
-          '<button type="button" class="icon-btn icon-btn-down" title="Stock out" data-action="quick-out" data-id="' + p.id + '">' + icon("down", 14) + "</button>" +
-          '<button type="button" class="icon-btn" title="Edit" data-action="open-edit-modal" data-id="' + p.id + '">' + icon("pencil", 14) + "</button>" +
-          '<button type="button" class="icon-btn" title="Delete" data-action="ask-delete" data-id="' + p.id + '">' + icon("trash", 14) + "</button>" +
-        "</div>"
-      ) +
+      '<div class="row-stock">' +
+        '<div class="row-stock-num' + (low ? " low" : "") + '">' + p.stock + "</div>" +
+        '<div class="row-stock-label">' + t("inStock") + "</div>" +
+      "</div>" +
+      '<div class="row-actions">' +
+        '<button type="button" class="icon-btn icon-btn-up" title="Stock in" data-action="quick-in" data-id="' + p.id + '">' + icon("up", 14) + "</button>" +
+        '<button type="button" class="icon-btn icon-btn-down" title="Stock out" data-action="quick-out" data-id="' + p.id + '">' + icon("down", 14) + "</button>" +
+        '<button type="button" class="icon-btn" title="Edit" data-action="open-edit-modal" data-id="' + p.id + '">' + icon("pencil", 14) + "</button>" +
+      "</div>" +
     "</div>"
   );
 }
@@ -442,9 +1779,9 @@ function renderEmptyState() {
   return (
     '<div class="empty-state">' +
       icon("inbox", 30) +
-      '<p class="empty-title">No products yet</p>' +
-      '<p class="empty-sub">Add your first helmet, bag, glove, or motor item to start tracking stock.</p>' +
-      '<button type="button" class="btn btn-primary" data-action="open-add-modal">' + icon("plus", 13) + " Add Product</button>" +
+      '<p class="empty-title">' + t("noProductsTitle") + "</p>" +
+      '<p class="empty-sub">' + t("noProductsSub") + "</p>" +
+      '<button type="button" class="btn btn-primary" data-action="open-add-modal">' + icon("plus", 13) + " " + t("addProduct") + "</button>" +
     "</div>"
   );
 }
@@ -457,12 +1794,23 @@ function renderStockForm(mode) {
   const error = isIn ? state.inError : state.outError;
   const selected = state.products.find(p => p.id === productId);
   const sorted = state.products.slice().sort((a, b) => a.name.localeCompare(b.name));
+  const subMode = isIn ? state.inMode : state.outMode;
 
   const heading = '<div class="form-icon-row">' + icon(isIn ? "up" : "down", 17, isIn ? "icon-up" : "icon-down") +
-    "<h2>" + (isIn ? "Stock In \u2014 Supplier Delivery" : "Stock Out \u2014 Customer Sale") + "</h2></div>";
+    "<h2>" + (isIn ? t("stockInTitle") : t("stockOutTitle")) + "</h2></div>";
 
   if (state.products.length === 0) {
-    return heading + '<p class="muted">Add a product first. <button type="button" class="link-btn" data-action="open-add-modal">Add one now</button></p>';
+    return heading + '<p class="muted">' + t("addProductFirst") + ' <button type="button" class="link-btn" data-action="open-add-modal">' + t("addOneNow") + "</button></p>";
+  }
+
+  const modeToggle =
+    '<div class="filter-row">' +
+      '<button type="button" class="chip' + (subMode === "single" ? " chip-active" : "") + '" data-action="set-stock-mode" data-mode="' + mode + '" data-sub="single">' + t("modeSingle") + "</button>" +
+      '<button type="button" class="chip' + (subMode === "import" ? " chip-active" : "") + '" data-action="set-stock-mode" data-mode="' + mode + '" data-sub="import">' + t("modeImport") + "</button>" +
+    "</div>";
+
+  if (subMode === "import") {
+    return heading + modeToggle + '<div class="import-page">' + renderImportPanel(mode) + "</div>";
   }
 
   const options = '<option value="">Select a product\u2026</option>' + sorted.map(p =>
@@ -470,53 +1818,446 @@ function renderStockForm(mode) {
   ).join("");
 
   return (
-    heading +
+    heading + modeToggle +
     '<form class="stock-form" data-action="submit-stock-' + mode + '">' +
-      '<div class="form-group">' +
-        '<label for="' + mode + 'ProductId">Product</label>' +
-        '<select id="' + mode + 'ProductId" data-field="' + mode + 'ProductId" class="input">' + options + "</select>" +
+      '<div class="form-col form-col-main">' +
+        renderProductPicker(mode, selected, sorted) +
       "</div>" +
+      '<div class="form-col form-col-side">' +
       '<div class="form-group">' +
-        '<label for="' + mode + 'Qty">Quantity</label>' +
+        '<label for="' + mode + 'Qty">' + t("quantity") + "</label>" +
         '<input type="text" inputmode="numeric" pattern="[0-9]*" id="' + mode + 'Qty" data-field="' + mode + 'Qty" value="' + escapeHtml(qty) + '" placeholder="0" class="input" />' +
-        (selected && !isIn ? '<p class="hint">' + selected.stock + " currently in stock</p>" : "") +
+        (selected && !isIn ? '<p class="hint">' + selected.stock + " " + t("currentlyInStock") + "</p>" : "") +
       "</div>" +
       '<div class="form-group">' +
-        '<label for="' + mode + 'Note">' + (isIn ? "Supplier / note (optional)" : "Customer / note (optional)") + "</label>" +
-        '<input id="' + mode + 'Note" data-field="' + mode + 'Note" value="' + escapeHtml(note) + '" placeholder="' + (isIn ? "e.g. ABC Trading" : "e.g. Mr. Dara") + '" class="input" />' +
+        '<label for="' + mode + 'Note">' + (isIn ? t("supplierNote") : t("customerNote")) + "</label>" +
+        '<input id="' + mode + 'Note" data-field="' + mode + 'Note" value="' + escapeHtml(note) + '" placeholder="' + escapeHtml(isIn ? t("supplierEg") : t("customerEg")) + '" class="input" />' +
       "</div>" +
       (error ? '<p class="form-error">' + escapeHtml(error) + "</p>" : "") +
-      '<button type="submit" class="submit-btn ' + (isIn ? "submit-in" : "submit-out") + '">' + (isIn ? "Add Stock" : "Remove Stock") + "</button>" +
+      '<button type="submit" class="submit-btn ' + (isIn ? "submit-in" : "submit-out") + '">' + (isIn ? t("addStock") : t("removeStock")) + "</button>" +
+      "</div>" +
     "</form>"
   );
 }
 
+function renderProductPicker(mode, selected, sorted) {
+  const searchVal = mode === "in" ? state.inSearch : state.outSearch;
+
+  if (selected) {
+    const thumb = selected.photo
+      ? '<img class="row-thumb" src="' + selected.photo + '" alt="" />'
+      : '<div class="row-thumb-placeholder">' + icon("camera", 16) + "</div>";
+    return (
+      '<div class="form-group">' +
+        "<label>" + t("product") + "</label>" +
+        '<div class="picked-row">' +
+          thumb +
+          '<div class="picked-info">' +
+            '<div class="picked-name">' + escapeHtml(selected.name) + "</div>" +
+            '<div class="picked-meta">' + selected.stock + " " + t("inStock") + "" +
+              (selected.productId ? " \u00b7 " + escapeHtml(selected.productId) : "") +
+            "</div>" +
+          "</div>" +
+          '<button type="button" class="link-btn" data-action="clear-stock-product" data-mode="' + mode + '">' + t("change") + "</button>" +
+        "</div>" +
+      "</div>"
+    );
+  }
+
+  const q = searchVal.trim().toLowerCase();
+  const matches = sorted.filter(p =>
+    !q ||
+    p.name.toLowerCase().includes(q) ||
+    (p.productId || "").toLowerCase().includes(q) ||
+    (p.barcode || "").toLowerCase().includes(q)
+  );
+  const shown = matches.slice(0, 8);
+
+  const list = shown.map(p => {
+    const thumb = p.photo
+      ? '<img class="row-thumb" src="' + p.photo + '" alt="" />'
+      : '<div class="row-thumb-placeholder">' + icon("camera", 16) + "</div>";
+    return (
+      '<button type="button" class="pick-row" data-action="select-stock-product" data-mode="' + mode + '" data-id="' + p.id + '">' +
+        thumb +
+        '<span class="pick-info">' +
+          '<span class="pick-name">' + escapeHtml(p.name) + "</span>" +
+          '<span class="pick-meta">' +
+            (p.productId ? escapeHtml(p.productId) : t("noId")) +
+            (p.barcode ? " \u00b7 " + escapeHtml(p.barcode) : "") +
+          "</span>" +
+        "</span>" +
+        '<span class="pick-stock' + (p.stock <= p.threshold ? " low" : "") + '">' + p.stock + "</span>" +
+      "</button>"
+    );
+  }).join("");
+
+  return (
+    '<div class="form-group">' +
+      '<label for="' + mode + 'Search">' + t("product") + "</label>" +
+      '<div class="search-wrap pick-search">' +
+        '<span class="search-icon">' + icon("search", 15) + "</span>" +
+        '<input id="' + mode + 'Search" data-field="' + mode + 'Search" value="' + escapeHtml(searchVal) +
+          '" placeholder="' + escapeHtml(t("pickerSearch")) + '" class="input input-search input-scan" autocomplete="off" />' +
+        scanBtn(mode + "Search") +
+      "</div>" +
+      (matches.length === 0
+        ? '<p class="hint">' + t("noProductMatchesThat") + "</p>"
+        : '<div class="pick-list">' + list + "</div>" +
+          (matches.length > shown.length
+            ? '<p class="hint">' + (matches.length - shown.length) + " " + t("moreKeepTyping") + "</p>"
+            : "")
+      ) +
+    "</div>"
+  );
+}
+
+function renderImportPanel(mode) {
+  const isIn = mode === "in";
+  const rows = state.importFor === mode ? state.importRows : [];
+  const okRows = rows.filter(r => r.ok);
+  const badRows = rows.filter(r => !r.ok);
+
+  const dropZone =
+    '<label for="importFile" class="import-drop">' +
+      icon("upload", 22) +
+      "<span class=\"import-drop-title\">" + (state.importFileName && state.importFor === mode ? escapeHtml(state.importFileName) : t("chooseFile")) + "</span>" +
+      '<span class="import-drop-sub">' + t("fileTypes") + '</span>' +
+    "</label>" +
+    '<input type="file" accept=".xlsx,.csv,.tsv,.txt" id="importFile" data-mode="' + mode + '" class="photo-file-input" />';
+
+  const legend =
+    '<div class="import-legend">' +
+      '<p class="import-legend-note">' + t("headerSkipped") + " " +
+      '<button type="button" class="link-btn" data-action="download-template">' + t("downloadTemplate") + "</button></p>" +
+    "</div>";
+
+  const example =
+    '<div class="imp-example">' +
+      '<p class="imp-example-title">' + t("fileExampleTitle") + "</p>" +
+      '<div class="imp-table">' +
+        '<div class="imp-tr imp-th">' +
+          "<span>" + t("colId") + "</span><span>" + t("colQty") + "</span><span>" + t("colNote") + "</span>" +
+        "</div>" +
+        '<div class="imp-tr"><span>9500001</span><span>10</span><span>ABC Trading</span></div>' +
+        '<div class="imp-tr"><span>8801234567890</span><span>5</span><span class="imp-dim">\u2014</span></div>' +
+        '<div class="imp-tr"><span>9500002</span><span>3</span><span class="imp-dim">\u2014</span></div>' +
+      "</div>" +
+      '<p class="hint">' + t("fileExampleNote") + "</p>" +
+    "</div>";
+
+  const errText = state.importError && state.importFor === mode
+    ? '<p class="form-error">' + escapeHtml(state.importError) + "</p>" : "";
+
+  if (state.importParsing) {
+    return '<div class="split"><div class="split-side">' + dropZone + legend + "</div>" +
+      '<div class="split-main"><div class="empty-inline"><span class="spinner"></span> ' + t("readingFile") + "</div></div></div>";
+  }
+
+  if (rows.length === 0) {
+    return '<div class="split"><div class="split-side">' + dropZone + errText + legend + "</div>" +
+      '<div class="split-main">' + example + "</div></div>";
+  }
+
+  const rowHtml = rows.slice(0, 200).map(r =>
+    '<div class="imp-row' + (r.ok ? "" : " imp-row-bad") + '">' +
+      '<span class="imp-num">' + r.rowNum + "</span>" +
+      '<span class="imp-info">' +
+        '<span class="imp-name">' + escapeHtml(r.product ? r.product.name : r.idRaw || "(blank)") + "</span>" +
+        '<span class="imp-meta">' +
+          (r.ok
+            ? escapeHtml(r.idRaw) + (r.note ? " \u00b7 " + escapeHtml(r.note) : "")
+            : escapeHtml(r.message)) +
+        "</span>" +
+      "</span>" +
+      '<span class="imp-qty' + (r.ok ? (isIn ? " amount-in" : " amount-out") : "") + '">' +
+        (r.ok ? (isIn ? "+" : "-") + r.qty : icon("alert", 14)) +
+      "</span>" +
+    "</div>"
+  ).join("");
+
+  const more = rows.length > 200 ? '<p class="hint">' + t("showingFirst") + " " + rows.length + " " + t("rowsWord") + "</p>" : "";
+
+  return (
+    '<div class="split">' +
+      '<div class="split-side">' + dropZone + legend + "</div>" +
+      '<div class="split-main">' +
+    '<div class="import-summary">' +
+      '<span class="imp-pill imp-pill-ok">' + okRows.length + " " + t("ready") + "</span>" +
+      (badRows.length ? '<span class="imp-pill imp-pill-bad">' + badRows.length + " " + t("skipped") + "</span>" : "") +
+    "</div>" +
+    '<div class="imp-list">' + rowHtml + "</div>" + more +
+    errText +
+    '<button type="button" class="submit-btn ' + (isIn ? "submit-in" : "submit-out") + '"' +
+      (okRows.length === 0 || state.importApplying ? " disabled" : "") +
+      ' data-action="apply-import">' +
+      (state.importApplying
+        ? t("applying")
+        : okRows.length === 0
+          ? t("nothingToApply")
+          : (isIn ? t("addStockForRows") : t("removeStockForRows")) + " " + okRows.length + " " + (okRows.length === 1 ? t("rowOne") : t("rowMany"))) +
+    "</button>" +
+      "</div>" +
+    "</div>"
+  );
+}
+
+// Groups products that share a non-empty value in the given field.
+function findDuplicateGroups(field) {
+  const map = {};
+  for (let i = 0; i < state.products.length; i++) {
+    const p = state.products[i];
+    const raw = String(p[field] === undefined || p[field] === null ? "" : p[field]).trim();
+    if (!raw) continue;
+    const key = raw.toLowerCase();
+    if (!map[key]) map[key] = { value: raw, items: [] };
+    map[key].items.push(p);
+  }
+  const out = [];
+  for (const k in map) if (map[k].items.length > 1) out.push(map[k]);
+  out.sort((a, b) => b.items.length - a.items.length || a.value.localeCompare(b.value));
+  return out;
+}
+
+function duplicateIssueCount() {
+  return findDuplicateGroups("productId").length + findDuplicateGroups("barcode").length;
+}
+
+function renderDupGroup(group, isIssue) {
+  const items = group.items.map(p =>
+    '<button type="button" class="dup-item" data-action="open-edit-modal" data-id="' + p.id + '">' +
+      (p.photo
+        ? '<img class="row-thumb" src="' + p.photo + '" alt="" />'
+        : '<div class="row-thumb-placeholder">' + icon("camera", 14) + "</div>") +
+      '<span class="dup-item-info">' +
+        '<span class="dup-item-name">' + escapeHtml(p.name) + "</span>" +
+        '<span class="dup-item-meta">' + escapeHtml(catLabel(p.category)) + " \u00b7 " + p.stock + " " + t("inStock") + "</span>" +
+      "</span>" +
+      '<span class="dup-item-edit">' + icon("pencil", 13) + "</span>" +
+    "</button>"
+  ).join("");
+  return (
+    '<div class="dup-group' + (isIssue ? " dup-group-issue" : "") + '">' +
+      '<div class="dup-value">' +
+        '<span class="dup-value-text">' + escapeHtml(group.value) + "</span>" +
+        '<span class="dup-count">' + group.items.length + " " + t("dupItems") + "</span>" +
+      "</div>" +
+      '<div class="dup-items">' + items + "</div>" +
+    "</div>"
+  );
+}
+
+function renderDupSection(titleKey, iconName, groups, isIssue, emptyKey) {
+  return (
+    '<div class="dup-section">' +
+      '<div class="dup-head">' + icon(iconName, 15, isIssue && groups.length ? "icon-down" : "") +
+        "<h3>" + t(titleKey) + "</h3>" +
+        (groups.length ? '<span class="dup-badge' + (isIssue ? " dup-badge-issue" : "") + '">' + groups.length + "</span>" : "") +
+      "</div>" +
+      (groups.length
+        ? '<div class="dup-groups">' + groups.map(g => renderDupGroup(g, isIssue)).join("") + "</div>"
+        : '<p class="dup-empty">' + t(emptyKey) + "</p>")
+    + "</div>"
+  );
+}
+
+function renderDuplicatesTab() {
+  const idGroups = findDuplicateGroups("productId");
+  const barcodeGroups = findDuplicateGroups("barcode");
+  const locationGroups = findDuplicateGroups("location");
+
+  if (state.products.length === 0) {
+    return '<div class="empty-state">' + icon("copy", 30) +
+      '<p class="empty-title">' + t("dupNoneTitle") + "</p>" +
+      '<p class="empty-sub">' + t("noProductsSub") + "</p></div>";
+  }
+
+  const clean = idGroups.length === 0 && barcodeGroups.length === 0;
+
+  return (
+    '<div class="dup-page">' +
+      (clean
+        ? '<div class="dup-ok">' + icon("check", 14) + "<span>" + t("dupNoneSub") + "</span></div>"
+        : "") +
+      '<div class="dup-cols">' +
+        renderDupSection("dupIdSection", "tag", idGroups, true, "dupNoneIds") +
+        renderDupSection("dupBarcodeSection", "barcode", barcodeGroups, true, "dupNoneBarcodes") +
+        renderDupSection("dupLocationSection", "pin", locationGroups, false, "dupNoneLocations") +
+      "</div>" +
+      (locationGroups.length ? '<p class="dup-note">' + t("dupLocationNote") + "</p>" : "") +
+    "</div>"
+  );
+}
+
+function renderDeleteTab() {
+  const terms = parseIdTerms(state.deleteQuery);
+  const result = matchIdTerms(terms);
+  const browsing = terms.length === 0;
+
+  const list = browsing
+    ? state.products.slice().sort((a, b) => a.name.localeCompare(b.name))
+    : result.matched;
+  const selected = list.filter(p => state.deleteSelected[p.id]);
+
+  const notFoundBox = (!browsing && result.notFound.length)
+    ? '<div class="notfound-box">' + icon("alert", 13) +
+        "<div><strong>" + result.notFound.length + " " + t("notFoundLabel") + "</strong> " +
+        escapeHtml(result.notFound.join(", ")) + "</div>" +
+      "</div>"
+    : "";
+
+  let body;
+  if (state.products.length === 0) {
+    body = '<div class="empty-state">' + icon("trash", 30) +
+      '<p class="empty-title">' + t("noProductsTitle") + "</p>" +
+      '<p class="empty-sub">' + t("noProductsSub") + "</p></div>";
+  } else if (list.length === 0) {
+    body = notFoundBox + '<div class="empty-inline">' + t("noMatchingProducts") + "</div>";
+  } else {
+    const rows = list.map(p => {
+      const checked = !!state.deleteSelected[p.id];
+      const thumb = photosOf(p).length
+        ? '<img class="row-thumb" src="' + photosOf(p)[0] + '" alt="" />'
+        : '<div class="row-thumb-placeholder">' + icon("camera", 16) + "</div>";
+      return (
+        '<button type="button" class="del-row' + (checked ? " del-row-on" : "") + '" data-action="toggle-delete-select" data-id="' + p.id + '">' +
+          '<span class="del-check' + (checked ? " on" : "") + '">' + (checked ? icon("check", 12) : "") + "</span>" +
+          thumb +
+          '<span class="del-info">' +
+            '<span class="del-name">' + escapeHtml(p.name) + "</span>" +
+            '<span class="del-meta">' +
+              (p.productId ? escapeHtml(p.productId) : t("noId")) +
+              (p.barcode ? " \u00b7 " + escapeHtml(p.barcode) : "") +
+              " \u00b7 " + p.stock + " " + t("inStock") +
+            "</span>" +
+          "</span>" +
+        "</button>"
+      );
+    }).join("");
+
+    const summary = browsing
+      ? '<p class="del-summary">' + t("deleteBrowseHint") + "</p>"
+      : '<p class="del-summary">' + t("foundOf") + " " + result.matched.length + " " + t("ofWord") + " " + terms.length +
+        " \u00b7 " + t("tapRowToToggle") + "</p>";
+
+    const actions = state.deleteConfirming
+      ? '<div class="danger-zone">' +
+          "<p><strong>" + t("permanentlyDelete") + " " + selected.length + " " +
+          (selected.length === 1 ? t("productOne") : t("productMany")) + "?</strong> " + t("cannotBeUndone") + "</p>" +
+          '<div class="page-actions">' +
+            '<button type="button" class="btn btn-secondary" data-action="cancel-bulk-delete">' + t("cancel") + "</button>" +
+            '<button type="button" class="btn btn-danger"' + (state.deleteBusy ? " disabled" : "") + ' data-action="confirm-bulk-delete">' +
+              (state.deleteBusy ? t("deleting") : t("yesDelete")) +
+            "</button>" +
+          "</div>" +
+        "</div>"
+      : '<button type="button" class="submit-btn submit-out"' + (selected.length === 0 ? " disabled" : "") + ' data-action="ask-bulk-delete">' +
+          (selected.length === 0 ? t("selectAtLeastOne") : t("deleteSelected") + " " + selected.length + " " + t("selectedWord")) +
+        "</button>";
+
+    body = notFoundBox + summary +
+      '<div class="del-list">' + rows + "</div>" +
+      (state.deleteError ? '<p class="form-error">' + escapeHtml(state.deleteError) + "</p>" : "") +
+      actions;
+  }
+
+  return (
+    '<div class="delete-page">' +
+      '<div class="form-icon-row">' + icon("trash", 16, "icon-down") + "<h2>" + t("deleteTitle") + "</h2></div>" +
+      '<div class="split">' +
+        '<div class="split-side">' +
+          '<div class="form-group">' +
+            '<label for="deleteQuery">' + t("deleteIdsLabel") + "</label>" +
+            '<div class="scan-wrap">' +
+              '<textarea id="deleteQuery" data-field="deleteQuery" class="input del-input input-scan" rows="4" placeholder="' + escapeHtml(t("deleteIdsPlaceholder")) + '">' + escapeHtml(state.deleteQuery) + "</textarea>" +
+              scanBtn("deleteQuery") +
+            "</div>" +
+            '<p class="hint">' + t("deleteIdsHint") + "</p>" +
+          "</div>" +
+        "</div>" +
+        '<div class="split-main">' + body + "</div>" +
+      "</div>" +
+    "</div>"
+  );
+}
+
 function renderHistory() {
-  const filtered = state.transactions.filter(t => state.historyFilter === "all" || t.type === state.historyFilter);
   if (state.transactions.length === 0) {
     return (
       '<div class="empty-state">' + icon("history", 30) +
-      '<p class="empty-title">No activity yet</p>' +
-      '<p class="empty-sub">Stock in and out transactions will appear here.</p></div>'
+      '<p class="empty-title">' + t("noActivityTitle") + "</p>" +
+      '<p class="empty-sub">' + t("noActivitySub") + "</p></div>"
     );
   }
-  const filters = [["all", "All"], ["in", "Stock In"], ["out", "Stock Out"]];
+
+  // Transactions store the product's document id, so look up the product to let
+  // people search by the Product ID or barcode they actually know.
+  const byDocId = {};
+  for (let i = 0; i < state.products.length; i++) byDocId[state.products[i].id] = state.products[i];
+
+  const q = state.historySearch.trim().toLowerCase();
+  const filtered = state.transactions.filter(t => {
+    if (state.historyFilter !== "all" && t.type !== state.historyFilter) return false;
+    if (!q) return true;
+    const p = byDocId[t.productId];
+    return (t.productName || "").toLowerCase().includes(q) ||
+      (t.note || "").toLowerCase().includes(q) ||
+      displayNote(t.note).toLowerCase().includes(q) ||
+      (p && (p.productId || "").toLowerCase().includes(q)) ||
+      (p && (p.barcode || "").toLowerCase().includes(q));
+  });
+
+  const filters = [["all", t("all")], ["in", t("tabIn")], ["out", t("tabOut")]];
   const chips = filters.map(f =>
     '<button type="button" class="chip' + (state.historyFilter === f[0] ? " chip-active" : "") + '" data-action="set-history-filter" data-filter="' + f[0] + '">' + f[1] + "</button>"
-  ).join("");
+  ).join("") +
+  '<button type="button" class="chip chip-sort" data-action="toggle-history-sort">' +
+    icon(state.historySort === "desc" ? "sortDesc" : "sortAsc", 13) + " " +
+    (state.historySort === "desc" ? t("sortNewest") : t("sortOldest")) +
+  "</button>";
+
+  const search =
+    '<div class="search-wrap">' +
+      '<span class="search-icon">' + icon("search", 15) + "</span>" +
+      '<input id="historySearch" data-field="historySearch" value="' + escapeHtml(state.historySearch) +
+        '" placeholder="' + escapeHtml(t("searchHistory")) + '" class="input input-search input-scan" autocomplete="off" />' +
+      scanBtn("historySearch") +
+    "</div>";
+
+  if (filtered.length === 0) {
+    return '<div class="filter-row">' + chips + "</div>" + search +
+      '<div class="empty-inline">' + t("noMatchingActivity") + "</div>";
+  }
+
+  if (state.historySort === "asc") filtered.reverse();
+
+  let totalIn = 0, totalOut = 0;
+  for (let i = 0; i < filtered.length; i++) {
+    if (filtered[i].type === "in") totalIn += filtered[i].qty;
+    else totalOut += filtered[i].qty;
+  }
+  const net = totalIn - totalOut;
+
+  const summary =
+    '<div class="hist-summary">' +
+      '<span class="imp-pill imp-pill-ok">+' + totalIn + " " + t("inWord") + "</span>" +
+      '<span class="imp-pill imp-pill-bad">-' + totalOut + " " + t("outWord") + "</span>" +
+      '<span class="hist-net">' + t("netWord") + " " + (net >= 0 ? "+" : "") + net + " \u00b7 " + filtered.length + " " + (filtered.length === 1 ? t("recordOne") : t("recordMany")) + "</span>" +
+    "</div>";
 
   const rows = filtered.map(t =>
     '<div class="history-row">' +
       '<div class="history-icon ' + (t.type === "in" ? "history-icon-in" : "history-icon-out") + '">' + icon(t.type === "in" ? "up" : "down", 13) + "</div>" +
       '<div class="history-info">' +
         '<div class="history-name">' + escapeHtml(t.productName) + "</div>" +
-        '<div class="history-meta">' + formatDate(t.date) + (t.note ? " \u00b7 " + escapeHtml(t.note) : "") + "</div>" +
+        '<div class="history-meta">' + formatDate(t.date) + (t.note ? " \u00b7 " + escapeHtml(displayNote(t.note)) : "") + "</div>" +
       "</div>" +
       '<div class="history-amount ' + (t.type === "in" ? "amount-in" : "amount-out") + '">' + (t.type === "in" ? "+" : "-") + t.qty + "</div>" +
     "</div>"
   ).join("");
 
-  return '<div class="filter-row">' + chips + '</div><div class="history-list">' + rows + "</div>";
+  return '<div class="filter-row">' + chips + "</div>" + search + summary +
+    '<div class="history-list">' + rows + "</div>";
 }
 
 function renderProductForm() {
@@ -524,33 +2265,76 @@ function renderProductForm() {
   return (
     '<div class="product-form-page">' +
       '<div class="form-icon-row">' + icon(editing ? "pencil" : "plus", 16) +
-        "<h2>" + (editing ? "Edit Product" : "Add Product") + "</h2>" +
+        "<h2>" + (editing ? t("editProduct") : t("addProduct")) + "</h2>" +
       "</div>" +
       '<form data-action="submit-product">' +
+        '<div class="form-col form-col-main">' +
         '<div class="form-group">' +
-          '<label for="newName">Name</label>' +
-          '<input id="newName" data-field="newName" value="' + escapeHtml(state.newName) + '" placeholder="e.g. AGV K1 Matte Black M" class="input" />' +
+          "<label>" + t("photosLabel") + "</label>" +
+          '<div class="photo-grid">' +
+            state.newPhotos.map((src, i) =>
+              '<div class="photo-cell">' +
+                '<button type="button" class="photo-thumb" data-action="set-main-photo" data-index="' + i + '" title="' + escapeHtml(t("makeMain")) + '">' +
+                  '<img src="' + src + '" alt="" />' +
+                "</button>" +
+                (i === 0 ? '<span class="photo-main-tag">' + t("mainPhoto") + "</span>" : "") +
+                '<button type="button" class="photo-remove" data-action="remove-photo" data-index="' + i + '" title="' + escapeHtml(t("removePhoto")) + '">' + icon("x", 11) + "</button>" +
+              "</div>"
+            ).join("") +
+            (state.newPhotos.length < MAX_PHOTOS
+              ? '<label for="newPhotoInput" class="photo-box photo-add">' + icon("camera", 18) + "<span>" + t("addPhoto") + "</span></label>"
+              : "") +
+          "</div>" +
+          '<input type="file" accept="image/*" multiple id="newPhotoInput" class="photo-file-input" />' +
+          (state.photoProcessing ? '<p class="photo-processing">' + t("processingImage") + "</p>" : "") +
+          (state.newPhotos.length > 1 ? '<p class="hint">' + t("mainPhotoHint") + "</p>" : "") +
         "</div>" +
         '<div class="form-group">' +
-          '<label for="newCategory">Category</label>' +
+          '<label for="newName">' + t("name") + "</label>" +
+          '<input id="newName" data-field="newName" value="' + escapeHtml(state.newName) + '" placeholder="' + escapeHtml(t("nameEg")) + '" class="input" />' +
+        "</div>" +
+        '<div class="form-group">' +
+          '<label for="newCategory">' + t("category") + "</label>" +
           '<select id="newCategory" data-field="newCategory" class="input">' +
-            CATEGORIES.map(c => '<option value="' + c + '"' + (c === state.newCategory ? " selected" : "") + ">" + c + "</option>").join("") +
+            CATEGORIES.map(c => '<option value="' + c + '"' + (c === state.newCategory ? " selected" : "") + ">" + catLabel(c) + "</option>").join("") +
           "</select>" +
+        "</div>" +
+        "</div>" +
+        '<div class="form-col form-col-side">' +
+        '<div class="form-group">' +
+          '<label for="newProductId">' + t("productIdLabel") + "</label>" +
+          '<input id="newProductId" data-field="newProductId" value="' + escapeHtml(state.newProductId) + '" placeholder="' + escapeHtml(t("productIdEg")) + '" class="input" />' +
+        "</div>" +
+        '<div class="form-group">' +
+          '<label for="newBarcode">' + t("barcodeLabel") + "</label>" +
+          '<div class="scan-wrap">' +
+            '<input id="newBarcode" data-field="newBarcode" value="' + escapeHtml(state.newBarcode) + '" placeholder="' + escapeHtml(t("barcodeEg")) + '" class="input input-scan" />' +
+            scanBtn("newBarcode") +
+          "</div>" +
+        "</div>" +
+        '<div class="form-group">' +
+          '<label for="newPrice">' + t("priceLabel") + "</label>" +
+          '<input type="text" inputmode="decimal" id="newPrice" data-field="newPrice" value="' + escapeHtml(state.newPrice) + '" placeholder="0.00" class="input" />' +
+        "</div>" +
+        '<div class="form-group">' +
+          '<label for="newLocation">' + t("locationLabel") + "</label>" +
+          '<input id="newLocation" data-field="newLocation" value="' + escapeHtml(state.newLocation) + '" placeholder="' + escapeHtml(t("locationEg")) + '" class="input" />' +
         "</div>" +
         (!editing ?
           '<div class="form-group">' +
-            '<label for="newStock">Starting stock</label>' +
+            '<label for="newStock">' + t("startingStock") + "</label>" +
             '<input type="text" inputmode="numeric" pattern="[0-9]*" id="newStock" data-field="newStock" value="' + escapeHtml(state.newStock) + '" placeholder="0" class="input" />' +
           "</div>" : ""
         ) +
         '<div class="form-group">' +
-          '<label for="newThreshold">Low stock alert at</label>' +
+          '<label for="newThreshold">' + t("lowStockAlertAt") + "</label>" +
           '<input type="text" inputmode="numeric" pattern="[0-9]*" id="newThreshold" data-field="newThreshold" value="' + escapeHtml(state.newThreshold) + '" class="input" />' +
         "</div>" +
-        (state.modalError ? '<p class="form-error">' + escapeHtml(state.modalError) + "</p>" : "") +
-        '<div class="page-actions">' +
-          '<button type="button" class="btn btn-secondary" data-action="close-modal">Back</button>' +
-          '<button type="submit" class="btn btn-primary">Save</button>' +
+        "</div>" +
+        (state.modalError ? '<p class="form-error form-span">' + escapeHtml(state.modalError) + "</p>" : "") +
+        '<div class="page-actions form-span">' +
+          '<button type="button" class="btn btn-secondary" data-action="close-modal">' + t("back") + "</button>" +
+          '<button type="submit" class="btn btn-primary"' + (state.photoProcessing ? " disabled" : "") + '>' + t("save") + "</button>" +
         "</div>" +
       "</form>" +
     "</div>"
@@ -577,7 +2361,6 @@ function showToast(msg) {
 // ---------------- actions ----------------
 
 function setTab(tab) { state.tab = tab; render(); }
-function setCategoryFilter(cat) { state.categoryFilter = cat; render(); }
 
 function openAddModal() {
   state.returnTab = state.tab;
@@ -586,6 +2369,12 @@ function openAddModal() {
   state.newCategory = CATEGORIES[0];
   state.newStock = "";
   state.newThreshold = "5";
+  state.newPhotos = [];
+  state.newProductId = "";
+  state.newBarcode = "";
+  state.newPrice = "";
+  state.newLocation = "";
+  state.photoProcessing = false;
   state.modalError = "";
   state.tab = "product-form";
   render();
@@ -602,11 +2391,189 @@ function openEditModal(id) {
   state.newCategory = p.category;
   state.newStock = "";
   state.newThreshold = String(p.threshold);
+  state.newPhotos = Array.isArray(p.photos) && p.photos.length ? p.photos.slice() : (p.photo ? [p.photo] : []);
+  state.newProductId = p.productId || "";
+  state.newBarcode = p.barcode || "";
+  state.newPrice = p.price !== undefined && p.price !== null ? String(p.price) : "";
+  state.newLocation = p.location || "";
+  state.photoProcessing = false;
   state.modalError = "";
   state.tab = "product-form";
   render();
   const el = document.getElementById("newName");
   if (el) el.focus();
+}
+
+function toggleTheme() {
+  state.theme = state.theme === "dark" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", state.theme);
+  try { localStorage.setItem("nija-stock-theme", state.theme); } catch (e) { /* private browsing */ }
+  render();
+}
+
+// ---------------- barcode scanning ----------------
+// The scanner overlay lives OUTSIDE #app and is managed imperatively: render()
+// replaces #app's innerHTML, which would tear down the <video> and drop the
+// camera stream mid-scan.
+let scanEl = null, scanStream = null, scanTimer = null, scanTarget = null;
+
+// Cameras are only available on a secure origin. Opening the saved .html file
+// directly (file:// or content://) will always fail, no matter the permission.
+function isSecureOrigin() {
+  try {
+    if (window.isSecureContext) return true;
+    const loc = window.location;
+    if (loc.protocol === "https:") return true;
+    return loc.hostname === "localhost" || loc.hostname === "127.0.0.1";
+  } catch (e) {
+    return false;
+  }
+}
+
+function scanMessage(text) {
+  if (!scanEl) return;
+  const el = scanEl.querySelector(".scan-msg");
+  if (el) el.textContent = text;
+}
+
+function stopScan() {
+  if (scanTimer) { clearTimeout(scanTimer); scanTimer = null; }
+  if (scanStream) {
+    scanStream.getTracks().forEach(tr => { try { tr.stop(); } catch (e) { /* already stopped */ } });
+    scanStream = null;
+  }
+  if (scanEl && scanEl.parentNode) scanEl.parentNode.removeChild(scanEl);
+  scanEl = null;
+  scanTarget = null;
+  try { document.body.style.overflow = ""; } catch (e) { /* no body */ }
+}
+
+function applyScan(field, code) {
+  const value = String(code || "").trim();
+  stopScan();
+  if (!value) return;
+  if (field === "deleteQuery") {
+    // Scanning several items in a row should build a list, not overwrite it.
+    const existing = state.deleteQuery.trim();
+    const already = parseIdTerms(existing).some(t => t.toLowerCase() === value.toLowerCase());
+    applyFieldValue(field, already ? existing : (existing ? existing + ", " + value : value));
+  } else {
+    applyFieldValue(field, value);
+  }
+  render();
+  const el = document.getElementById(field);
+  if (el) el.focus();
+}
+
+async function startScan(field) {
+  if (scanEl) return;
+  scanTarget = field;
+
+  scanEl = document.createElement("div");
+  scanEl.className = "scan-overlay";
+  scanEl.innerHTML =
+    '<div class="scan-bar">' +
+      '<span class="scan-title">' + escapeHtml(t("scanTitle")) + "</span>" +
+      '<button type="button" class="lb-close scan-close" aria-label="' + escapeHtml(t("close")) + '">' + icon("x", 18) + "</button>" +
+    "</div>" +
+    '<div class="scan-stage">' +
+      '<video class="scan-video" playsinline muted autoplay></video>' +
+      '<div class="scan-frame"></div>' +
+    "</div>" +
+    '<p class="scan-msg">' + escapeHtml(t("scanHint")) + "</p>";
+  document.body.appendChild(scanEl);
+  try { document.body.style.overflow = "hidden"; } catch (e) { /* no body */ }
+
+  scanEl.querySelector(".scan-close").addEventListener("click", stopScan);
+  scanEl.addEventListener("click", (e) => { if (e.target === scanEl) stopScan(); });
+
+  if (!isSecureOrigin()) {
+    scanMessage(t("scanInsecure"));
+    return;
+  }
+  if (typeof BarcodeDetector === "undefined") {
+    scanMessage(t("scanUnsupported"));
+    return;
+  }
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    scanMessage(t("scanNoCamera"));
+    return;
+  }
+
+  try {
+    scanStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: "environment" } }, audio: false,
+    });
+  } catch (err) {
+    console.error("camera failed", err);
+    scanMessage(err && err.name === "NotAllowedError" ? t("scanDenied") : t("scanNoCamera"));
+    return;
+  }
+  if (!scanEl) { // closed while the permission prompt was up
+    scanStream.getTracks().forEach(tr => tr.stop());
+    scanStream = null;
+    return;
+  }
+
+  const video = scanEl.querySelector(".scan-video");
+  video.srcObject = scanStream;
+  try { await video.play(); } catch (e) { /* autoplay attribute covers this */ }
+
+  let detector;
+  try {
+    let formats = null;
+    try { formats = await BarcodeDetector.getSupportedFormats(); } catch (e) { formats = null; }
+    detector = (formats && formats.length) ? new BarcodeDetector({ formats: formats }) : new BarcodeDetector();
+  } catch (err) {
+    console.error(err);
+    scanMessage(t("scanUnsupported"));
+    return;
+  }
+
+  const tick = async () => {
+    if (!scanEl) return;
+    try {
+      const found = await detector.detect(video);
+      if (found && found.length && found[0].rawValue) {
+        applyScan(scanTarget, found[0].rawValue);
+        return;
+      }
+    } catch (err) { /* frame not ready yet */ }
+    scanTimer = setTimeout(tick, 180);
+  };
+  scanTimer = setTimeout(tick, 300);
+}
+
+function openLightbox(id) {
+  const p = state.products.find(x => x.id === id);
+  if (!p || photosOf(p).length === 0) return;
+  state.lightboxProductId = id;
+  state.lightboxIndex = 0;
+  try { document.body.style.overflow = "hidden"; } catch (e) { /* no body yet */ }
+  render();
+}
+
+function closeLightbox() {
+  state.lightboxProductId = null;
+  state.lightboxIndex = 0;
+  try { document.body.style.overflow = ""; } catch (e) { /* no body */ }
+  render();
+}
+
+function stepLightbox(delta) {
+  const p = state.products.find(x => x.id === state.lightboxProductId);
+  if (!p) return;
+  const pics = photosOf(p);
+  if (pics.length < 2) return;
+  state.lightboxIndex = (state.lightboxIndex + delta + pics.length) % pics.length;
+  render();
+}
+
+function toggleLang() {
+  state.lang = state.lang === "kh" ? "en" : "kh";
+  document.documentElement.setAttribute("lang", state.lang === "kh" ? "km" : "en");
+  try { localStorage.setItem("nija-stock-lang", state.lang); } catch (e) { /* private browsing */ }
+  render();
 }
 
 function closeModal() {
@@ -618,13 +2585,25 @@ function closeModal() {
 
 async function saveProduct() {
   const name = state.newName.trim();
-  if (!name) { state.modalError = "Product name is required."; render(); return; }
+  if (!name) { state.modalError = t("errNameRequired"); render(); return; }
   const threshold = Math.max(0, parseInt(state.newThreshold, 10) || 0);
+  const priceTrimmed = state.newPrice.trim();
+  const price = priceTrimmed === "" ? null : Math.max(0, parseFloat(priceTrimmed) || 0);
+  const productId = state.newProductId.trim();
+  const barcode = state.newBarcode.trim();
+  const location = state.newLocation.trim();
+  const photos = state.newPhotos.slice();
+  const photo = photos[0] || "";  // first image doubles as the thumbnail everywhere else
 
   if (state.editingProductId) {
     try {
-      await updateDoc(doc(db, "stock_products", state.editingProductId), { name: name, category: state.newCategory, threshold: threshold });
-      showToast("Updated " + name);
+      await updateDoc(doc(db, "stock_products", state.editingProductId), {
+        name: name, category: state.newCategory, threshold: threshold,
+        productId: productId, barcode: barcode, price: price, location: location,
+        photo: photo, photos: photos,
+        updatedAt: Date.now(),
+      });
+      showToast(t("toastUpdated") + " " + name);
       closeModal();
     } catch (err) {
       console.error(err);
@@ -635,16 +2614,20 @@ async function saveProduct() {
   }
 
   const startStock = Math.max(0, parseInt(state.newStock, 10) || 0);
+  const now = Date.now();
   try {
     const ref = await addDoc(collection(db, "stock_products"), {
-      name: name, category: state.newCategory, stock: startStock, threshold: threshold, createdAt: Date.now(),
+      name: name, category: state.newCategory, stock: startStock, threshold: threshold,
+      productId: productId, barcode: barcode, price: price, location: location,
+      photo: photo, photos: photos,
+      createdAt: now, updatedAt: now,
     });
     if (startStock > 0) {
       await addDoc(collection(db, "stock_transactions"), {
-        productId: ref.id, productName: name, type: "in", qty: startStock, note: "Initial stock", date: Date.now(),
+        productId: ref.id, productName: name, type: "in", qty: startStock, note: SYS_NOTE_INITIAL, date: now,
       });
     }
-    showToast("Added " + name);
+    showToast(t("toastAdded") + " " + name);
     closeModal();
   } catch (err) {
     console.error(err);
@@ -653,28 +2636,158 @@ async function saveProduct() {
   }
 }
 
-async function deleteProduct(id) {
+function resetImport() {
+  state.importRows = [];
+  state.importFileName = "";
+  state.importError = "";
+  state.importParsing = false;
+  state.importApplying = false;
+}
+
+async function handleImportFile(file, mode) {
+  state.importFor = mode;
+  state.importParsing = true;
+  state.importError = "";
+  state.importRows = [];
+  state.importFileName = file.name || "file";
+  render();
   try {
-    await deleteDoc(doc(db, "stock_products", id));
-    state.confirmDeleteId = null;
-    showToast("Product deleted");
-    render();
+    const raw = await parseSpreadsheetFile(file);
+    state.importRows = buildImportRows(raw, mode);
+    if (state.importRows.length === 0) {
+      state.importError = t("noDataRows");
+    }
   } catch (err) {
     console.error(err);
-    state.confirmDeleteId = null;
-    showToast("Could not delete: " + describeError(err));
-    render();
+    state.importRows = [];
+    state.importError = err && err.message ? err.message : "Could not read that file.";
   }
+  state.importParsing = false;
+  render();
+}
+
+async function applyImport() {
+  const mode = state.importFor;
+  const valid = state.importRows.filter(r => r.ok);
+  if (valid.length === 0 || (mode !== "in" && mode !== "out")) return;
+
+  state.importApplying = true;
+  state.importError = "";
+  render();
+
+  // One stock write per product, but one history entry per spreadsheet row
+  // so each row's note is preserved.
+  const groups = {};
+  for (let i = 0; i < valid.length; i++) {
+    const r = valid[i];
+    if (!groups[r.product.id]) groups[r.product.id] = { product: r.product, total: 0, rows: [] };
+    groups[r.product.id].total += r.qty;
+    groups[r.product.id].rows.push(r);
+  }
+
+  const now = Date.now();
+  let appliedRows = 0;
+  let firstErr = null;
+  const ids = Object.keys(groups);
+
+  for (let i = 0; i < ids.length; i++) {
+    const g = groups[ids[i]];
+    const newStock = mode === "in" ? g.product.stock + g.total : g.product.stock - g.total;
+    try {
+      await updateDoc(doc(db, "stock_products", g.product.id), { stock: newStock, updatedAt: now });
+    } catch (err) {
+      console.error("import stock update failed for", g.product.id, err);
+      if (!firstErr) firstErr = err;
+      continue; // don't log transactions for a stock change that didn't happen
+    }
+    for (let j = 0; j < g.rows.length; j++) {
+      const r = g.rows[j];
+      try {
+        await addDoc(collection(db, "stock_transactions"), {
+          productId: g.product.id,
+          productName: g.product.name,
+          type: mode,
+          qty: r.qty,
+          note: r.note || (SYS_NOTE_IMPORT_PREFIX + state.importFileName),
+          date: now,
+        });
+        appliedRows++;
+      } catch (err) {
+        console.error("import transaction failed", err);
+        if (!firstErr) firstErr = err;
+      }
+    }
+  }
+
+  state.importApplying = false;
+  if (firstErr) {
+    state.importError = t("appliedOf") + " " + appliedRows + "/" + valid.length + " " + t("rowsOf") + " " + describeError(firstErr);
+  } else {
+    showToast((mode === "in" ? t("toastStockedIn") : t("toastStockedOut")) + " " + appliedRows + " " + (appliedRows === 1 ? t("rowOne") : t("rowMany")));
+    resetImport();
+  }
+  render();
+}
+
+function downloadImportTemplate() {
+  const csv = "Product ID or Barcode,Quantity,Note\n9500001,10,ABC Trading\n9500002,5,\n";
+  try {
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "stock-import-template.csv";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  } catch (err) {
+    console.error(err);
+    showToast("Could not create the template file");
+  }
+}
+
+async function performBulkDelete() {
+  const selected = state.products.filter(p => state.deleteSelected[p.id]);
+  if (selected.length === 0) return;
+
+  state.deleteBusy = true;
+  state.deleteError = "";
+  render();
+
+  let done = 0;
+  let firstErr = null;
+  for (let i = 0; i < selected.length; i++) {
+    try {
+      await deleteDoc(doc(db, "stock_products", selected[i].id));
+      done++;
+    } catch (err) {
+      console.error("delete failed for", selected[i].id, err);
+      if (!firstErr) firstErr = err;
+    }
+  }
+
+  state.deleteBusy = false;
+  state.deleteConfirming = false;
+
+  if (firstErr) {
+    state.deleteError = "Deleted " + done + " of " + selected.length + ". " + describeError(firstErr);
+  } else {
+    state.deleteQuery = "";
+    state.deleteSelected = {};
+    showToast(t("toastDeleted") + " " + done + " " + (done === 1 ? t("productOne") : t("productMany")));
+  }
+  render();
 }
 
 async function submitStockIn() {
   state.inError = "";
   const product = state.products.find(p => p.id === state.inProductId);
   const qty = parseInt(state.inQty, 10);
-  if (!product) { state.inError = "Choose a product."; render(); return; }
-  if (!qty || qty <= 0) { state.inError = "Enter a quantity greater than 0."; render(); return; }
+  if (!product) { state.inError = t("errChooseProduct"); render(); return; }
+  if (!qty || qty <= 0) { state.inError = t("errQtyPositive"); render(); return; }
   try {
-    await updateDoc(doc(db, "stock_products", product.id), { stock: product.stock + qty });
+    await updateDoc(doc(db, "stock_products", product.id), { stock: product.stock + qty, updatedAt: Date.now() });
     await addDoc(collection(db, "stock_transactions"), {
       productId: product.id, productName: product.name, type: "in", qty: qty, note: state.inNote.trim(), date: Date.now(),
     });
@@ -692,11 +2805,11 @@ async function submitStockOut() {
   state.outError = "";
   const product = state.products.find(p => p.id === state.outProductId);
   const qty = parseInt(state.outQty, 10);
-  if (!product) { state.outError = "Choose a product."; render(); return; }
-  if (!qty || qty <= 0) { state.outError = "Enter a quantity greater than 0."; render(); return; }
-  if (qty > product.stock) { state.outError = "Only " + product.stock + " in stock."; render(); return; }
+  if (!product) { state.outError = t("errChooseProduct"); render(); return; }
+  if (!qty || qty <= 0) { state.outError = t("errQtyPositive"); render(); return; }
+  if (qty > product.stock) { state.outError = t("errOnly") + " " + product.stock + " " + t("errInStock"); render(); return; }
   try {
-    await updateDoc(doc(db, "stock_products", product.id), { stock: product.stock - qty });
+    await updateDoc(doc(db, "stock_products", product.id), { stock: product.stock - qty, updatedAt: Date.now() });
     await addDoc(collection(db, "stock_transactions"), {
       productId: product.id, productName: product.name, type: "out", qty: qty, note: state.outNote.trim(), date: Date.now(),
     });
@@ -719,16 +2832,77 @@ appEl.addEventListener("click", (e) => {
   if (!el) return;
   const action = el.dataset.action;
   if (action === "set-tab") setTab(el.dataset.tab);
-  else if (action === "set-category") setCategoryFilter(el.dataset.category);
   else if (action === "set-history-filter") { state.historyFilter = el.dataset.filter; render(); }
+  else if (action === "toggle-history-sort") {
+    state.historySort = state.historySort === "desc" ? "asc" : "desc";
+    render();
+  }
   else if (action === "open-add-modal") openAddModal();
   else if (action === "open-edit-modal") openEditModal(el.dataset.id);
   else if (action === "close-modal") closeModal();
-  else if (action === "ask-delete") { state.confirmDeleteId = el.dataset.id; render(); }
-  else if (action === "cancel-delete") { state.confirmDeleteId = null; render(); }
-  else if (action === "confirm-delete") deleteProduct(el.dataset.id);
+  else if (action === "select-stock-product") {
+    const m = el.dataset.mode;
+    if (m === "in") { state.inProductId = el.dataset.id; state.inSearch = ""; state.inError = ""; }
+    else { state.outProductId = el.dataset.id; state.outSearch = ""; state.outError = ""; }
+    render();
+  }
+  else if (action === "clear-stock-product") {
+    const m = el.dataset.mode;
+    if (m === "in") { state.inProductId = ""; state.inSearch = ""; }
+    else { state.outProductId = ""; state.outSearch = ""; }
+    render();
+    const s = document.getElementById((m === "in" ? "in" : "out") + "Search");
+    if (s) s.focus();
+  }
+  else if (action === "set-stock-mode") {
+    const m = el.dataset.mode;
+    const sub = el.dataset.sub;
+    if (m === "in") state.inMode = sub; else state.outMode = sub;
+    if (sub === "import" && state.importFor !== m) resetImport();
+    render();
+  }
+  else if (action === "apply-import") applyImport();
+  else if (action === "download-template") downloadImportTemplate();
+  else if (action === "toggle-delete-select") {
+    const id = el.dataset.id;
+    if (state.deleteSelected[id]) delete state.deleteSelected[id];
+    else state.deleteSelected[id] = true;
+    state.deleteConfirming = false;
+    render();
+  }
+  else if (action === "ask-bulk-delete") { state.deleteConfirming = true; state.deleteError = ""; render(); }
+  else if (action === "cancel-bulk-delete") { state.deleteConfirming = false; render(); }
+  else if (action === "confirm-bulk-delete") performBulkDelete();
   else if (action === "quick-in") { state.tab = "in"; state.inProductId = el.dataset.id; state.inError = ""; render(); }
   else if (action === "quick-out") { state.tab = "out"; state.outProductId = el.dataset.id; state.outError = ""; render(); }
+  else if (action === "remove-photo") {
+    state.newPhotos.splice(parseInt(el.dataset.index, 10), 1);
+    state.modalError = "";
+    render();
+  }
+  else if (action === "set-main-photo") {
+    const idx = parseInt(el.dataset.index, 10);
+    if (idx > 0) {
+      const pick = state.newPhotos.splice(idx, 1)[0];
+      state.newPhotos.unshift(pick);
+      render();
+    }
+  }
+  else if (action === "toggle-theme") toggleTheme();
+  else if (action === "toggle-lang") toggleLang();
+  else if (action === "scan") startScan(el.dataset.scanField);
+  else if (action === "open-lightbox") openLightbox(el.dataset.id);
+  else if (action === "close-lightbox") {
+    // Ignore clicks that land on the picture or the strip -- only the
+    // backdrop and the X should dismiss it.
+    if (e.target.closest(".lb-stage") || e.target.closest(".lb-strip")) {
+      if (!e.target.closest(".lb-close")) return;
+    }
+    closeLightbox();
+  }
+  else if (action === "lightbox-prev") stepLightbox(-1);
+  else if (action === "lightbox-next") stepLightbox(1);
+  else if (action === "lightbox-pick") { state.lightboxIndex = parseInt(el.dataset.index, 10) || 0; render(); }
 });
 
 appEl.addEventListener("submit", (e) => {
@@ -741,6 +2915,37 @@ appEl.addEventListener("submit", (e) => {
   else if (action === "submit-product") saveProduct();
 });
 
+// Applying a field value from typing OR from a barcode scan must behave
+// identically, so both go through here.
+function applyFieldValue(field, value) {
+  state[field] = value;
+
+  if (field === "deleteQuery") {
+    state.deleteConfirming = false;
+    state.deleteError = "";
+    // Pasting IDs selects exactly those products; clearing the box clears the
+    // selection so nothing stays armed for deletion by accident.
+    state.deleteSelected = {};
+    const hits = matchIdTerms(parseIdTerms(value)).matched;
+    for (let i = 0; i < hits.length; i++) state.deleteSelected[hits[i].id] = true;
+  }
+
+  // A barcode scanner types the whole code then Enter. If what's typed exactly
+  // matches one product's ID or barcode, pick it straight away.
+  if (field === "inSearch" || field === "outSearch") {
+    const key = String(value).trim().toLowerCase();
+    if (key) {
+      const hits = state.products.filter(p =>
+        (p.productId || "").toLowerCase() === key || (p.barcode || "").toLowerCase() === key
+      );
+      if (hits.length === 1) {
+        if (field === "inSearch") { state.inProductId = hits[0].id; state.inSearch = ""; state.inError = ""; }
+        else { state.outProductId = hits[0].id; state.outSearch = ""; state.outError = ""; }
+      }
+    }
+  }
+}
+
 appEl.addEventListener("input", (e) => {
   if (e.target.tagName === "SELECT") return;
   const field = e.target.dataset.field;
@@ -748,12 +2953,26 @@ appEl.addEventListener("input", (e) => {
   let value = e.target.value;
   if (e.target.inputMode === "numeric") {
     value = value.replace(/[^0-9]/g, "");
+  } else if (e.target.inputMode === "decimal") {
+    value = value.replace(/[^0-9.]/g, "");
+    const dot = value.indexOf(".");
+    if (dot !== -1) value = value.slice(0, dot + 1) + value.slice(dot + 1).replace(/\./g, "");
   }
-  state[field] = value;
+  applyFieldValue(field, value);
   render();
 });
 
 appEl.addEventListener("change", (e) => {
+  if (e.target.id === "newPhotoInput") {
+    if (e.target.files && e.target.files.length) handlePhotoSelect(e.target.files);
+    e.target.value = "";
+    return;
+  }
+  if (e.target.id === "importFile") {
+    const file = e.target.files && e.target.files[0];
+    if (file) handleImportFile(file, e.target.dataset.mode);
+    return;
+  }
   if (e.target.tagName !== "SELECT") return;
   const field = e.target.dataset.field;
   if (field) { state[field] = e.target.value; render(); }
@@ -783,6 +3002,46 @@ if (!FIREBASE_NOT_CONFIGURED) {
     render();
   });
 }
+
+// Arrow keys / Escape while the lightbox is open.
+document.addEventListener("keydown", (e) => {
+  if (!state.lightboxProductId) return;
+  if (e.key === "Escape") { closeLightbox(); }
+  else if (e.key === "ArrowLeft") { stepLightbox(-1); }
+  else if (e.key === "ArrowRight") { stepLightbox(1); }
+  else return;
+  e.preventDefault();
+});
+
+// Swipe left/right on touch devices.
+let lbTouchX = null;
+appEl.addEventListener("touchstart", (e) => {
+  if (!state.lightboxProductId || !e.touches || !e.touches.length) return;
+  lbTouchX = e.touches[0].clientX;
+}, { passive: true });
+appEl.addEventListener("touchend", (e) => {
+  if (lbTouchX === null || !state.lightboxProductId) { lbTouchX = null; return; }
+  const endX = e.changedTouches && e.changedTouches.length ? e.changedTouches[0].clientX : null;
+  const dx = endX === null ? 0 : endX - lbTouchX;
+  lbTouchX = null;
+  if (Math.abs(dx) > 40) stepLightbox(dx < 0 ? 1 : -1);
+}, { passive: true });
+
+(function initLang() {
+  let l = "kh";
+  try { l = localStorage.getItem("nija-stock-lang") === "en" ? "en" : "kh"; } catch (e) { l = "kh"; }
+  state.lang = l;
+  document.documentElement.setAttribute("lang", l === "kh" ? "km" : "en");
+})();
+
+(function initTheme() {
+  let t = document.documentElement.getAttribute("data-theme");
+  if (t !== "light" && t !== "dark") {
+    try { t = localStorage.getItem("nija-stock-theme") === "light" ? "light" : "dark"; } catch (e) { t = "dark"; }
+  }
+  state.theme = t;
+  document.documentElement.setAttribute("data-theme", t);
+})();
 
 render();
 </script>
