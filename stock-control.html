@@ -30,6 +30,8 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
     --danger-ink: #2a0808;
     --danger-bg: #2a1416;
     --danger-border: #3a1e20;
+    --warn-bg: #2b2113; --warn-fg: #fbbf24; --warn-bd: #3f301b;
+    --info-bg: #0c2333; --info-fg: #38bdf8; --info-bd: #143348;
     --chip-hover: #3a3a44;
     --accent-tint: rgba(242,164,19,0.12);
     --accent-tint-border: rgba(242,164,19,0.4);
@@ -69,6 +71,8 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
     --danger-ink: #ffffff;
     --danger-bg: #fdecec;
     --danger-border: #f6c9c9;
+    --warn-bg: #fdf2df; --warn-fg: #a16207; --warn-bd: #f6e0b5;
+    --info-bg: #e8f3fd; --info-fg: #0d6dc4; --info-bd: #c3e0f8;
     --chip-hover: #b9c0c9;
     --accent-tint: rgba(180,83,9,0.08);
     --accent-tint-border: rgba(180,83,9,0.4);
@@ -264,6 +268,71 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
   .input-scan { padding-right: 58px; padding-top: 12px; padding-bottom: 12px; }
   .del-input.input-scan { padding-top: 10px; }
 
+  .chip-scan { display: inline-flex; align-items: center; gap: 5px; border-color: var(--accent-tint-border); color: var(--signal); }
+
+  /* Continuous scan session: list on top, live camera pinned at the bottom. */
+  .sess-overlay {
+    position: fixed; inset: 0; z-index: 120; background: var(--bg);
+    display: flex; flex-direction: column;
+  }
+  .sess-bar {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 12px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+  }
+  .sess-title { font-size: 14px; font-weight: 600; }
+  .sess-list { flex: 1; min-height: 0; overflow-y: auto; padding: 10px 14px; }
+  .sess-empty { text-align: center; color: var(--text-dim); font-size: 13px; padding: 28px 10px; }
+  .sess-row {
+    display: flex; align-items: center; gap: 10px; padding: 10px;
+    border: 1px solid var(--border); border-radius: var(--radius);
+    background: var(--surface); margin-bottom: 8px;
+  }
+  html[data-theme="light"] .sess-row { background: var(--surface); }
+  .sess-info { flex: 1; min-width: 0; }
+  .sess-name { font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sess-meta { font-size: 11px; color: var(--text-dim); margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .sess-qty { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+  .sess-step {
+    width: 34px; height: 34px; border-radius: var(--radius-sm); border: 1px solid var(--border);
+    background: var(--surface-2); color: var(--text); font-size: 17px; line-height: 1;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;
+  }
+  .sess-step:active { background: var(--accent-tint); }
+  .sess-num { min-width: 30px; text-align: center; font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .sess-del {
+    width: 30px; height: 30px; border: none; background: none; color: var(--text-dimmer);
+    cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .sess-del:hover { color: var(--danger); }
+  .sess-cam {
+    position: relative; flex-shrink: 0; height: 34vh; min-height: 170px;
+    background: #000; overflow: hidden; border-top: 1px solid var(--border);
+  }
+  .sess-video { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .sess-frame {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    width: min(70%, 300px); height: 46%;
+    border: 2px solid var(--signal); border-radius: var(--radius); pointer-events: none;
+  }
+  .sess-flash {
+    position: absolute; left: 0; right: 0; bottom: 0; padding: 8px 12px;
+    font-size: 13px; font-weight: 500; text-align: center; color: #fff;
+    background: transparent; transition: background .15s ease; pointer-events: none;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .sess-flash-ok { background: rgba(34,197,94,.92); }
+  .sess-flash-bad { background: rgba(239,68,68,.92); }
+  .sess-foot {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 12px 14px; border-top: 1px solid var(--border); flex-shrink: 0;
+  }
+  .sess-count { font-size: 13px; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+  .sess-foot .btn { padding: 10px 18px; border-radius: var(--radius); font-size: 14px; }
+
+  @media (min-width: 1024px) {
+    .sess-overlay { max-width: 640px; margin: 0 auto; border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
+  }
+
   .scan-overlay {
     position: fixed; inset: 0; z-index: 110; background: rgba(0,0,0,.94);
     display: flex; flex-direction: column;
@@ -410,23 +479,36 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
   .dup-section { margin-bottom: 22px; }
   .dup-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
   .dup-head h3 { font-size: 13px; font-weight: 600; margin: 0; }
+  .dup-head-icon { display: flex; }
   .dup-badge {
     font-size: 11px; font-weight: 600; padding: 1px 8px; border-radius: 999px;
     background: var(--surface-2); color: var(--text-dim);
   }
-  .dup-badge-issue { background: var(--danger-bg); color: var(--danger); }
+  .dup-section-danger .dup-head-icon { color: var(--danger); }
+  .dup-section-warn .dup-head-icon { color: var(--warn-fg); }
+  .dup-section-info .dup-head-icon { color: var(--info-fg); }
+  .dup-section-danger .dup-badge { background: var(--danger-bg); color: var(--danger); }
+  .dup-section-warn .dup-badge { background: var(--warn-bg); color: var(--warn-fg); }
+  .dup-section-info .dup-badge { background: var(--info-bg); color: var(--info-fg); }
   .dup-empty { font-size: 12px; color: var(--text-dimmer); margin: 0; }
   .dup-group {
     border: 1px solid var(--border); border-radius: var(--radius);
     overflow: hidden; margin-bottom: 8px; background: var(--surface);
   }
   html[data-theme="light"] .dup-group { background: var(--bg); }
-  .dup-group-issue { border-color: var(--danger-border); }
+  .dup-danger { border-color: var(--danger-border); }
+  .dup-warn { border-color: var(--warn-bd); }
+  .dup-info { border-color: var(--info-bd); }
   .dup-value {
     display: flex; align-items: center; justify-content: space-between; gap: 10px;
     padding: 8px 10px; background: var(--surface-2); border-bottom: 1px solid var(--border);
   }
-  .dup-group-issue .dup-value { background: var(--danger-bg); border-bottom-color: var(--danger-border); }
+  .dup-danger .dup-value { background: var(--danger-bg); border-bottom-color: var(--danger-border); }
+  .dup-warn .dup-value { background: var(--warn-bg); border-bottom-color: var(--warn-bd); }
+  .dup-info .dup-value { background: var(--info-bg); border-bottom-color: var(--info-bd); }
+  .dup-danger .dup-value-text { color: var(--danger); }
+  .dup-warn .dup-value-text { color: var(--warn-fg); }
+  .dup-info .dup-value-text { color: var(--info-fg); }
   .dup-value-text {
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -523,6 +605,37 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
   .imp-row-bad .imp-meta { color: var(--danger); }
   .imp-qty { flex-shrink: 0; font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; display: flex; align-items: center; }
   .imp-row-bad .imp-qty { color: var(--danger); }
+
+  .labels-page { max-width: 1400px; }
+  .lbl-picker { max-height: 300px; overflow-y: auto; }
+  .lbl-warn { color: var(--danger); }
+  .lbl-actions { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+  .lbl-actions .del-summary { margin: 0; }
+  .label-sheet { display: flex; flex-wrap: wrap; gap: 3mm; align-content: flex-start; }
+  .lbl {
+    background: #fff; color: #000; border: 1px solid #d8dde3; border-radius: 2px;
+    padding: 1.5mm 2mm; display: flex; flex-direction: column; justify-content: space-between;
+    overflow: hidden; box-sizing: border-box;
+  }
+  .lbl-name {
+    font-weight: 600; line-height: 1.15; overflow: hidden;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  }
+  .lbl-bc { flex: 1; min-height: 0; display: flex; align-items: center; }
+  .lbl-bc .bc-svg { width: 100%; height: 100%; display: block; }
+  .lbl-code { text-align: center; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: .04em; line-height: 1.1; }
+
+  @media print {
+    @page { margin: 8mm; }
+    html, body { background: #fff !important; }
+    .no-print, .header, .shell > .header, .form-icon-row, .toast, .scan-overlay, .lb-overlay { display: none !important; }
+    .shell { border: none !important; margin: 0 !important; min-height: 0 !important; }
+    .content { padding: 0 !important; }
+    .split { display: block !important; }
+    .labels-page { max-width: none !important; }
+    .label-sheet { gap: 2mm; }
+    .lbl { border: 1px dashed #bbb; break-inside: avoid; page-break-inside: avoid; }
+  }
 
   .delete-page { max-width: 480px; }
   .del-input { resize: vertical; min-height: 60px; line-height: 1.5; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
@@ -679,6 +792,84 @@ const CATEGORY_LABELS = {
   "Accessory": "\u1782\u17d2\u179a\u17bf\u1784\u179b\u17c1\u1784",
 };
 // Every photo for a product, tolerating older records that only have `photo`.
+// ---------------- Code 128 barcode generation ----------------
+// Drawn as SVG so it prints crisply. Code 128 is used because it handles
+// letters as well as digits, so IDs like "HLM-014" work, not just numbers.
+const CODE128_PATTERNS = [
+  "212222","222122","222221","121223","121322","131222","122213","122312","132212","221213",
+  "221312","231212","112232","122132","122231","113222","123122","123221","223211","221132",
+  "221231","213212","223112","312131","311222","321122","321221","312212","322112","322211",
+  "212123","212321","232121","111323","131123","131321","112313","132113","132311","211313",
+  "231113","231311","112133","112331","132131","113123","113321","133121","313121","211331",
+  "231131","213113","213311","213131","311123","311321","331121","312113","312311","332111",
+  "314111","221411","431111","111224","111422","121124","121421","141122","141221","112214",
+  "112412","122114","122411","142112","142211","241211","221114","413111","241112","134111",
+  "111242","121142","121241","114212","124112","124211","411212","421112","421211","212141",
+  "214121","412121","111143","111341","131141","114113","114311","411113","411311","113141",
+  "114131","311141","411131","211412","211214","211232","2331112",
+];
+const CODE128_STOP = 106;
+
+// Returns the list of symbol values (without start/check/stop) plus which
+// subset to use. Subset C halves the width of long all-digit codes.
+function code128Values(text) {
+  const s = String(text);
+  const allDigits = /^\d+$/.test(s) && s.length % 2 === 0 && s.length >= 4;
+  if (allDigits) {
+    const vals = [];
+    for (let i = 0; i < s.length; i += 2) vals.push(parseInt(s.substr(i, 2), 10));
+    return { start: 105, values: vals };
+  }
+  const vals = [];
+  for (let i = 0; i < s.length; i++) {
+    const code = s.charCodeAt(i);
+    // Subset B covers printable ASCII; anything else is replaced so the label
+    // still scans rather than producing an invalid symbol.
+    vals.push(code >= 32 && code <= 126 ? code - 32 : "?".charCodeAt(0) - 32);
+  }
+  return { start: 104, values: vals };
+}
+
+function code128Symbols(text) {
+  const enc = code128Values(text);
+  let sum = enc.start;
+  for (let i = 0; i < enc.values.length; i++) sum += enc.values[i] * (i + 1);
+  const check = sum % 103;
+  return [enc.start].concat(enc.values, [check, CODE128_STOP]);
+}
+
+function barcodeSvg(text, widthPx, heightPx) {
+  const symbols = code128Symbols(text);
+  let modules = 0;
+  const runs = [];
+  for (let i = 0; i < symbols.length; i++) {
+    const pattern = CODE128_PATTERNS[symbols[i]];
+    for (let j = 0; j < pattern.length; j++) {
+      const w = parseInt(pattern[j], 10);
+      runs.push({ bar: j % 2 === 0, w: w });
+      modules += w;
+    }
+  }
+  let x = 0;
+  let rects = "";
+  for (let i = 0; i < runs.length; i++) {
+    if (runs[i].bar) {
+      rects += '<rect x="' + x + '" y="0" width="' + runs[i].w + '" height="' + heightPx + '" fill="#000"/>';
+    }
+    x += runs[i].w;
+  }
+  return '<svg class="bc-svg" viewBox="0 0 ' + modules + " " + heightPx +
+    '" preserveAspectRatio="none" width="' + widthPx + '" height="' + heightPx +
+    '" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">' + rects + "</svg>";
+}
+
+// The code printed on a label: prefer the real barcode, fall back to the ID.
+function labelCodeFor(p) {
+  const bc = String(p.barcode || "").trim();
+  if (bc) return bc;
+  return String(p.productId || "").trim();
+}
+
 function scanBtn(field) {
   return '<button type="button" class="scan-btn" data-action="scan" data-scan-field="' + field +
     '" title="' + escapeHtml(t("scanBarcode")) + '" aria-label="' + escapeHtml(t("scanBarcode")) + '">' +
@@ -716,6 +907,7 @@ const ICONS = {
   check: '<polyline points="4,12 9,17 20,6"/>',
   sortDesc: '<line x1="4" y1="6" x2="16" y2="6"/><line x1="4" y1="12" x2="12" y2="12"/><line x1="4" y1="18" x2="8" y2="18"/>',
   sortAsc: '<line x1="4" y1="6" x2="8" y2="6"/><line x1="4" y1="12" x2="12" y2="12"/><line x1="4" y1="18" x2="16" y2="18"/>',
+  printer: '<path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7"/>',
   scan: '<path d="M4 8V6a2 2 0 0 1 2-2h2"/><path d="M16 4h2a2 2 0 0 1 2 2v2"/><path d="M20 16v2a2 2 0 0 1-2 2h-2"/><path d="M8 20H6a2 2 0 0 1-2-2v-2"/><line x1="8" y1="9" x2="8" y2="15"/><line x1="11" y1="9" x2="11" y2="15"/><line x1="14" y1="9" x2="14" y2="15"/><line x1="16.5" y1="9" x2="16.5" y2="15"/>',
   chevronLeft: '<polyline points="15,4 7,12 15,20"/>',
   chevronRight: '<polyline points="9,4 17,12 9,20"/>',
@@ -773,6 +965,10 @@ const state = {
   newPrice: "",
   newLocation: "",
   photoProcessing: false,
+  labelSelected: {},
+  labelCopies: "1",
+  labelSize: "medium",
+  labelSearch: "",
   lightboxProductId: null,
   lightboxIndex: 0,
   theme: "dark",
@@ -1195,7 +1391,17 @@ const I18N = {
     loading: "Loading stock\u2026",
     setupTitle: "Firebase setup needed",
     tabOverview: "Overview", tabIn: "Stock In", tabOut: "Stock Out",
-    tabHistory: "History", tabDelete: "Delete", tabDuplicates: "Duplicates",
+    tabHistory: "History", tabDelete: "Delete", tabDuplicates: "Duplicates", tabLabels: "Labels",
+    labelsTitle: "Print Barcode Labels",
+    labelCopies: "Copies of each label",
+    labelSizeLabel: "Label size",
+    labelSizeSmall: "Small", labelSizeMedium: "Medium", labelSizeLarge: "Large",
+    printLabels: "Print",
+    labelNoCode: "No barcode or product ID",
+    labelSkipped: "skipped (no code to print):",
+    labelPickSome: "Select products on the left to build a label sheet.",
+    labelCount: "labels ready",
+    selectAll: "Select all", clearSelection: "Clear",
     dupIdSection: "Duplicate Product IDs",
     dupBarcodeSection: "Duplicate Barcodes",
     dupLocationSection: "Shared Locations",
@@ -1265,6 +1471,11 @@ const I18N = {
     cancel: "Cancel", yesDelete: "Yes, delete", deleting: "Deleting\u2026",
     close: "Close",
     scanBarcode: "Scan barcode",
+    scanMany: "Scan many",
+    scanItems: "items",
+    scanCartEmpty: "Scan a barcode to add the first item.",
+    scanNotFound: "No product with code",
+    scannedNote: "Scanned",
     scanTitle: "Scan a barcode",
     scanHint: "Point the camera at the barcode",
     scanUnsupported: "This browser can't scan barcodes. Try Chrome on Android, or type the code.",
@@ -1314,6 +1525,17 @@ const I18N = {
     tabHistory: "ប្រវត្តិ",
     tabDelete: "លុប",
     tabDuplicates: "ស្ទួន",
+    tabLabels: "ស្លាកបាកូដ",
+    labelsTitle: "បោះពុម្ពស្លាកបាកូដ",
+    labelCopies: "ចំនួនច្បាប់ក្នុងមួយស្លាក",
+    labelSizeLabel: "ទំហំស្លាក",
+    labelSizeSmall: "តូច", labelSizeMedium: "មធ្យម", labelSizeLarge: "ធំ",
+    printLabels: "បោះពុម្ព",
+    labelNoCode: "គ្មានបាកូដ ឬលេខសម្គាល់",
+    labelSkipped: "បានរំលង (គ្មានលេខសម្រាប់បោះពុម្ព)៖",
+    labelPickSome: "សូមជ្រើសរើសទំនិញនៅខាងឆ្វេង ដើម្បីបង្កើតសន្លឹកស្លាក។",
+    labelCount: "ស្លាករួចរាល់",
+    selectAll: "ជ្រើសទាំងអស់", clearSelection: "សម្អាត",
     dupIdSection: "លេខសម្គាល់ទំនិញស្ទួន",
     dupBarcodeSection: "បាកូដស្ទួន",
     dupLocationSection: "ទីតាំងដូចគ្នា",
@@ -1414,6 +1636,11 @@ const I18N = {
     deleting: "កំពុងលុប…",
     close: "បិទ",
     scanBarcode: "ស្កែនបាកូដ",
+    scanMany: "ស្កែនច្រើន",
+    scanItems: "មុខ",
+    scanCartEmpty: "ស្កែនបាកូដ ដើម្បីបន្ថែមទំនិញដំបូង។",
+    scanNotFound: "គ្មានទំនិញដែលមានលេខ",
+    scannedNote: "ស្កែន",
     scanTitle: "ស្កែនបាកូដ",
     scanHint: "តម្រង់កាមេរ៉ាទៅលើបាកូដ",
     scanUnsupported: "កម្មវិធីរុករកនេះមិនអាចស្កែនបាកូដបានទេ។ សូមប្រើ Chrome លើ Android ឬវាយលេខដោយដៃ។",
@@ -1491,12 +1718,14 @@ function t(key) {
 
 const SYS_NOTE_INITIAL = "Initial stock";
 const SYS_NOTE_IMPORT_PREFIX = "Imported from ";
+const SYS_NOTE_SCAN = "Scanned";
 
 // System-generated notes are stored in English so they never depend on the
 // language the entry was made in. User-typed notes pass through untouched.
 function displayNote(note) {
   if (!note) return "";
   if (note === SYS_NOTE_INITIAL) return t("initialStock");
+  if (note === SYS_NOTE_SCAN) return t("scannedNote");
   if (note.indexOf(SYS_NOTE_IMPORT_PREFIX) === 0) {
     return t("importedFrom") + " " + note.slice(SYS_NOTE_IMPORT_PREFIX.length);
   }
@@ -1583,6 +1812,7 @@ function renderAppHTML() {
   else if (state.tab === "history") body = renderHistory();
   else if (state.tab === "delete") body = renderDeleteTab();
   else if (state.tab === "duplicates") body = renderDuplicatesTab();
+  else if (state.tab === "labels") body = renderLabelsTab();
   else if (state.tab === "product-form") body = renderProductForm();
 
   return (
@@ -1626,6 +1856,7 @@ function renderTabsInner() {
     { id: "out", label: t("tabOut"), icon: "down" },
     { id: "history", label: t("tabHistory"), icon: "history" },
     { id: "duplicates", label: t("tabDuplicates"), icon: "copy" },
+    { id: "labels", label: t("tabLabels"), icon: "tag" },
     { id: "delete", label: t("tabDelete"), icon: "trash" },
   ];
   const low = lowStockCount();
@@ -1807,6 +2038,9 @@ function renderStockForm(mode) {
     '<div class="filter-row">' +
       '<button type="button" class="chip' + (subMode === "single" ? " chip-active" : "") + '" data-action="set-stock-mode" data-mode="' + mode + '" data-sub="single">' + t("modeSingle") + "</button>" +
       '<button type="button" class="chip' + (subMode === "import" ? " chip-active" : "") + '" data-action="set-stock-mode" data-mode="' + mode + '" data-sub="import">' + t("modeImport") + "</button>" +
+      '<button type="button" class="chip chip-scan" data-action="start-scan-session" data-mode="' + mode + '">' +
+        icon("scan", 14) + " " + t("scanMany") +
+      "</button>" +
     "</div>";
 
   if (subMode === "import") {
@@ -2023,7 +2257,7 @@ function duplicateIssueCount() {
   return findDuplicateGroups("productId").length + findDuplicateGroups("barcode").length;
 }
 
-function renderDupGroup(group, isIssue) {
+function renderDupGroup(group, tone) {
   const items = group.items.map(p =>
     '<button type="button" class="dup-item" data-action="open-edit-modal" data-id="' + p.id + '">' +
       (p.photo
@@ -2037,7 +2271,7 @@ function renderDupGroup(group, isIssue) {
     "</button>"
   ).join("");
   return (
-    '<div class="dup-group' + (isIssue ? " dup-group-issue" : "") + '">' +
+    '<div class="dup-group dup-' + tone + '">' +
       '<div class="dup-value">' +
         '<span class="dup-value-text">' + escapeHtml(group.value) + "</span>" +
         '<span class="dup-count">' + group.items.length + " " + t("dupItems") + "</span>" +
@@ -2047,15 +2281,16 @@ function renderDupGroup(group, isIssue) {
   );
 }
 
-function renderDupSection(titleKey, iconName, groups, isIssue, emptyKey) {
+function renderDupSection(titleKey, iconName, groups, tone, emptyKey) {
   return (
-    '<div class="dup-section">' +
-      '<div class="dup-head">' + icon(iconName, 15, isIssue && groups.length ? "icon-down" : "") +
+    '<div class="dup-section dup-section-' + tone + '">' +
+      '<div class="dup-head">' +
+        '<span class="dup-head-icon">' + icon(iconName, 15) + "</span>" +
         "<h3>" + t(titleKey) + "</h3>" +
-        (groups.length ? '<span class="dup-badge' + (isIssue ? " dup-badge-issue" : "") + '">' + groups.length + "</span>" : "") +
+        (groups.length ? '<span class="dup-badge">' + groups.length + "</span>" : "") +
       "</div>" +
       (groups.length
-        ? '<div class="dup-groups">' + groups.map(g => renderDupGroup(g, isIssue)).join("") + "</div>"
+        ? '<div class="dup-groups">' + groups.map(g => renderDupGroup(g, tone)).join("") + "</div>"
         : '<p class="dup-empty">' + t(emptyKey) + "</p>")
     + "</div>"
   );
@@ -2080,11 +2315,118 @@ function renderDuplicatesTab() {
         ? '<div class="dup-ok">' + icon("check", 14) + "<span>" + t("dupNoneSub") + "</span></div>"
         : "") +
       '<div class="dup-cols">' +
-        renderDupSection("dupIdSection", "tag", idGroups, true, "dupNoneIds") +
-        renderDupSection("dupBarcodeSection", "barcode", barcodeGroups, true, "dupNoneBarcodes") +
-        renderDupSection("dupLocationSection", "pin", locationGroups, false, "dupNoneLocations") +
+        renderDupSection("dupIdSection", "tag", idGroups, "danger", "dupNoneIds") +
+        renderDupSection("dupBarcodeSection", "barcode", barcodeGroups, "warn", "dupNoneBarcodes") +
+        renderDupSection("dupLocationSection", "pin", locationGroups, "info", "dupNoneLocations") +
       "</div>" +
       (locationGroups.length ? '<p class="dup-note">' + t("dupLocationNote") + "</p>" : "") +
+    "</div>"
+  );
+}
+
+const LABEL_SIZES = {
+  small:  { w: 38, h: 21, bcH: 26, name: 8,  code: 7.5 },
+  medium: { w: 50, h: 28, bcH: 34, name: 9,  code: 8.5 },
+  large:  { w: 70, h: 38, bcH: 46, name: 11, code: 10 },
+};
+
+function renderLabelsTab() {
+  if (state.products.length === 0) {
+    return '<div class="empty-state">' + icon("tag", 30) +
+      '<p class="empty-title">' + t("noProductsTitle") + "</p>" +
+      '<p class="empty-sub">' + t("noProductsSub") + "</p></div>";
+  }
+
+  const q = state.labelSearch.trim().toLowerCase();
+  const listed = state.products
+    .filter(p => !q || p.name.toLowerCase().includes(q) ||
+      (p.productId || "").toLowerCase().includes(q) || (p.barcode || "").toLowerCase().includes(q))
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  const chosen = state.products.filter(p => state.labelSelected[p.id]);
+  const printable = chosen.filter(p => labelCodeFor(p));
+  const noCode = chosen.filter(p => !labelCodeFor(p));
+  const copies = Math.max(1, Math.min(50, parseInt(state.labelCopies, 10) || 1));
+  const size = LABEL_SIZES[state.labelSize] || LABEL_SIZES.medium;
+
+  const picker = listed.map(p => {
+    const on = !!state.labelSelected[p.id];
+    const code = labelCodeFor(p);
+    return (
+      '<button type="button" class="del-row' + (on ? " del-row-on" : "") + '" data-action="toggle-label-select" data-id="' + p.id + '">' +
+        '<span class="del-check' + (on ? " on" : "") + '">' + (on ? icon("check", 12) : "") + "</span>" +
+        '<span class="del-info">' +
+          '<span class="del-name">' + escapeHtml(p.name) + "</span>" +
+          '<span class="del-meta">' + (code ? escapeHtml(code) : '<span class="lbl-warn">' + t("labelNoCode") + "</span>") + "</span>" +
+        "</span>" +
+      "</button>"
+    );
+  }).join("");
+
+  // Build the sheet: one label per copy, per selected product.
+  let sheet = "";
+  for (let i = 0; i < printable.length; i++) {
+    const p = printable[i];
+    const code = labelCodeFor(p);
+    for (let n = 0; n < copies; n++) {
+      sheet +=
+        '<div class="lbl" style="width:' + size.w + "mm;height:" + size.h + 'mm">' +
+          '<div class="lbl-name" style="font-size:' + size.name + 'pt">' + escapeHtml(p.name) + "</div>" +
+          '<div class="lbl-bc">' + barcodeSvg(code, "100%", size.bcH) + "</div>" +
+          '<div class="lbl-code" style="font-size:' + size.code + 'pt">' + escapeHtml(code) + "</div>" +
+        "</div>";
+    }
+  }
+  const totalLabels = printable.length * copies;
+
+  const sizeOpts = ["small", "medium", "large"].map(k =>
+    '<option value="' + k + '"' + (state.labelSize === k ? " selected" : "") + ">" +
+      t("labelSize" + k.charAt(0).toUpperCase() + k.slice(1)) + " (" + LABEL_SIZES[k].w + "\u00d7" + LABEL_SIZES[k].h + "mm)" +
+    "</option>").join("");
+
+  return (
+    '<div class="labels-page">' +
+      '<div class="form-icon-row">' + icon("tag", 16) + "<h2>" + t("labelsTitle") + "</h2></div>" +
+      '<div class="split">' +
+        '<div class="split-side no-print">' +
+          '<div class="form-group">' +
+            '<label for="labelSearch">' + t("product") + "</label>" +
+            '<div class="search-wrap">' +
+              '<span class="search-icon">' + icon("search", 15) + "</span>" +
+              '<input id="labelSearch" data-field="labelSearch" value="' + escapeHtml(state.labelSearch) +
+                '" placeholder="' + escapeHtml(t("searchProducts")) + '" class="input input-search input-scan" autocomplete="off" />' +
+              scanBtn("labelSearch") +
+            "</div>" +
+          "</div>" +
+          '<div class="filter-row">' +
+            '<button type="button" class="chip" data-action="label-select-all">' + t("selectAll") + "</button>" +
+            '<button type="button" class="chip" data-action="label-clear">' + t("clearSelection") + "</button>" +
+          "</div>" +
+          '<div class="del-list lbl-picker">' + picker + "</div>" +
+          '<div class="form-group">' +
+            '<label for="labelCopies">' + t("labelCopies") + "</label>" +
+            '<input type="text" inputmode="numeric" pattern="[0-9]*" id="labelCopies" data-field="labelCopies" value="' + escapeHtml(state.labelCopies) + '" class="input" />' +
+          "</div>" +
+          '<div class="form-group">' +
+            '<label for="labelSize">' + t("labelSizeLabel") + "</label>" +
+            '<select id="labelSize" data-field="labelSize" class="input">' + sizeOpts + "</select>" +
+          "</div>" +
+        "</div>" +
+        '<div class="split-main">' +
+          (noCode.length
+            ? '<div class="notfound-box no-print">' + icon("alert", 13) +
+                "<div><strong>" + noCode.length + " " + t("labelSkipped") + "</strong> " +
+                escapeHtml(noCode.map(p => p.name).join(", ")) + "</div></div>"
+            : "") +
+          (totalLabels === 0
+            ? '<div class="empty-inline no-print">' + t("labelPickSome") + "</div>"
+            : '<div class="lbl-actions no-print">' +
+                '<span class="del-summary">' + totalLabels + " " + t("labelCount") + "</span>" +
+                '<button type="button" class="btn btn-primary" data-action="print-labels">' + icon("printer", 14) + " " + t("printLabels") + "</button>" +
+              "</div>" +
+              '<div class="label-sheet">' + sheet + "</div>") +
+        "</div>" +
+      "</div>" +
     "</div>"
   );
 }
@@ -2428,6 +2770,248 @@ function isSecureOrigin() {
   } catch (e) {
     return false;
   }
+}
+
+// ---------------- continuous scan session ----------------
+// A POS-style flow: the camera stays open at the bottom and each scanned item
+// stacks up in the list above. Built outside #app and updated imperatively so
+// a re-render never tears down the live <video>.
+let sessEl = null, sessStream = null, sessTimer = null, sessMode = null;
+let sessCart = [];
+let sessLastCode = null, sessLastAt = 0, sessCodeInView = false, sessAbsentFrames = 0;
+
+function sessProductFor(code) {
+  const key = String(code).trim().toLowerCase();
+  if (!key) return null;
+  return state.products.find(p =>
+    (p.barcode || "").toLowerCase() === key || (p.productId || "").toLowerCase() === key
+  ) || null;
+}
+
+function sessFlash(text, bad) {
+  if (!sessEl) return;
+  const el = sessEl.querySelector(".sess-flash");
+  if (!el) return;
+  el.textContent = text;
+  el.className = "sess-flash" + (bad ? " sess-flash-bad" : " sess-flash-ok");
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { if (el) { el.textContent = ""; el.className = "sess-flash"; } }, 1600);
+}
+
+function sessTotal() {
+  return sessCart.reduce((n, r) => n + r.qty, 0);
+}
+
+function renderSessList() {
+  if (!sessEl) return;
+  const listEl = sessEl.querySelector(".sess-list");
+  const footEl = sessEl.querySelector(".sess-foot");
+  if (!listEl || !footEl) return;
+
+  listEl.innerHTML = sessCart.length === 0
+    ? '<div class="sess-empty">' + escapeHtml(t("scanCartEmpty")) + "</div>"
+    : sessCart.map((r, i) =>
+        '<div class="sess-row">' +
+          '<div class="sess-info">' +
+            '<div class="sess-name">' + escapeHtml(r.name) + "</div>" +
+            '<div class="sess-meta">' + escapeHtml(r.code) +
+              (sessMode === "out" ? " \u00b7 " + r.stock + " " + escapeHtml(t("inStock")) : "") +
+            "</div>" +
+          "</div>" +
+          '<div class="sess-qty">' +
+            '<button type="button" class="sess-step" data-sess="dec" data-i="' + i + '">\u2212</button>' +
+            '<span class="sess-num">' + r.qty + "</span>" +
+            '<button type="button" class="sess-step" data-sess="inc" data-i="' + i + '">+</button>' +
+          "</div>" +
+          '<button type="button" class="sess-del" data-sess="del" data-i="' + i + '">' + icon("x", 14) + "</button>" +
+        "</div>"
+      ).join("");
+
+  const n = sessTotal();
+  const label = sessMode === "in" ? t("addStockForRows") : t("removeStockForRows");
+  footEl.innerHTML =
+    '<span class="sess-count">' + n + " " + escapeHtml(t("scanItems")) + "</span>" +
+    '<button type="button" class="btn ' + (sessMode === "in" ? "btn-primary" : "btn-danger") + '" data-sess="apply"' +
+      (n === 0 ? " disabled" : "") + ">" + escapeHtml(label) + "</button>";
+}
+
+function sessAddCode(code) {
+  const now = Date.now();
+  // While the same barcode stays in front of the camera it is one item, not
+  // many. It only counts again once it has actually left the frame.
+  if (code === sessLastCode && now - sessLastAt < 150) return;
+  if (code === sessLastCode && sessCodeInView) return;
+  sessLastCode = code;
+  sessLastAt = now;
+  sessCodeInView = true;
+
+  const p = sessProductFor(code);
+  if (!p) {
+    sessFlash(t("scanNotFound") + " " + code, true);
+    return;
+  }
+  try { if (navigator.vibrate) navigator.vibrate(35); } catch (e) { /* not supported */ }
+
+  const existing = sessCart.find(r => r.id === p.id);
+  if (existing) {
+    if (sessMode === "out" && existing.qty >= p.stock) {
+      sessFlash(t("errOnly") + " " + p.stock + " " + t("inStock"), true);
+      renderSessList();
+      return;
+    }
+    existing.qty += 1;
+    sessFlash(p.name + " \u00d7" + existing.qty, false);
+  } else {
+    if (sessMode === "out" && p.stock < 1) {
+      sessFlash(t("errOnly") + " 0 " + t("inStock"), true);
+      return;
+    }
+    sessCart.unshift({ id: p.id, name: p.name, code: labelCodeFor(p) || code, qty: 1, stock: p.stock });
+    sessFlash(p.name, false);
+  }
+  renderSessList();
+}
+
+function stopScanSession() {
+  if (sessTimer) { clearTimeout(sessTimer); sessTimer = null; }
+  if (sessStream) {
+    sessStream.getTracks().forEach(tr => { try { tr.stop(); } catch (e) { /* already stopped */ } });
+    sessStream = null;
+  }
+  if (sessEl && sessEl.parentNode) sessEl.parentNode.removeChild(sessEl);
+  sessEl = null; sessMode = null; sessCart = [];
+  sessLastCode = null; sessLastAt = 0; sessCodeInView = false; sessAbsentFrames = 0;
+  try { document.body.style.overflow = ""; } catch (e) { /* no body */ }
+}
+
+async function applyScanSession() {
+  if (!sessCart.length || !sessMode) return;
+  const mode = sessMode;
+  const rows = sessCart.slice();
+  const now = Date.now();
+  let applied = 0, firstErr = null;
+
+  for (let i = 0; i < rows.length; i++) {
+    const r = rows[i];
+    const p = state.products.find(x => x.id === r.id);
+    if (!p) continue;
+    const newStock = mode === "in" ? p.stock + r.qty : Math.max(0, p.stock - r.qty);
+    try {
+      await updateDoc(doc(db, "stock_products", p.id), { stock: newStock, updatedAt: now });
+      await addDoc(collection(db, "stock_transactions"), {
+        productId: p.id, productName: p.name, type: mode, qty: r.qty,
+        note: SYS_NOTE_SCAN, date: now,
+      });
+      applied += r.qty;
+    } catch (err) {
+      console.error("scan session apply failed", err);
+      if (!firstErr) firstErr = err;
+    }
+  }
+
+  stopScanSession();
+  if (firstErr) {
+    showToast(describeError(firstErr));
+  } else {
+    showToast((mode === "in" ? t("toastStockedIn") : t("toastStockedOut")) + " " + applied);
+  }
+  render();
+}
+
+async function startScanSession(mode) {
+  if (sessEl) return;
+  sessMode = mode;
+  sessCart = [];
+  sessLastCode = null; sessLastAt = 0; sessCodeInView = false; sessAbsentFrames = 0;
+
+  sessEl = document.createElement("div");
+  sessEl.className = "sess-overlay";
+  sessEl.innerHTML =
+    '<div class="sess-bar">' +
+      '<span class="sess-title">' + escapeHtml(mode === "in" ? t("tabIn") : t("tabOut")) + " \u00b7 " + escapeHtml(t("scanMany")) + "</span>" +
+      '<button type="button" class="lb-close" data-sess="close" aria-label="' + escapeHtml(t("close")) + '">' + icon("x", 18) + "</button>" +
+    "</div>" +
+    '<div class="sess-list"></div>' +
+    '<div class="sess-cam">' +
+      '<video class="sess-video" playsinline muted autoplay></video>' +
+      '<div class="sess-frame"></div>' +
+      '<div class="sess-flash"></div>' +
+    "</div>" +
+    '<div class="sess-foot"></div>';
+  document.body.appendChild(sessEl);
+  try { document.body.style.overflow = "hidden"; } catch (e) { /* no body */ }
+
+  sessEl.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-sess]");
+    if (!btn) return;
+    const act = btn.dataset.sess;
+    if (act === "close") { stopScanSession(); render(); return; }
+    if (act === "apply") { applyScanSession(); return; }
+    const i = parseInt(btn.dataset.i, 10);
+    const row = sessCart[i];
+    if (!row) return;
+    if (act === "inc") {
+      const p = state.products.find(x => x.id === row.id);
+      if (sessMode === "out" && p && row.qty >= p.stock) {
+        sessFlash(t("errOnly") + " " + p.stock + " " + t("inStock"), true);
+      } else row.qty += 1;
+    } else if (act === "dec") {
+      row.qty -= 1;
+      if (row.qty < 1) sessCart.splice(i, 1);
+    } else if (act === "del") {
+      sessCart.splice(i, 1);
+    }
+    renderSessList();
+  });
+
+  renderSessList();
+
+  if (!isSecureOrigin()) { sessFlash(t("scanInsecure"), true); return; }
+  if (typeof BarcodeDetector === "undefined") { sessFlash(t("scanUnsupported"), true); return; }
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { sessFlash(t("scanNoCamera"), true); return; }
+
+  try {
+    sessStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: "environment" } }, audio: false,
+    });
+  } catch (err) {
+    console.error("camera failed", err);
+    sessFlash(err && err.name === "NotAllowedError" ? t("scanDenied") : t("scanNoCamera"), true);
+    return;
+  }
+  if (!sessEl) { sessStream.getTracks().forEach(tr => tr.stop()); sessStream = null; return; }
+
+  const video = sessEl.querySelector(".sess-video");
+  video.srcObject = sessStream;
+  try { await video.play(); } catch (e) { /* autoplay attribute covers this */ }
+
+  let detector;
+  try {
+    let formats = null;
+    try { formats = await BarcodeDetector.getSupportedFormats(); } catch (e) { formats = null; }
+    detector = (formats && formats.length) ? new BarcodeDetector({ formats: formats }) : new BarcodeDetector();
+  } catch (err) {
+    sessFlash(t("scanUnsupported"), true);
+    return;
+  }
+
+  const tick = async () => {
+    if (!sessEl) return;
+    try {
+      const found = await detector.detect(video);
+      if (found && found.length && found[0].rawValue) {
+        sessAbsentFrames = 0;
+        sessAddCode(String(found[0].rawValue).trim());
+      } else {
+        // Two clear frames in a row, so a single missed read can't be mistaken
+        // for the item being taken away and presented again.
+        sessAbsentFrames++;
+        if (sessAbsentFrames >= 2) sessCodeInView = false;
+      }
+    } catch (err) { /* frame not ready */ }
+    sessTimer = setTimeout(tick, 220);
+  };
+  sessTimer = setTimeout(tick, 300);
 }
 
 function scanMessage(text) {
@@ -2891,6 +3475,24 @@ appEl.addEventListener("click", (e) => {
   else if (action === "toggle-theme") toggleTheme();
   else if (action === "toggle-lang") toggleLang();
   else if (action === "scan") startScan(el.dataset.scanField);
+  else if (action === "start-scan-session") startScanSession(el.dataset.mode);
+  else if (action === "toggle-label-select") {
+    const id = el.dataset.id;
+    if (state.labelSelected[id]) delete state.labelSelected[id];
+    else state.labelSelected[id] = true;
+    render();
+  }
+  else if (action === "label-select-all") {
+    const q = state.labelSearch.trim().toLowerCase();
+    state.products.forEach(p => {
+      const match = !q || p.name.toLowerCase().includes(q) ||
+        (p.productId || "").toLowerCase().includes(q) || (p.barcode || "").toLowerCase().includes(q);
+      if (match) state.labelSelected[p.id] = true;
+    });
+    render();
+  }
+  else if (action === "label-clear") { state.labelSelected = {}; render(); }
+  else if (action === "print-labels") { try { window.print(); } catch (err) { console.error(err); } }
   else if (action === "open-lightbox") openLightbox(el.dataset.id);
   else if (action === "close-lightbox") {
     // Ignore clicks that land on the picture or the strip -- only the
