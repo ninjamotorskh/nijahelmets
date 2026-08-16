@@ -2969,23 +2969,72 @@ async function createBarcodeReader() {
     hints.set(Z.DecodeHintType.TRY_HARDER, true);
   } catch (e) { /* fall back to defaults */ }
 
-  const zreader = new Z.BrowserMultiFormatReader(hints);
   const canvas = document.createElement("canvas");
-  const ctx = canvas.getContext("2d");
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
 
+  // Core reader path: build the bitmap ourselves rather than relying on any
+  // particular browser-helper method existing in the published build.
+  let core = null;
+  try {
+    if (Z.MultiFormatReader && Z.RGBLuminanceSource && Z.BinaryBitmap && Z.HybridBinarizer) {
+      core = new Z.MultiFormatReader();
+      if (core.setHints) core.setHints(hints);
+    }
+  } catch (e) { core = null; }
+
+  // Older helper as a second option.
+  let helper = null;
+  if (!core && Z.BrowserMultiFormatReader) {
+    try { helper = new Z.BrowserMultiFormatReader(hints); } catch (e) { helper = null; }
+  }
+  if (!core && !helper) throw new Error("No usable decoder in the barcode library");
+
+  const isNotFound = (err) => {
+    if (!err) return true;
+    const n = (err.name || "") + " " + (err.constructor ? err.constructor.name : "") + " " + (err.message || "");
+    return /NotFound|No MultiFormat Readers|not found/i.test(n);
+  };
+
+  let hardErrors = 0;
   return {
     native: false,
     detect: async (video) => {
-      const w = video.videoWidth, h = video.videoHeight;
-      if (!w || !h) return null;
+      const vw = video.videoWidth, vh = video.videoHeight;
+      if (!vw || !vh) return null;
+
+      // Decoding a full 1080p frame is slow on a phone; ~800px is plenty for
+      // a barcode filling the aiming box.
+      const scale = Math.min(1, 800 / vw);
+      const w = Math.max(1, Math.round(vw * scale));
+      const h = Math.max(1, Math.round(vh * scale));
       canvas.width = w;
       canvas.height = h;
       ctx.drawImage(video, 0, 0, w, h);
+
       try {
-        const result = zreader.decodeFromCanvas(canvas);
+        if (core) {
+          const rgba = ctx.getImageData(0, 0, w, h).data;
+          const gray = new Uint8ClampedArray(w * h);
+          for (let i = 0, j = 0; j < gray.length; i += 4, j++) {
+            gray[j] = (rgba[i] * 0.299 + rgba[i + 1] * 0.587 + rgba[i + 2] * 0.114) | 0;
+          }
+          const source = new Z.RGBLuminanceSource(gray, w, h);
+          const bitmap = new Z.BinaryBitmap(new Z.HybridBinarizer(source));
+          const result = core.decode(bitmap, hints);
+          if (core.reset) core.reset();
+          hardErrors = 0;
+          return result ? String(result.getText()) : null;
+        }
+        const result = helper.decodeFromCanvas(canvas);
+        hardErrors = 0;
         return result ? String(result.getText()) : null;
       } catch (err) {
-        return null;   // nothing in this frame
+        if (isNotFound(err)) return null;   // just no barcode in this frame
+        // A genuine fault would otherwise fail silently on every frame.
+        hardErrors++;
+        if (hardErrors === 1) console.error("barcode decode error", err);
+        if (hardErrors > 8) throw err;   // ~2s of real faults, not a transient blip
+        return null;
       }
     },
   };
@@ -3227,7 +3276,11 @@ async function startScanSession(mode) {
         sessAbsentFrames++;
         if (sessAbsentFrames >= 2) sessCodeInView = false;
       }
-    } catch (err) { /* frame not ready */ }
+    } catch (err) {
+      console.error("scanning stopped", err);
+      sessFlash(t("scanReaderFailed"), true);
+      return;
+    }
     sessTimer = setTimeout(tick, reader.native ? 220 : 300);
   };
   sessTimer = setTimeout(tick, 300);
@@ -3335,7 +3388,11 @@ async function startScan(field) {
     try {
       const code = await reader.detect(video);
       if (code) { applyScan(scanTarget, code); return; }
-    } catch (err) { /* frame not ready yet */ }
+    } catch (err) {
+      console.error("scanning stopped", err);
+      scanMessage(t("scanReaderFailed"));
+      return;
+    }
     scanTimer = setTimeout(tick, reader.native ? 180 : 260);
   };
   scanTimer = setTimeout(tick, 300);
