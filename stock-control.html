@@ -340,6 +340,31 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
   .sess-count { font-size: 13px; color: var(--text-dim); font-variant-numeric: tabular-nums; }
   .sess-foot .btn { padding: 10px 18px; border-radius: var(--radius); font-size: 14px; }
 
+  /* Hardware scanner (USB/Bluetooth "gun") input: it types the code and hits
+     Enter. Kept focused so a scan always lands here; also lets you type. */
+  .sess-hw { padding: 10px 14px 0; flex-shrink: 0; }
+  .sess-hw-input {
+    width: 100%; box-sizing: border-box; padding: 12px 14px;
+    border: 1px solid var(--accent-tint-border); border-radius: var(--radius);
+    background: var(--surface); color: var(--text); font-size: 15px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: .02em;
+  }
+  .sess-hw-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-tint); }
+  .sess-hw-input::placeholder { font-family: var(--font); letter-spacing: normal; color: var(--text-dimmer); }
+  /* When no camera is available, the black video panel becomes a calm
+     "scanner ready" panel instead of a scary error. */
+  .sess-cam.sess-cam-off { background: var(--surface-2); }
+  .sess-cam-ph {
+    display: none; position: absolute; inset: 0; padding: 16px;
+    flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-align: center;
+  }
+  .sess-cam.sess-cam-off .sess-video,
+  .sess-cam.sess-cam-off .sess-frame { display: none; }
+  .sess-cam.sess-cam-off .sess-cam-ph { display: flex; }
+  .sess-cam-ph svg { color: var(--accent); opacity: .8; }
+  .sess-cam-ph-title { font-size: 14px; font-weight: 600; color: var(--text); }
+  .sess-cam-ph-hint { font-size: 12px; color: var(--text-dim); max-width: 320px; line-height: 1.5; }
+
   @media (min-width: 1024px) {
     .sess-overlay { max-width: 640px; margin: 0 auto; border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
   }
@@ -1576,6 +1601,9 @@ const I18N = {
     close: "Close",
     scanBarcode: "Scan barcode",
     scanMany: "Scan many",
+    hwScanTitle: "Ready for your scanner",
+    hwScanHint: "Point a USB or Bluetooth barcode scanner here \u2014 or type a code and press Enter.",
+    hwScanPlaceholder: "Scan or type a code, then Enter",
     scanItems: "items",
     scanCartEmpty: "Scan a barcode to add the first item.",
     scanNotFound: "No product with code",
@@ -1752,6 +1780,9 @@ const I18N = {
     close: "បិទ",
     scanBarcode: "ស្កែនបាកូដ",
     scanMany: "ស្កែនច្រើន",
+    hwScanTitle: "រួចរាល់សម្រាប់ម៉ាស៊ីនស្កែន",
+    hwScanHint: "ដាក់ម៉ាស៊ីនស្កែនបាកូដ USB ឬ Bluetooth នៅទីនេះ — ឬវាយបញ្ចូលលេខ រួចចុច Enter។",
+    hwScanPlaceholder: "ស្កែន ឬវាយបញ្ចូលលេខ រួចចុច Enter",
     scanItems: "មុខ",
     scanCartEmpty: "ស្កែនបាកូដ ដើម្បីបន្ថែមទំនិញដំបូង។",
     scanNotFound: "គ្មានទំនិញដែលមានលេខ",
@@ -3215,10 +3246,20 @@ async function startScanSession(mode) {
       '<span class="sess-title">' + escapeHtml(mode === "in" ? t("tabIn") : t("tabOut")) + " \u00b7 " + escapeHtml(t("scanMany")) + "</span>" +
       '<button type="button" class="lb-close" data-sess="close" aria-label="' + escapeHtml(t("close")) + '">' + icon("x", 18) + "</button>" +
     "</div>" +
+    '<div class="sess-hw">' +
+      '<input class="sess-hw-input" type="text" inputmode="text" autocomplete="off" ' +
+        'autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" ' +
+        'placeholder="' + escapeHtml(t("hwScanPlaceholder")) + '">' +
+    "</div>" +
     '<div class="sess-list"></div>' +
     '<div class="sess-cam">' +
       '<video class="sess-video" playsinline muted autoplay></video>' +
       '<div class="sess-frame"></div>' +
+      '<div class="sess-cam-ph">' +
+        icon("scan", 30) +
+        '<div class="sess-cam-ph-title">' + escapeHtml(t("hwScanTitle")) + "</div>" +
+        '<div class="sess-cam-ph-hint">' + escapeHtml(t("hwScanHint")) + "</div>" +
+      "</div>" +
       '<div class="sess-flash"></div>' +
     "</div>" +
     '<div class="sess-foot"></div>';
@@ -3246,12 +3287,54 @@ async function startScanSession(mode) {
       sessCart.splice(i, 1);
     }
     renderSessList();
+    focusHwInput();
   });
 
-  renderSessList();
+  // ----- hardware scanner (USB / Bluetooth "gun") + manual typing -----
+  // A scanner types the barcode into the focused field and sends Enter, so a
+  // kept-focused input is all that is needed -- no camera required. This is the
+  // way to use "Scan many" on a computer.
+  const hwInput = sessEl.querySelector(".sess-hw-input");
+  // Phones use the camera, and auto-focusing here would pop up the on-screen
+  // keyboard, so only grab focus on devices with a real pointer (a computer).
+  const isTouch = !!(window.matchMedia && window.matchMedia("(pointer: coarse)").matches);
+  function focusHwInput() {
+    if (isTouch || !hwInput) return;
+    try { hwInput.focus(); } catch (e) { /* not focusable */ }
+  }
+  if (hwInput) {
+    hwInput.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter") return;
+      e.preventDefault();
+      const code = hwInput.value.trim();
+      hwInput.value = "";
+      if (!code) return;
+      // A deliberate trigger-pull is always a fresh item, so don't let the
+      // camera's "same code still in view" guard swallow a repeat scan.
+      sessCodeInView = false;
+      sessAddCode(code);
+      focusHwInput();
+    });
+    // If focus drifts (e.g. after clicking a button), a click anywhere that
+    // isn't a control brings it back so the next scan still lands.
+    sessEl.addEventListener("click", (e) => {
+      if (!e.target.closest("[data-sess], .sess-hw-input")) focusHwInput();
+    });
+  }
 
-  if (!isSecureOrigin()) { sessFlash(t("scanInsecure"), true); return; }
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { sessFlash(t("scanNoCamera"), true); return; }
+  renderSessList();
+  focusHwInput();
+
+  // The camera is a bonus, not a requirement. When it isn't there (e.g. a
+  // computer with no webcam or with permission blocked), the black panel turns
+  // into a calm "scanner ready" panel and the hardware input carries on.
+  function camUnavailable() {
+    const cam = sessEl && sessEl.querySelector(".sess-cam");
+    if (cam) cam.classList.add("sess-cam-off");
+    focusHwInput();
+  }
+
+  if (!isSecureOrigin() || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { camUnavailable(); return; }
 
   try {
     sessStream = await navigator.mediaDevices.getUserMedia({
@@ -3263,7 +3346,7 @@ async function startScanSession(mode) {
     });
   } catch (err) {
     console.error("camera failed", err);
-    sessFlash(err && err.name === "NotAllowedError" ? t("scanDenied") : t("scanNoCamera"), true);
+    camUnavailable();
     return;
   }
   if (!sessEl) { sessStream.getTracks().forEach(tr => tr.stop()); sessStream = null; return; }
