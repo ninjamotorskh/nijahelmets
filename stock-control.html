@@ -190,6 +190,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
     display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: var(--radius);
     background: var(--surface); border: 1px solid var(--border);
   }
+  .product-row { flex-wrap: wrap; }
   html[data-theme="light"] .product-row, html[data-theme="light"] .history-row { background: var(--bg); }
   .product-info { flex: 1; min-width: 0; }
   .row-thumb { width: 42px; height: 42px; border-radius: var(--radius-sm); object-fit: cover; flex-shrink: 0; background: var(--surface-2); border: 1px solid var(--border); }
@@ -211,13 +212,23 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
   .cat-accessory { background: var(--accessory-bg); color: var(--accessory-fg); border-color: var(--accessory-bd); }
   .low-flag { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; color: var(--danger); }
   .product-meta { font-size: 12px; color: var(--text-dim); margin-top: 4px; font-variant-numeric: tabular-nums; }
-  .product-extra { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  .product-extra {
+    display: flex; gap: 6px; flex-wrap: nowrap; margin-top: 2px; min-width: 0;
+    /* 42px thumbnail + 12px row gap keeps it aligned with the product name. */
+    flex: 0 0 calc(100% - 54px); margin-left: 54px; box-sizing: border-box;
+  }
   .extra-item {
     display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 500;
     color: var(--text); background: var(--surface-2); border: 1px solid var(--border);
     padding: 3px 8px; border-radius: var(--radius-sm); line-height: 1.4;
+    min-width: 0; flex: 0 1 auto;
   }
+  .extra-ico { display: flex; flex-shrink: 0; }
   .extra-item svg { flex-shrink: 0; color: var(--signal); }
+  .extra-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .extra-barcode .extra-text { font-variant-numeric: tabular-nums; }
+  /* The location is short, so let the barcode take the leftover room. */
+  .extra-item:first-child { flex-shrink: 0; }
   .extra-barcode { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: .02em; }
   .row-stock { flex-shrink: 0; text-align: right; padding: 0 2px; }
   .row-stock-num { font-size: 20px; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; color: var(--text); }
@@ -608,6 +619,10 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
 
   .labels-page { max-width: 1400px; }
   .lbl-picker { max-height: 300px; overflow-y: auto; }
+  .gen-all {
+    display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%;
+    padding: 10px; border-radius: var(--radius); font-size: 13px; margin-bottom: 14px;
+  }
   .lbl-warn { color: var(--danger); }
   .lbl-actions { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
   .lbl-actions .del-summary { margin: 0; }
@@ -626,7 +641,6 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
   .lbl-code { text-align: center; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: .04em; line-height: 1.1; }
 
   @media print {
-    @page { margin: 8mm; }
     html, body { background: #fff !important; }
     .no-print, .header, .shell > .header, .form-icon-row, .toast, .scan-overlay, .lb-overlay { display: none !important; }
     .shell { border: none !important; margin: 0 !important; min-height: 0 !important; }
@@ -672,6 +686,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
 
   @media (max-width: 560px) {
     .product-row { gap: 10px; padding: 10px; align-items: flex-start; }
+    .product-extra { flex-basis: calc(100% - 52px); margin-left: 52px; }
     .product-name { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.3; }
     .row-stock { padding-top: 2px; }
     .row-actions { flex-wrap: wrap; justify-content: flex-end; max-width: 76px; }
@@ -870,6 +885,85 @@ function labelCodeFor(p) {
   return String(p.productId || "").trim();
 }
 
+// ---------------- in-store barcode generation ----------------
+// EAN-13 codes beginning 20-29 are reserved for in-store use, so numbers
+// generated here can never collide with a real supplier barcode.
+function ean13CheckDigit(twelve) {
+  let sum = 0;
+  for (let i = 0; i < 12; i++) {
+    const d = twelve.charCodeAt(i) - 48;
+    sum += (i % 2 === 0) ? d : d * 3;
+  }
+  return String((10 - (sum % 10)) % 10);
+}
+
+function usedBarcodeSet() {
+  const set = {};
+  for (let i = 0; i < state.products.length; i++) {
+    const b = String(state.products[i].barcode || "").trim();
+    if (b) set[b] = true;
+  }
+  return set;
+}
+
+// Continues the sequence from whatever in-store codes already exist.
+function nextInternalBarcode(used, extraTaken) {
+  let seq = 1;
+  for (const code in used) {
+    if (/^20\d{11}$/.test(code)) {
+      const n = parseInt(code.slice(2, 12), 10);
+      if (!isNaN(n) && n >= seq) seq = n + 1;
+    }
+  }
+  for (let guard = 0; guard < 200000; guard++) {
+    const data = "20" + String(seq).padStart(10, "0");
+    const code = data + ean13CheckDigit(data);
+    if (!used[code] && !(extraTaken && extraTaken[code])) return code;
+    seq++;
+  }
+  return null;
+}
+
+function generateBarcodeForForm() {
+  const used = usedBarcodeSet();
+  // Don't count the code this product already has as a clash with itself.
+  const current = String(state.newBarcode || "").trim();
+  if (current) delete used[current];
+  const code = nextInternalBarcode(used, null);
+  if (!code) return;
+  state.newBarcode = code;
+  render();
+  const el = document.getElementById("newBarcode");
+  if (el) el.focus();
+}
+
+async function generateMissingBarcodes() {
+  const targets = state.products.filter(p => !String(p.barcode || "").trim());
+  if (targets.length === 0) { showToast(t("allHaveCodes")); return; }
+
+  const used = usedBarcodeSet();
+  const assigned = {};
+  let done = 0, firstErr = null;
+
+  for (let i = 0; i < targets.length; i++) {
+    const code = nextInternalBarcode(used, assigned);
+    if (!code) break;
+    assigned[code] = true;
+    used[code] = true;
+    try {
+      await updateDoc(doc(db, "stock_products", targets[i].id), { barcode: code, updatedAt: Date.now() });
+      done++;
+    } catch (err) {
+      console.error("barcode assign failed", err);
+      if (!firstErr) firstErr = err;
+    }
+  }
+
+  if (firstErr) showToast(describeError(firstErr));
+  else showToast(t("generatedCodes") + " " + done);
+  render();
+}
+
 function scanBtn(field) {
   return '<button type="button" class="scan-btn" data-action="scan" data-scan-field="' + field +
     '" title="' + escapeHtml(t("scanBarcode")) + '" aria-label="' + escapeHtml(t("scanBarcode")) + '">' +
@@ -967,7 +1061,8 @@ const state = {
   photoProcessing: false,
   labelSelected: {},
   labelCopies: "1",
-  labelSize: "medium",
+  labelSize: "50x30",
+  labelTarget: "roll",
   labelSearch: "",
   lightboxProductId: null,
   lightboxIndex: 0,
@@ -1393,9 +1488,18 @@ const I18N = {
     tabOverview: "Overview", tabIn: "Stock In", tabOut: "Stock Out",
     tabHistory: "History", tabDelete: "Delete", tabDuplicates: "Duplicates", tabLabels: "Labels",
     labelsTitle: "Print Barcode Labels",
+    generateBarcode: "Generate a code",
+    generateBarcodeHint: "for products with no supplier barcode.",
+    generateFor: "Generate codes for",
+    generatedCodes: "Generated codes for",
+    allHaveCodes: "Every product already has a code.",
     labelCopies: "Copies of each label",
     labelSizeLabel: "Label size",
-    labelSizeSmall: "Small", labelSizeMedium: "Medium", labelSizeLarge: "Large",
+    printTarget: "Printing to",
+    targetRoll: "Label printer (roll)",
+    targetSheet: "Sticker sheet (A4)",
+    rollHint: "One label per page, sized to match the roll. Set the same size in the printer driver.",
+    sheetHint: "Labels are tiled onto the page with cut lines.",
     printLabels: "Print",
     labelNoCode: "No barcode or product ID",
     labelSkipped: "skipped (no code to print):",
@@ -1479,6 +1583,8 @@ const I18N = {
     scanTitle: "Scan a barcode",
     scanHint: "Point the camera at the barcode",
     scanUnsupported: "This browser can't scan barcodes. Try Chrome on Android, or type the code.",
+    scanLoading: "Preparing the scanner\u2026",
+    scanReaderFailed: "Could not load the scanner. Check your internet connection and try again.",
     scanNoCamera: "No camera available. Check the site is opened over https and try again.",
     scanDenied: "Camera permission was blocked. Allow camera access for this site, then try again.",
     scanInsecure: "The camera only works on the live web address. Open the app from your https:// link instead of a downloaded file.",
@@ -1527,9 +1633,18 @@ const I18N = {
     tabDuplicates: "ស្ទួន",
     tabLabels: "ស្លាកបាកូដ",
     labelsTitle: "បោះពុម្ពស្លាកបាកូដ",
+    generateBarcode: "បង្កើតលេខកូដ",
+    generateBarcodeHint: "សម្រាប់ទំនិញដែលគ្មានបាកូដពីអ្នកផ្គត់ផ្គង់។",
+    generateFor: "បង្កើតលេខកូដសម្រាប់",
+    generatedCodes: "បានបង្កើតលេខកូដសម្រាប់",
+    allHaveCodes: "ទំនិញទាំងអស់មានលេខកូដរួចហើយ។",
     labelCopies: "ចំនួនច្បាប់ក្នុងមួយស្លាក",
     labelSizeLabel: "ទំហំស្លាក",
-    labelSizeSmall: "តូច", labelSizeMedium: "មធ្យម", labelSizeLarge: "ធំ",
+    printTarget: "បោះពុម្ពទៅ",
+    targetRoll: "ម៉ាស៊ីនស្លាក (ក្រាស់)",
+    targetSheet: "សន្លឹកស្ទីគ័រ (A4)",
+    rollHint: "មួយស្លាកក្នុងមួយទំព័រ ត្រូវនឹងទំហំក្រាស់។ សូមកំណត់ទំហំដូចគ្នាក្នុងម៉ាស៊ីនបោះពុម្ព។",
+    sheetHint: "ស្លាកត្រូវបានរៀបលើទំព័រ ជាមួយបន្ទាត់កាត់។",
     printLabels: "បោះពុម្ព",
     labelNoCode: "គ្មានបាកូដ ឬលេខសម្គាល់",
     labelSkipped: "បានរំលង (គ្មានលេខសម្រាប់បោះពុម្ព)៖",
@@ -1644,6 +1759,8 @@ const I18N = {
     scanTitle: "ស្កែនបាកូដ",
     scanHint: "តម្រង់កាមេរ៉ាទៅលើបាកូដ",
     scanUnsupported: "កម្មវិធីរុករកនេះមិនអាចស្កែនបាកូដបានទេ។ សូមប្រើ Chrome លើ Android ឬវាយលេខដោយដៃ។",
+    scanLoading: "កំពុងរៀបចំម៉ាស៊ីនស្កែន…",
+    scanReaderFailed: "មិនអាចផ្ទុកម៉ាស៊ីនស្កែនបានទេ។ សូមពិនិត្យអ៊ីនធឺណិត រួចព្យាយាមម្តងទៀត។",
     scanNoCamera: "រកមិនឃើញកាមេរ៉ា។ សូមពិនិត្យថាគេហទំព័របើកតាម https រួចព្យាយាមម្តងទៀត។",
     scanDenied: "កាមេរ៉ាត្រូវបានបិទ។ សូមអនុញ្ញាតឲ្យប្រើកាមេរ៉ាសម្រាប់គេហទំព័រនេះ រួចព្យាយាមម្តងទៀត។",
     scanInsecure: "កាមេរ៉ាដំណើរការតែលើអាសយដ្ឋានគេហទំព័រពិតប្រាកដប៉ុណ្ណោះ។ សូមបើកកម្មវិធីតាមតំណ https:// ជំនួសឯកសារដែលបានទាញយក។",
@@ -1770,6 +1887,7 @@ function render() {
     }
   }
   scrollActiveTabIntoView(appEl);
+  syncPrintPageStyle();
 }
 
 // The tab strip scrolls sideways on narrow screens, so the selected tab can end
@@ -1986,12 +2104,6 @@ function renderProductRow(p) {
         '<div class="product-meta">' + t("reorderAt") + " " + p.threshold +
           (updated ? " \u00b7 " + t("updated") + " " + updated : "") +
         "</div>" +
-        (p.location || p.barcode ?
-          '<div class="product-extra">' +
-            (p.location ? '<span class="extra-item">' + icon("pin", 12) + escapeHtml(p.location) + "</span>" : "") +
-            (p.barcode ? '<span class="extra-item extra-barcode">' + icon("barcode", 12) + escapeHtml(p.barcode) + "</span>" : "") +
-          "</div>" : ""
-        ) +
       "</div>" +
       '<div class="row-stock">' +
         '<div class="row-stock-num' + (low ? " low" : "") + '">' + p.stock + "</div>" +
@@ -2002,6 +2114,12 @@ function renderProductRow(p) {
         '<button type="button" class="icon-btn icon-btn-down" title="Stock out" data-action="quick-out" data-id="' + p.id + '">' + icon("down", 14) + "</button>" +
         '<button type="button" class="icon-btn" title="Edit" data-action="open-edit-modal" data-id="' + p.id + '">' + icon("pencil", 14) + "</button>" +
       "</div>" +
+      (p.location || p.barcode ?
+        '<div class="product-extra">' +
+          (p.location ? '<span class="extra-item"><span class="extra-ico">' + icon("pin", 12) + '</span><span class="extra-text">' + escapeHtml(p.location) + "</span></span>" : "") +
+          (p.barcode ? '<span class="extra-item extra-barcode"><span class="extra-ico">' + icon("barcode", 12) + '</span><span class="extra-text">' + escapeHtml(p.barcode) + "</span></span>" : "") +
+        "</div>" : ""
+      ) +
     "</div>"
   );
 }
@@ -2325,10 +2443,38 @@ function renderDuplicatesTab() {
 }
 
 const LABEL_SIZES = {
-  small:  { w: 38, h: 21, bcH: 26, name: 8,  code: 7.5 },
-  medium: { w: 50, h: 28, bcH: 34, name: 9,  code: 8.5 },
-  large:  { w: 70, h: 38, bcH: 46, name: 11, code: 10 },
+  "40x30": { w: 40, h: 30, name: 7.5, code: 7 },
+  "50x30": { w: 50, h: 30, name: 8.5, code: 8 },
+  "60x40": { w: 60, h: 40, name: 10,  code: 9 },
+  "70x20": { w: 70, h: 20, name: 7.5, code: 7 },
+  "70x40": { w: 70, h: 40, name: 11,  code: 9.5 },
+  "80x50": { w: 80, h: 50, name: 13,  code: 11 },
 };
+
+// A roll printer feeds one label per page, so the page size must match the
+// label exactly. Sticker sheets instead tile many labels onto one A4 page.
+function syncPrintPageStyle() {
+  let el = document.getElementById("print-page-style");
+  if (!el) {
+    el = document.createElement("style");
+    el.id = "print-page-style";
+    document.head.appendChild(el);
+  }
+  const size = LABEL_SIZES[state.labelSize] || LABEL_SIZES["50x30"];
+  if (state.labelTarget === "roll") {
+    el.textContent =
+      "@media print{" +
+        "@page{size:" + size.w + "mm " + size.h + "mm;margin:0;}" +
+        ".label-sheet{display:block!important;gap:0!important;}" +
+        ".lbl{width:" + size.w + "mm!important;height:" + size.h + "mm!important;" +
+          "border:none!important;border-radius:0!important;margin:0!important;" +
+          "page-break-after:always;break-after:page;}" +
+        ".lbl:last-child{page-break-after:auto;break-after:auto;}" +
+      "}";
+  } else {
+    el.textContent = "@media print{@page{size:auto;margin:8mm;}}";
+  }
+}
 
 function renderLabelsTab() {
   if (state.products.length === 0) {
@@ -2343,6 +2489,7 @@ function renderLabelsTab() {
       (p.productId || "").toLowerCase().includes(q) || (p.barcode || "").toLowerCase().includes(q))
     .sort((a, b) => a.name.localeCompare(b.name));
 
+  const missingCodes = state.products.filter(p => !String(p.barcode || "").trim()).length;
   const chosen = state.products.filter(p => state.labelSelected[p.id]);
   const printable = chosen.filter(p => labelCodeFor(p));
   const noCode = chosen.filter(p => !labelCodeFor(p));
@@ -2372,16 +2519,21 @@ function renderLabelsTab() {
       sheet +=
         '<div class="lbl" style="width:' + size.w + "mm;height:" + size.h + 'mm">' +
           '<div class="lbl-name" style="font-size:' + size.name + 'pt">' + escapeHtml(p.name) + "</div>" +
-          '<div class="lbl-bc">' + barcodeSvg(code, "100%", size.bcH) + "</div>" +
+          '<div class="lbl-bc">' + barcodeSvg(code, "100%", 40) + "</div>" +
           '<div class="lbl-code" style="font-size:' + size.code + 'pt">' + escapeHtml(code) + "</div>" +
         "</div>";
     }
   }
   const totalLabels = printable.length * copies;
 
-  const sizeOpts = ["small", "medium", "large"].map(k =>
+  const sizeOpts = Object.keys(LABEL_SIZES).map(k =>
     '<option value="' + k + '"' + (state.labelSize === k ? " selected" : "") + ">" +
-      t("labelSize" + k.charAt(0).toUpperCase() + k.slice(1)) + " (" + LABEL_SIZES[k].w + "\u00d7" + LABEL_SIZES[k].h + "mm)" +
+      LABEL_SIZES[k].w + " \u00d7 " + LABEL_SIZES[k].h + " mm" +
+    "</option>").join("");
+
+  const targetOpts = ["roll", "sheet"].map(k =>
+    '<option value="' + k + '"' + (state.labelTarget === k ? " selected" : "") + ">" +
+      t(k === "roll" ? "targetRoll" : "targetSheet") +
     "</option>").join("");
 
   return (
@@ -2402,14 +2554,24 @@ function renderLabelsTab() {
             '<button type="button" class="chip" data-action="label-select-all">' + t("selectAll") + "</button>" +
             '<button type="button" class="chip" data-action="label-clear">' + t("clearSelection") + "</button>" +
           "</div>" +
+          (missingCodes > 0
+            ? '<button type="button" class="btn btn-secondary gen-all" data-action="generate-missing">' +
+                icon("barcode", 14) + " " + t("generateFor") + " " + missingCodes + " " + t("scanItems") +
+              "</button>"
+            : "") +
           '<div class="del-list lbl-picker">' + picker + "</div>" +
           '<div class="form-group">' +
             '<label for="labelCopies">' + t("labelCopies") + "</label>" +
             '<input type="text" inputmode="numeric" pattern="[0-9]*" id="labelCopies" data-field="labelCopies" value="' + escapeHtml(state.labelCopies) + '" class="input" />' +
           "</div>" +
           '<div class="form-group">' +
+            '<label for="labelTarget">' + t("printTarget") + "</label>" +
+            '<select id="labelTarget" data-field="labelTarget" class="input">' + targetOpts + "</select>" +
+          "</div>" +
+          '<div class="form-group">' +
             '<label for="labelSize">' + t("labelSizeLabel") + "</label>" +
             '<select id="labelSize" data-field="labelSize" class="input">' + sizeOpts + "</select>" +
+            '<p class="hint">' + t(state.labelTarget === "roll" ? "rollHint" : "sheetHint") + "</p>" +
           "</div>" +
         "</div>" +
         '<div class="split-main">' +
@@ -2653,6 +2815,7 @@ function renderProductForm() {
             '<input id="newBarcode" data-field="newBarcode" value="' + escapeHtml(state.newBarcode) + '" placeholder="' + escapeHtml(t("barcodeEg")) + '" class="input input-scan" />' +
             scanBtn("newBarcode") +
           "</div>" +
+          '<p class="hint"><button type="button" class="link-btn" data-action="generate-barcode">' + t("generateBarcode") + "</button> " + t("generateBarcodeHint") + "</p>" +
         "</div>" +
         '<div class="form-group">' +
           '<label for="newPrice">' + t("priceLabel") + "</label>" +
@@ -2770,6 +2933,62 @@ function isSecureOrigin() {
   } catch (e) {
     return false;
   }
+}
+
+// ---------------- barcode reader ----------------
+// Android Chrome has a built-in BarcodeDetector. Safari (iPhone) does not, so
+// there a decoder is fetched on demand and driven off canvas frames. Both
+// paths expose the same detect(video) -> code | null.
+const ZXING_URL = "https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/+esm";
+let zxingModule = null;
+let zxingLoader = () => import(/* @vite-ignore */ ZXING_URL);
+
+async function createBarcodeReader() {
+  if (typeof BarcodeDetector !== "undefined") {
+    let formats = null;
+    try { formats = await BarcodeDetector.getSupportedFormats(); } catch (e) { formats = null; }
+    const detector = (formats && formats.length) ? new BarcodeDetector({ formats: formats }) : new BarcodeDetector();
+    return {
+      native: true,
+      detect: async (video) => {
+        const found = await detector.detect(video);
+        return (found && found.length && found[0].rawValue) ? String(found[0].rawValue) : null;
+      },
+    };
+  }
+
+  if (!zxingModule) zxingModule = await zxingLoader();
+  const Z = zxingModule;
+
+  const hints = new Map();
+  try {
+    hints.set(Z.DecodeHintType.POSSIBLE_FORMATS, [
+      Z.BarcodeFormat.EAN_13, Z.BarcodeFormat.EAN_8, Z.BarcodeFormat.UPC_A, Z.BarcodeFormat.UPC_E,
+      Z.BarcodeFormat.CODE_128, Z.BarcodeFormat.CODE_39, Z.BarcodeFormat.ITF, Z.BarcodeFormat.QR_CODE,
+    ]);
+    hints.set(Z.DecodeHintType.TRY_HARDER, true);
+  } catch (e) { /* fall back to defaults */ }
+
+  const zreader = new Z.BrowserMultiFormatReader(hints);
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+
+  return {
+    native: false,
+    detect: async (video) => {
+      const w = video.videoWidth, h = video.videoHeight;
+      if (!w || !h) return null;
+      canvas.width = w;
+      canvas.height = h;
+      ctx.drawImage(video, 0, 0, w, h);
+      try {
+        const result = zreader.decodeFromCanvas(canvas);
+        return result ? String(result.getText()) : null;
+      } catch (err) {
+        return null;   // nothing in this frame
+      }
+    },
+  };
 }
 
 // ---------------- continuous scan session ----------------
@@ -2967,7 +3186,6 @@ async function startScanSession(mode) {
   renderSessList();
 
   if (!isSecureOrigin()) { sessFlash(t("scanInsecure"), true); return; }
-  if (typeof BarcodeDetector === "undefined") { sessFlash(t("scanUnsupported"), true); return; }
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { sessFlash(t("scanNoCamera"), true); return; }
 
   try {
@@ -2985,23 +3203,24 @@ async function startScanSession(mode) {
   video.srcObject = sessStream;
   try { await video.play(); } catch (e) { /* autoplay attribute covers this */ }
 
-  let detector;
+  let reader;
   try {
-    let formats = null;
-    try { formats = await BarcodeDetector.getSupportedFormats(); } catch (e) { formats = null; }
-    detector = (formats && formats.length) ? new BarcodeDetector({ formats: formats }) : new BarcodeDetector();
+    if (typeof BarcodeDetector === "undefined") sessFlash(t("scanLoading"), false);
+    reader = await createBarcodeReader();
+    if (!sessEl) return;
   } catch (err) {
-    sessFlash(t("scanUnsupported"), true);
+    console.error("barcode reader failed to load", err);
+    sessFlash(t("scanReaderFailed"), true);
     return;
   }
 
   const tick = async () => {
     if (!sessEl) return;
     try {
-      const found = await detector.detect(video);
-      if (found && found.length && found[0].rawValue) {
+      const code = await reader.detect(video);
+      if (code) {
         sessAbsentFrames = 0;
-        sessAddCode(String(found[0].rawValue).trim());
+        sessAddCode(String(code).trim());
       } else {
         // Two clear frames in a row, so a single missed read can't be mistaken
         // for the item being taken away and presented again.
@@ -3009,7 +3228,7 @@ async function startScanSession(mode) {
         if (sessAbsentFrames >= 2) sessCodeInView = false;
       }
     } catch (err) { /* frame not ready */ }
-    sessTimer = setTimeout(tick, 220);
+    sessTimer = setTimeout(tick, reader.native ? 220 : 300);
   };
   sessTimer = setTimeout(tick, 300);
 }
@@ -3075,10 +3294,6 @@ async function startScan(field) {
     scanMessage(t("scanInsecure"));
     return;
   }
-  if (typeof BarcodeDetector === "undefined") {
-    scanMessage(t("scanUnsupported"));
-    return;
-  }
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
     scanMessage(t("scanNoCamera"));
     return;
@@ -3103,27 +3318,25 @@ async function startScan(field) {
   video.srcObject = scanStream;
   try { await video.play(); } catch (e) { /* autoplay attribute covers this */ }
 
-  let detector;
+  let reader;
   try {
-    let formats = null;
-    try { formats = await BarcodeDetector.getSupportedFormats(); } catch (e) { formats = null; }
-    detector = (formats && formats.length) ? new BarcodeDetector({ formats: formats }) : new BarcodeDetector();
+    if (typeof BarcodeDetector === "undefined") scanMessage(t("scanLoading"));
+    reader = await createBarcodeReader();
+    if (!scanEl) return;
+    scanMessage(t("scanHint"));
   } catch (err) {
-    console.error(err);
-    scanMessage(t("scanUnsupported"));
+    console.error("barcode reader failed to load", err);
+    scanMessage(t("scanReaderFailed"));
     return;
   }
 
   const tick = async () => {
     if (!scanEl) return;
     try {
-      const found = await detector.detect(video);
-      if (found && found.length && found[0].rawValue) {
-        applyScan(scanTarget, found[0].rawValue);
-        return;
-      }
+      const code = await reader.detect(video);
+      if (code) { applyScan(scanTarget, code); return; }
     } catch (err) { /* frame not ready yet */ }
-    scanTimer = setTimeout(tick, 180);
+    scanTimer = setTimeout(tick, reader.native ? 180 : 260);
   };
   scanTimer = setTimeout(tick, 300);
 }
@@ -3492,6 +3705,8 @@ appEl.addEventListener("click", (e) => {
     render();
   }
   else if (action === "label-clear") { state.labelSelected = {}; render(); }
+  else if (action === "generate-barcode") generateBarcodeForForm();
+  else if (action === "generate-missing") generateMissingBarcodes();
   else if (action === "print-labels") { try { window.print(); } catch (err) { console.error(err); } }
   else if (action === "open-lightbox") openLightbox(el.dataset.id);
   else if (action === "close-lightbox") {
