@@ -3002,14 +3002,22 @@ async function createBarcodeReader() {
       const vw = video.videoWidth, vh = video.videoHeight;
       if (!vw || !vh) return null;
 
-      // Decoding a full 1080p frame is slow on a phone; ~800px is plenty for
-      // a barcode filling the aiming box.
-      const scale = Math.min(1, 800 / vw);
-      const w = Math.max(1, Math.round(vw * scale));
-      const h = Math.max(1, Math.round(vh * scale));
+      // Only the middle of the frame matters -- that is where the aiming box
+      // is. Cropping is both faster and less prone to misreads from whatever
+      // else is in shot.
+      const cropW = Math.max(1, Math.round(vw * 0.86));
+      const cropH = Math.max(1, Math.round(vh * 0.55));
+      const sx = Math.round((vw - cropW) / 2);
+      const sy = Math.round((vh - cropH) / 2);
+
+      // A full 1080p frame is slow to decode on a phone; ~900px across is
+      // plenty for a barcode that fills the box.
+      const scale = Math.min(1, 900 / cropW);
+      const w = Math.max(1, Math.round(cropW * scale));
+      const h = Math.max(1, Math.round(cropH * scale));
       canvas.width = w;
       canvas.height = h;
-      ctx.drawImage(video, 0, 0, w, h);
+      ctx.drawImage(video, sx, sy, cropW, cropH, 0, 0, w, h);
 
       try {
         if (core) {
@@ -3047,6 +3055,7 @@ async function createBarcodeReader() {
 let sessEl = null, sessStream = null, sessTimer = null, sessMode = null;
 let sessCart = [];
 let sessLastCode = null, sessLastAt = 0, sessCodeInView = false, sessAbsentFrames = 0;
+let sessPendingCode = null, sessPendingCount = 0;
 
 function sessProductFor(code) {
   const key = String(code).trim().toLowerCase();
@@ -3149,6 +3158,7 @@ function stopScanSession() {
   if (sessEl && sessEl.parentNode) sessEl.parentNode.removeChild(sessEl);
   sessEl = null; sessMode = null; sessCart = [];
   sessLastCode = null; sessLastAt = 0; sessCodeInView = false; sessAbsentFrames = 0;
+  sessPendingCode = null; sessPendingCount = 0;
   try { document.body.style.overflow = ""; } catch (e) { /* no body */ }
 }
 
@@ -3191,6 +3201,7 @@ async function startScanSession(mode) {
   sessMode = mode;
   sessCart = [];
   sessLastCode = null; sessLastAt = 0; sessCodeInView = false; sessAbsentFrames = 0;
+  sessPendingCode = null; sessPendingCount = 0;
 
   sessEl = document.createElement("div");
   sessEl.className = "sess-overlay";
@@ -3263,14 +3274,23 @@ async function startScanSession(mode) {
     return;
   }
 
+  // Same rule as the single scanner: confirm a code across frames before
+  // trusting it, so one bad decode can't add the wrong product.
+  const needed = reader.native ? 2 : 3;
+
   const tick = async () => {
     if (!sessEl) return;
     try {
       const code = await reader.detect(video);
       if (code) {
         sessAbsentFrames = 0;
-        sessAddCode(String(code).trim());
+        const trimmed = String(code).trim();
+        if (trimmed === sessPendingCode) sessPendingCount++;
+        else { sessPendingCode = trimmed; sessPendingCount = 1; }
+        if (sessPendingCount >= needed) sessAddCode(trimmed);
       } else {
+        sessPendingCode = null;
+        sessPendingCount = 0;
         // Two clear frames in a row, so a single missed read can't be mistaken
         // for the item being taken away and presented again.
         sessAbsentFrames++;
@@ -3281,7 +3301,7 @@ async function startScanSession(mode) {
       sessFlash(t("scanReaderFailed"), true);
       return;
     }
-    sessTimer = setTimeout(tick, reader.native ? 220 : 300);
+    sessTimer = setTimeout(tick, reader.native ? 200 : 240);
   };
   sessTimer = setTimeout(tick, 300);
 }
@@ -3383,17 +3403,28 @@ async function startScan(field) {
     return;
   }
 
+  // A single frame can decode incorrectly, so a code is only accepted after
+  // the same value has been read on consecutive frames.
+  const needed = reader.native ? 2 : 3;
+  let pending = null, pendingCount = 0;
+
   const tick = async () => {
     if (!scanEl) return;
     try {
       const code = await reader.detect(video);
-      if (code) { applyScan(scanTarget, code); return; }
+      if (code) {
+        if (code === pending) pendingCount++;
+        else { pending = code; pendingCount = 1; }
+        if (pendingCount >= needed) { applyScan(scanTarget, code); return; }
+      } else {
+        pending = null; pendingCount = 0;
+      }
     } catch (err) {
       console.error("scanning stopped", err);
       scanMessage(t("scanReaderFailed"));
       return;
     }
-    scanTimer = setTimeout(tick, reader.native ? 180 : 260);
+    scanTimer = setTimeout(tick, reader.native ? 160 : 220);
   };
   scanTimer = setTimeout(tick, 300);
 }
