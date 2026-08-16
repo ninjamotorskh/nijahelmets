@@ -195,9 +195,9 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
   .product-info { flex: 1; min-width: 0; }
   .row-thumb { width: 42px; height: 42px; border-radius: var(--radius-sm); object-fit: cover; flex-shrink: 0; background: var(--surface-2); border: 1px solid var(--border); }
   .row-thumb-placeholder { width: 42px; height: 42px; border-radius: var(--radius-sm); flex-shrink: 0; background: var(--surface-2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--text-dimmer); }
-  .product-name-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .product-name { font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
-  .cat-tag { font-size: 11px; padding: 2px 7px; border-radius: 5px; border: 1px solid transparent; line-height: 1.5; }
+  .product-name-row { display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; }
+  .product-name { font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; max-width: 100%; }
+  .cat-tag { flex-shrink: 0; margin-left: auto; white-space: nowrap; font-size: 11px; padding: 2px 7px; border-radius: 5px; border: 1px solid transparent; line-height: 1.5; }
   .cat-helmet { background: var(--helmet-bg); color: var(--helmet-fg); border-color: var(--helmet-bd); }
   .cat-frame { background: var(--frame-bg); color: var(--frame-fg); border-color: var(--frame-bd); }
   .cat-plastic-box { background: var(--plastic-box-bg); color: var(--plastic-box-fg); border-color: var(--plastic-box-bd); }
@@ -210,7 +210,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
   .cat-brake-pads { background: var(--brake-pads-bg); color: var(--brake-pads-fg); border-color: var(--brake-pads-bd); }
   .cat-oil { background: var(--oil-bg); color: var(--oil-fg); border-color: var(--oil-bd); }
   .cat-accessory { background: var(--accessory-bg); color: var(--accessory-fg); border-color: var(--accessory-bd); }
-  .low-flag { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; color: var(--danger); }
+  .low-flag { flex-shrink: 0; white-space: nowrap; display: inline-flex; align-items: center; gap: 3px; font-size: 11px; color: var(--danger); }
   .product-meta { font-size: 12px; color: var(--text-dim); margin-top: 4px; font-variant-numeric: tabular-nums; }
   .product-extra {
     display: flex; gap: 6px; flex-wrap: nowrap; margin-top: 2px; min-width: 0;
@@ -326,11 +326,13 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
     border: 2px solid var(--signal); border-radius: var(--radius); pointer-events: none;
   }
   .sess-flash {
-    position: absolute; left: 0; right: 0; bottom: 0; padding: 8px 12px;
+    margin: 8px 14px 0; border-radius: var(--radius);
     font-size: 13px; font-weight: 500; text-align: center; color: #fff;
-    background: transparent; transition: background .15s ease; pointer-events: none;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    max-height: 0; padding: 0 12px; opacity: 0; overflow: hidden;
+    text-overflow: ellipsis; white-space: nowrap;
+    transition: max-height .15s ease, opacity .15s ease, padding .15s ease;
   }
+  .sess-flash-ok, .sess-flash-bad { max-height: 44px; padding: 9px 12px; opacity: 1; }
   .sess-flash-ok { background: rgba(34,197,94,.92); }
   .sess-flash-bad { background: rgba(239,68,68,.92); }
   .sess-foot {
@@ -347,23 +349,20 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
     width: 100%; box-sizing: border-box; padding: 12px 14px;
     border: 1px solid var(--accent-tint-border); border-radius: var(--radius);
     background: var(--surface); color: var(--text); font-size: 15px;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: .02em;
+    font-family: inherit;
   }
   .sess-hw-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-tint); }
-  .sess-hw-input::placeholder { font-family: var(--font); letter-spacing: normal; color: var(--text-dimmer); }
-  /* When no camera is available, the black video panel becomes a calm
-     "scanner ready" panel instead of a scary error. */
-  .sess-cam.sess-cam-off { background: var(--surface-2); }
-  .sess-cam-ph {
-    display: none; position: absolute; inset: 0; padding: 16px;
-    flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-align: center;
+  .sess-hw-input::placeholder { color: var(--text-dimmer); }
+  /* No camera (e.g. a computer): drop the video panel entirely and let the
+     list fill the space -- the scan box above is all that's needed. */
+  .sess-cam.sess-cam-off { display: none; }
+  /* The close button is shared with the dark image viewer, where white is
+     right. On the light session header it needs theme-aware contrast. */
+  .sess-bar .lb-close {
+    background: var(--surface-2); color: var(--text);
+    border: 1px solid var(--border);
   }
-  .sess-cam.sess-cam-off .sess-video,
-  .sess-cam.sess-cam-off .sess-frame { display: none; }
-  .sess-cam.sess-cam-off .sess-cam-ph { display: flex; }
-  .sess-cam-ph svg { color: var(--accent); opacity: .8; }
-  .sess-cam-ph-title { font-size: 14px; font-weight: 600; color: var(--text); }
-  .sess-cam-ph-hint { font-size: 12px; color: var(--text-dim); max-width: 320px; line-height: 1.5; }
+  .sess-bar .lb-close:hover { background: var(--accent-tint); color: var(--text); border-color: var(--accent-tint-border); }
 
   @media (min-width: 1024px) {
     .sess-overlay { max-width: 640px; margin: 0 auto; border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
@@ -462,6 +461,11 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
   }
   .photo-box:hover { border-color: var(--chip-hover); color: var(--text-dim); }
   .photo-box span { font-size: 10px; }
+  /* This tile is a <label>, so the generic ".form-group label" rule was
+     forcing display:block and flattening the icon and text onto one line.
+     Restore the flex column so the camera icon sits centered with "Add photo"
+     directly beneath it. */
+  .form-group label.photo-box { display: flex; margin-bottom: 0; }
   .photo-file-input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
   .photo-remove {
     position: absolute; top: -6px; right: -6px; width: 20px; height: 20px; border-radius: 50%;
@@ -552,15 +556,15 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
   .dup-count { font-size: 11px; color: var(--text-dim); white-space: nowrap; flex-shrink: 0; }
   .dup-items { display: flex; flex-direction: column; }
   .dup-item {
-    display: flex; align-items: center; gap: 10px; padding: 8px 10px; width: 100%; text-align: left;
+    display: flex; align-items: center; gap: 12px; padding: 12px 14px; width: 100%; text-align: left;
     background: none; border: none; border-top: 1px solid var(--border); cursor: pointer; color: var(--text);
   }
   .dup-item:first-child { border-top: none; }
   .dup-item:hover { background: var(--surface-2); }
-  .dup-item .row-thumb, .dup-item .row-thumb-placeholder { width: 32px; height: 32px; }
-  .dup-item-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-  .dup-item-name { font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .dup-item-meta { font-size: 11px; color: var(--text-dim); }
+  .dup-item .row-thumb, .dup-item .row-thumb-placeholder { width: 44px; height: 44px; }
+  .dup-item-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+  .dup-item-name { font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dup-item-meta { font-size: 12px; color: var(--text-dim); }
   .dup-item-edit { color: var(--text-dimmer); flex-shrink: 0; display: flex; }
   .dup-item:hover .dup-item-edit { color: var(--signal); }
   .dup-note { font-size: 11px; color: var(--text-dimmer); margin: -12px 0 0; line-height: 1.5; }
@@ -743,6 +747,9 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
        which scrambles the date order. Capped so rows stay readable. */
     .history-list { max-width: 1100px; }
     .hist-summary, .history-list, .filter-row, .search-wrap { max-width: 1100px; }
+    /* Overview's toolbar and search run full width so they line up with the
+       edges of the product grid below, rather than stopping short of it. */
+    .filter-row.filter-row-overview, .search-wrap.search-wrap-overview { max-width: none; }
 
     /* Stock In/Out and the product form: two working columns. */
     .stock-form, .product-form-page form {
@@ -766,12 +773,12 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
       display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 8px;
     }
 
-    /* Duplicates: the three checks run side by side as columns, each keeping
-       its own groups stacked so related rows stay together. */
+    /* Duplicates: two full-width columns like the Overview grid, so the cards
+       are large and easy to read; the third check wraps to a second row. */
     .dup-page { max-width: none; }
     .dup-cols {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
-      gap: 12px 32px; align-items: start;
+      display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px 32px; align-items: start;
     }
     .dup-section { margin-bottom: 8px; }
     .dup-groups { display: block; }
@@ -2070,10 +2077,10 @@ function renderOverview() {
   }
 
   return (
-    '<div class="filter-row">' + chips +
+    '<div class="filter-row filter-row-overview">' + chips +
       '<button type="button" class="btn btn-primary chip-add" data-action="open-add-modal">' + icon("plus", 13) + " " + t("addProduct") + "</button>" +
     "</div>" +
-    '<div class="search-wrap">' +
+    '<div class="search-wrap search-wrap-overview">' +
       '<span class="search-icon">' + icon("search", 15) + "</span>" +
       '<input id="search" data-field="search" value="' + escapeHtml(state.search) + '" placeholder="' + escapeHtml(t("searchProducts")) + '" class="input input-search input-scan" />' +
       scanBtn("search") +
@@ -2128,7 +2135,7 @@ function renderProductRow(p) {
       thumb +
       '<div class="product-info">' +
         '<div class="product-name-row">' +
-          '<span class="product-name">' + escapeHtml(p.name) + "</span>" +
+          '<span class="product-name" title="' + escapeHtml(p.name) + '">' + escapeHtml(p.name) + "</span>" +
           '<span class="cat-tag ' + catSlug(p.category) + '">' + escapeHtml(catLabel(p.category)) + "</span>" +
           (low ? '<span class="low-flag">' + icon("alert", 12) + " " + t("low") + "</span>" : "") +
         "</div>" +
@@ -3251,16 +3258,11 @@ async function startScanSession(mode) {
         'autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" ' +
         'placeholder="' + escapeHtml(t("hwScanPlaceholder")) + '">' +
     "</div>" +
+    '<div class="sess-flash"></div>' +
     '<div class="sess-list"></div>' +
     '<div class="sess-cam">' +
       '<video class="sess-video" playsinline muted autoplay></video>' +
       '<div class="sess-frame"></div>' +
-      '<div class="sess-cam-ph">' +
-        icon("scan", 30) +
-        '<div class="sess-cam-ph-title">' + escapeHtml(t("hwScanTitle")) + "</div>" +
-        '<div class="sess-cam-ph-hint">' + escapeHtml(t("hwScanHint")) + "</div>" +
-      "</div>" +
-      '<div class="sess-flash"></div>' +
     "</div>" +
     '<div class="sess-foot"></div>';
   document.body.appendChild(sessEl);
