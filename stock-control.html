@@ -2336,7 +2336,7 @@ function renderImportPanel(mode) {
 
   const legend =
     '<div class="import-legend">' +
-      '<p class="import-legend-note">' + t("headerSkipped") + " " +
+      '<p class="import-legend-note">' +
       '<button type="button" class="link-btn" data-action="download-template">' + t("downloadTemplate") + "</button></p>" +
     "</div>";
 
@@ -2351,7 +2351,6 @@ function renderImportPanel(mode) {
         '<div class="imp-tr"><span>8801234567890</span><span>5</span><span class="imp-dim">\u2014</span></div>' +
         '<div class="imp-tr"><span>9500002</span><span>3</span><span class="imp-dim">\u2014</span></div>' +
       "</div>" +
-      '<p class="hint">' + t("fileExampleNote") + "</p>" +
     "</div>";
 
   const errText = state.importError && state.importFor === mode
