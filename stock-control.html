@@ -274,10 +274,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
     transition: background .15s ease, border-color .15s ease;
   }
   .scan-btn:hover, .scan-btn:active { background: var(--accent-tint); border-color: var(--accent-tint-border); }
-  /* The delete box is a tall textarea, so pin its button to the top instead. */
-  .del-input ~ .scan-btn { top: 6px; transform: none; }
   .input-scan { padding-right: 58px; padding-top: 12px; padding-bottom: 12px; }
-  .del-input.input-scan { padding-top: 10px; }
 
   .chip-scan { display: inline-flex; align-items: center; gap: 5px; border-color: var(--accent-tint-border); color: var(--signal); }
 
@@ -568,6 +565,10 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
   .dup-item-edit { color: var(--text-dimmer); flex-shrink: 0; display: flex; }
   .dup-item:hover .dup-item-edit { color: var(--signal); }
   .dup-note { font-size: 11px; color: var(--text-dimmer); margin: -12px 0 0; line-height: 1.5; }
+  /* On a phone the sections stack, so an empty check (e.g. no duplicate
+     barcodes) would sit between two real sections as a gap. Hide the empty
+     ones on narrow screens; on desktop they usefully fill their column. */
+  @media (max-width: 1023px) { .dup-section-empty { display: none; } }
 
   .cat-select { width: auto; min-width: 150px; max-width: 60%; flex: 0 1 auto; padding-right: 30px; }
   .pick-search { margin-bottom: 8px; }
@@ -609,7 +610,10 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
   .import-legend ol { margin: 0 0 8px; padding-left: 20px; }
   .import-legend-note { color: var(--text-dimmer); }
   .import-summary { display: flex; gap: 8px; margin-bottom: 10px; }
-  .imp-pill { font-size: 12px; font-weight: 500; padding: 3px 10px; border-radius: 999px; border: 1px solid transparent; }
+  .imp-pill { font-size: 12px; font-weight: 500; padding: 3px 10px; border-radius: 999px; border: 1px solid transparent; cursor: pointer; font-family: inherit; transition: filter .15s ease, border-color .15s ease; }
+  .imp-pill:hover { filter: brightness(1.12); }
+  .imp-pill.active { border-color: currentColor; font-weight: 700; }
+  .imp-pill-all { background: var(--surface-2); color: var(--text); border-color: var(--border); }
   .imp-pill-ok { background: var(--success-bg); color: var(--success); border-color: var(--success-border); }
   .imp-pill-bad { background: var(--danger-bg); color: var(--danger); border-color: var(--danger-border); }
   .imp-example { max-width: 640px; }
@@ -643,7 +647,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
   .imp-name { font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .imp-meta { font-size: 11px; color: var(--text-dim); overflow: hidden; text-overflow: ellipsis; }
   .imp-row-bad .imp-meta { color: var(--danger); }
-  .imp-qty { flex-shrink: 0; font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; display: flex; align-items: center; }
+  .imp-qty { flex-shrink: 0; font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; display: flex; align-items: center; gap: 5px; }
   .imp-row-bad .imp-qty { color: var(--danger); }
 
   .labels-page { max-width: 1400px; }
@@ -681,7 +685,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
   }
 
   .delete-page { max-width: 480px; }
-  .del-input { resize: vertical; min-height: 60px; line-height: 1.5; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .del-input { resize: none; line-height: 1.5; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
   .del-summary { font-size: 12px; color: var(--text-dim); margin: 0 0 10px; }
   .notfound-box {
     display: flex; gap: 8px; align-items: flex-start; padding: 10px 12px; margin-bottom: 12px;
@@ -690,6 +694,8 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
   }
   .notfound-box svg { flex-shrink: 0; margin-top: 2px; }
   .del-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+  .del-submit { padding: 9px 16px; border-radius: var(--radius); font-size: 13px; }
+  .del-submit[disabled] { opacity: .55; cursor: default; filter: none; }
   .del-row {
     display: flex; align-items: center; gap: 10px; padding: 10px; width: 100%; text-align: left;
     border-radius: var(--radius); background: var(--surface); border: 1px solid var(--border);
@@ -766,8 +772,11 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
       display: grid; grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
       gap: 36px; align-items: start;
     }
-    .delete-page, .import-page { max-width: 1400px; }
-    .del-input { min-height: 160px; }
+    .import-page { max-width: 1400px; }
+    /* Fixed upload-panel height so it stays the same size no matter what's on
+       the right (example table, or a longer/shorter row list per filter). */
+    .import-page .import-drop { height: 175px; margin-bottom: 14px; }
+    .delete-page { max-width: none; }
     .imp-list, .del-list { max-height: none; }
     .del-list {
       display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 8px;
@@ -1066,6 +1075,7 @@ const state = {
   outMode: "single",
   importFor: null,
   importRows: [],
+  importFilter: "all",
   importFileName: "",
   importParsing: false,
   importApplying: false,
@@ -1566,6 +1576,7 @@ const I18N = {
     supplierEg: "e.g. ABC Trading", customerEg: "e.g. Mr. Dara",
     addStock: "Add Stock", removeStock: "Remove Stock",
     pickerSearch: "Search or scan name, ID, barcode\u2026",
+    pickStartHint: "Search or scan a product to begin.",
     noProductMatchesThat: "No product matches that.",
     change: "Change", noId: "no ID",
     moreKeepTyping: "more \u2014 keep typing to narrow it down.",
@@ -1578,7 +1589,8 @@ const I18N = {
     colId: "Product ID or barcode", colQty: "Quantity", colNote: "Note (optional)",
     headerSkipped: "A header row is skipped automatically.",
     downloadTemplate: "Download a template",
-    ready: "ready", skipped: "skipped",
+    ready: "ready", skipped: "skipped", recheck: "Recheck", allWord: "All",
+    fixRecheckFirst: "Fix the Recheck rows first",
     showingFirst: "Showing the first 200 of", rowsWord: "rows.",
     nothingToApply: "Nothing to apply", applying: "Applying\u2026",
     addStockForRows: "Add stock for", removeStockForRows: "Remove stock for",
@@ -1724,6 +1736,7 @@ const I18N = {
     addStock: "បន្ថែមស្តុក",
     removeStock: "ដកស្តុក",
     pickerSearch: "ស្វែងរក ឬស្កែនបាកូដ…",
+    pickStartHint: "ស្វែងរក ឬស្កែនទំនិញ ដើម្បីចាប់ផ្តើម។",
     noProductMatchesThat: "មិនមានទំនិញត្រូវគ្នា។",
     change: "ប្តូរ",
     noId: "គ្មានលេខសម្គាល់",
@@ -1742,6 +1755,9 @@ const I18N = {
     downloadTemplate: "ទាញយកគំរូ",
     ready: "រួចរាល់",
     skipped: "បានរំលង",
+    recheck: "ពិនិត្យឡើងវិញ",
+    allWord: "ទាំងអស់",
+    fixRecheckFirst: "សូមកែជួរ Recheck ជាមុនសិន",
     showingFirst: "បង្ហាញ 200 ដំបូងនៃ",
     rowsWord: "ជួរ។",
     nothingToApply: "គ្មានអ្វីដើម្បីអនុវត្ត",
@@ -2291,12 +2307,14 @@ function renderProductPicker(mode, selected, sorted) {
           '" placeholder="' + escapeHtml(t("pickerSearch")) + '" class="input input-search input-scan" autocomplete="off" />' +
         scanBtn(mode + "Search") +
       "</div>" +
-      (matches.length === 0
-        ? '<p class="hint">' + t("noProductMatchesThat") + "</p>"
-        : '<div class="pick-list">' + list + "</div>" +
-          (matches.length > shown.length
-            ? '<p class="hint">' + (matches.length - shown.length) + " " + t("moreKeepTyping") + "</p>"
-            : "")
+      (!q
+        ? ""
+        : matches.length === 0
+          ? '<p class="hint">' + t("noProductMatchesThat") + "</p>"
+          : '<div class="pick-list">' + list + "</div>" +
+            (matches.length > shown.length
+              ? '<p class="hint">' + (matches.length - shown.length) + " " + t("moreKeepTyping") + "</p>"
+              : "")
       ) +
     "</div>"
   );
@@ -2349,7 +2367,10 @@ function renderImportPanel(mode) {
       '<div class="split-main">' + example + "</div></div>";
   }
 
-  const rowHtml = rows.slice(0, 200).map(r =>
+  const filter = state.importFilter || "all";
+  const shown = filter === "ok" ? okRows : filter === "bad" ? badRows : rows;
+
+  const rowHtml = shown.slice(0, 200).map(r =>
     '<div class="imp-row' + (r.ok ? "" : " imp-row-bad") + '">' +
       '<span class="imp-num">' + r.rowNum + "</span>" +
       '<span class="imp-info">' +
@@ -2357,35 +2378,40 @@ function renderImportPanel(mode) {
         '<span class="imp-meta">' +
           (r.ok
             ? escapeHtml(r.idRaw) + (r.note ? " \u00b7 " + escapeHtml(r.note) : "")
-            : escapeHtml(r.message)) +
-        "</span>" +
+            : (r.idRaw ? escapeHtml(r.idRaw) + " \u00b7 " : "") + escapeHtml(r.message))
+        + "</span>" +
       "</span>" +
       '<span class="imp-qty' + (r.ok ? (isIn ? " amount-in" : " amount-out") : "") + '">' +
-        (r.ok ? (isIn ? "+" : "-") + r.qty : icon("alert", 14)) +
+        (r.ok
+          ? (isIn ? "+" : "-") + r.qty
+          : (r.qty > 0 ? (isIn ? "+" : "-") + r.qty + " " : "") + icon("alert", 14)) +
       "</span>" +
     "</div>"
   ).join("");
 
-  const more = rows.length > 200 ? '<p class="hint">' + t("showingFirst") + " " + rows.length + " " + t("rowsWord") + "</p>" : "";
+  const more = shown.length > 200 ? '<p class="hint">' + t("showingFirst") + " " + shown.length + " " + t("rowsWord") + "</p>" : "";
 
   return (
     '<div class="split">' +
       '<div class="split-side">' + dropZone + legend + "</div>" +
       '<div class="split-main">' +
     '<div class="import-summary">' +
-      '<span class="imp-pill imp-pill-ok">' + okRows.length + " " + t("ready") + "</span>" +
-      (badRows.length ? '<span class="imp-pill imp-pill-bad">' + badRows.length + " " + t("skipped") + "</span>" : "") +
+      '<button type="button" class="imp-pill imp-pill-all' + (filter === "all" ? " active" : "") + '" data-action="import-filter" data-filter="all">' + rows.length + " " + t("allWord") + "</button>" +
+      '<button type="button" class="imp-pill imp-pill-ok' + (filter === "ok" ? " active" : "") + '" data-action="import-filter" data-filter="ok">' + okRows.length + " " + t("ready") + "</button>" +
+      (badRows.length ? '<button type="button" class="imp-pill imp-pill-bad' + (filter === "bad" ? " active" : "") + '" data-action="import-filter" data-filter="bad">' + badRows.length + " " + t("recheck") + "</button>" : "") +
     "</div>" +
     '<div class="imp-list">' + rowHtml + "</div>" + more +
     errText +
     '<button type="button" class="submit-btn ' + (isIn ? "submit-in" : "submit-out") + '"' +
-      (okRows.length === 0 || state.importApplying ? " disabled" : "") +
+      (okRows.length === 0 || badRows.length > 0 || state.importApplying ? " disabled" : "") +
       ' data-action="apply-import">' +
       (state.importApplying
         ? t("applying")
-        : okRows.length === 0
-          ? t("nothingToApply")
-          : (isIn ? t("addStockForRows") : t("removeStockForRows")) + " " + okRows.length + " " + (okRows.length === 1 ? t("rowOne") : t("rowMany"))) +
+        : badRows.length > 0
+          ? t("fixRecheckFirst")
+          : okRows.length === 0
+            ? t("nothingToApply")
+            : (isIn ? t("addStockForRows") : t("removeStockForRows")) + " " + okRows.length + " " + (okRows.length === 1 ? t("rowOne") : t("rowMany"))) +
     "</button>" +
       "</div>" +
     "</div>"
@@ -2439,7 +2465,7 @@ function renderDupGroup(group, tone) {
 
 function renderDupSection(titleKey, iconName, groups, tone, emptyKey) {
   return (
-    '<div class="dup-section dup-section-' + tone + '">' +
+    '<div class="dup-section dup-section-' + tone + (groups.length ? "" : " dup-section-empty") + '">' +
       '<div class="dup-head">' +
         '<span class="dup-head-icon">' + icon(iconName, 15) + "</span>" +
         "<h3>" + t(titleKey) + "</h3>" +
@@ -2636,10 +2662,10 @@ function renderDeleteTab() {
   const result = matchIdTerms(terms);
   const browsing = terms.length === 0;
 
-  const list = browsing
-    ? state.products.slice().sort((a, b) => a.name.localeCompare(b.name))
-    : result.matched;
-  const selected = list.filter(p => state.deleteSelected[p.id]);
+  // Products are chosen by typing or scanning their IDs/barcodes, so the list
+  // only ever shows what was matched -- there's no default catalog to browse.
+  const list = result.matched;
+  const selected = state.products.filter(p => state.deleteSelected[p.id]);
 
   const notFoundBox = (!browsing && result.notFound.length)
     ? '<div class="notfound-box">' + icon("alert", 13) +
@@ -2648,13 +2674,31 @@ function renderDeleteTab() {
       "</div>"
     : "";
 
+  const actions = state.deleteConfirming
+    ? '<div class="danger-zone">' +
+        "<p><strong>" + t("permanentlyDelete") + " " + selected.length + " " +
+        (selected.length === 1 ? t("productOne") : t("productMany")) + "?</strong> " + t("cannotBeUndone") + "</p>" +
+        '<div class="page-actions">' +
+          '<button type="button" class="btn btn-secondary" data-action="cancel-bulk-delete">' + t("cancel") + "</button>" +
+          '<button type="button" class="btn btn-danger"' + (state.deleteBusy ? " disabled" : "") + ' data-action="confirm-bulk-delete">' +
+            (state.deleteBusy ? t("deleting") : t("yesDelete")) +
+          "</button>" +
+        "</div>" +
+      "</div>"
+    : '<button type="button" class="btn btn-danger del-submit"' + (selected.length === 0 ? " disabled" : "") + ' data-action="ask-bulk-delete">' +
+        (selected.length === 0 ? t("selectAtLeastOne") : t("deleteSelected") + " " + selected.length + " " + t("selectedWord")) +
+      "</button>";
+
   let body;
   if (state.products.length === 0) {
     body = '<div class="empty-state">' + icon("trash", 30) +
       '<p class="empty-title">' + t("noProductsTitle") + "</p>" +
       '<p class="empty-sub">' + t("noProductsSub") + "</p></div>";
+  } else if (browsing) {
+    // Nothing entered yet: no product list, just the (disabled) delete action.
+    body = actions;
   } else if (list.length === 0) {
-    body = notFoundBox + '<div class="empty-inline">' + t("noMatchingProducts") + "</div>";
+    body = notFoundBox + '<div class="empty-inline">' + t("noMatchingProducts") + "</div>" + actions;
   } else {
     const rows = list.map(p => {
       const checked = !!state.deleteSelected[p.id];
@@ -2677,25 +2721,8 @@ function renderDeleteTab() {
       );
     }).join("");
 
-    const summary = browsing
-      ? '<p class="del-summary">' + t("deleteBrowseHint") + "</p>"
-      : '<p class="del-summary">' + t("foundOf") + " " + result.matched.length + " " + t("ofWord") + " " + terms.length +
-        " \u00b7 " + t("tapRowToToggle") + "</p>";
-
-    const actions = state.deleteConfirming
-      ? '<div class="danger-zone">' +
-          "<p><strong>" + t("permanentlyDelete") + " " + selected.length + " " +
-          (selected.length === 1 ? t("productOne") : t("productMany")) + "?</strong> " + t("cannotBeUndone") + "</p>" +
-          '<div class="page-actions">' +
-            '<button type="button" class="btn btn-secondary" data-action="cancel-bulk-delete">' + t("cancel") + "</button>" +
-            '<button type="button" class="btn btn-danger"' + (state.deleteBusy ? " disabled" : "") + ' data-action="confirm-bulk-delete">' +
-              (state.deleteBusy ? t("deleting") : t("yesDelete")) +
-            "</button>" +
-          "</div>" +
-        "</div>"
-      : '<button type="button" class="submit-btn submit-out"' + (selected.length === 0 ? " disabled" : "") + ' data-action="ask-bulk-delete">' +
-          (selected.length === 0 ? t("selectAtLeastOne") : t("deleteSelected") + " " + selected.length + " " + t("selectedWord")) +
-        "</button>";
+    const summary = '<p class="del-summary">' + t("foundOf") + " " + result.matched.length + " " + t("ofWord") + " " + terms.length +
+      " \u00b7 " + t("tapRowToToggle") + "</p>";
 
     body = notFoundBox + summary +
       '<div class="del-list">' + rows + "</div>" +
@@ -2706,19 +2733,14 @@ function renderDeleteTab() {
   return (
     '<div class="delete-page">' +
       '<div class="form-icon-row">' + icon("trash", 16, "icon-down") + "<h2>" + t("deleteTitle") + "</h2></div>" +
-      '<div class="split">' +
-        '<div class="split-side">' +
-          '<div class="form-group">' +
-            '<label for="deleteQuery">' + t("deleteIdsLabel") + "</label>" +
-            '<div class="scan-wrap">' +
-              '<textarea id="deleteQuery" data-field="deleteQuery" class="input del-input input-scan" rows="4" placeholder="' + escapeHtml(t("deleteIdsPlaceholder")) + '">' + escapeHtml(state.deleteQuery) + "</textarea>" +
-              scanBtn("deleteQuery") +
-            "</div>" +
-            '<p class="hint">' + t("deleteIdsHint") + "</p>" +
-          "</div>" +
+      '<div class="form-group">' +
+        '<label for="deleteQuery">' + t("deleteIdsLabel") + "</label>" +
+        '<div class="scan-wrap">' +
+          '<textarea id="deleteQuery" data-field="deleteQuery" class="input del-input input-scan" rows="1" placeholder="' + escapeHtml(t("deleteIdsPlaceholder")) + '">' + escapeHtml(state.deleteQuery) + "</textarea>" +
+          scanBtn("deleteQuery") +
         "</div>" +
-        '<div class="split-main">' + body + "</div>" +
       "</div>" +
+      body +
     "</div>"
   );
 }
@@ -3642,6 +3664,7 @@ async function handleImportFile(file, mode) {
   state.importParsing = true;
   state.importError = "";
   state.importRows = [];
+  state.importFilter = "all";
   state.importFileName = file.name || "file";
   render();
   try {
@@ -3662,6 +3685,9 @@ async function handleImportFile(file, mode) {
 async function applyImport() {
   const mode = state.importFor;
   const valid = state.importRows.filter(r => r.ok);
+  // All-or-nothing: if any row needs a recheck, nothing is applied until the
+  // file is fixed, so a partial import can't slip through.
+  if (state.importRows.some(r => !r.ok)) return;
   if (valid.length === 0 || (mode !== "in" && mode !== "out")) return;
 
   state.importApplying = true;
@@ -3856,6 +3882,12 @@ appEl.addEventListener("click", (e) => {
   }
   else if (action === "apply-import") applyImport();
   else if (action === "download-template") downloadImportTemplate();
+  else if (action === "import-filter") {
+    const f = el.dataset.filter;
+    // Clicking the active filter again clears it back to showing all rows.
+    state.importFilter = state.importFilter === f ? "all" : f;
+    render();
+  }
   else if (action === "toggle-delete-select") {
     const id = el.dataset.id;
     if (state.deleteSelected[id]) delete state.deleteSelected[id];
