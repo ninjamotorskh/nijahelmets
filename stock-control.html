@@ -130,15 +130,28 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
   html[data-theme="light"] .shell { background: var(--surface); box-shadow: 0 1px 3px rgba(20,30,50,0.06); }
   @media (max-width: 480px) { .shell { margin: 0; border-radius: 0; border-left: none; border-right: none; box-shadow: none; } }
 
-  .header { padding: 20px 20px 0; border-bottom: 1px solid var(--border); }
-  .brand { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-  .brand-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .header { padding: 20px 20px 16px; border-bottom: 1px solid var(--border); }
+  .brand { display: flex; align-items: center; gap: 10px; flex-wrap: nowrap; }
+  .cat-select.header-filter { min-width: 108px; max-width: 220px; }
+  /* On a phone, keep the filter + Add Product on the logo's row: the title can
+     shrink, the filter gets narrow, and Add Product collapses to a + icon. */
+  @media (max-width: 560px) {
+    .cat-select.header-filter { min-width: 96px; max-width: 116px; padding-right: 22px; }
+    .header-add .btn-label { display: none; }
+    .header-add { padding: 8px 10px; }
+    .brand { gap: 8px; }
+    .brand-left { gap: 8px; }
+    .back-btn { width: 32px; height: 32px; }
+    .brand-mark { width: 32px; height: 32px; }
+  }
+  .brand-left { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1 1 auto; }
   .brand-mark {
     width: 36px; height: 36px; flex-shrink: 0; border-radius: var(--radius); background: var(--accent-tint);
     border: 1px solid var(--accent-tint-border); color: var(--signal); display: flex; align-items: center; justify-content: center;
   }
+  .brand-text { min-width: 0; overflow: hidden; }
   .brand-text h1 { font-size: 16px; margin: 0; font-weight: 600; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .brand-text p { font-size: 12px; margin: 1px 0 0; color: var(--text-dim); line-height: 1.2; }
+  .brand-text p { font-size: 12px; margin: 1px 0 0; color: var(--text-dim); line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .header-btns { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
   .lang-btn { font-size: 12px; font-weight: 600; letter-spacing: .02em; }
   .theme-btn {
@@ -148,16 +161,29 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
   }
   .theme-btn:hover { color: var(--text); border-color: var(--chip-hover); }
 
-  .tabs { display: flex; gap: 4px; margin-top: 16px; overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; scroll-behavior: smooth; }
-  .tabs::-webkit-scrollbar { display: none; }
-  .tab-btn {
-    display: flex; align-items: center; gap: 6px; padding: 10px 12px; font-size: 12px; font-weight: 500;
-    background: none; border: none; border-bottom: 2px solid transparent; color: var(--text-dim); cursor: pointer;
-    white-space: nowrap; transition: color .15s ease, border-color .15s ease;
+  /* Home launcher: a grid of menu tiles. */
+  .launcher { max-width: 720px; margin: 0 auto; }
+  .launcher-search { margin-bottom: 18px; }
+  .launcher-title { font-size: 16px; font-weight: 600; text-align: center; margin: 0 0 20px; color: var(--text); }
+  .launcher-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 24px 16px; }
+  html[data-theme="light"] .launcher-grid { background: var(--surface); border-color: var(--border); box-shadow: 0 10px 30px rgba(30,41,59,.10); }
+  .launch-tile { display: flex; flex-direction: column; align-items: center; gap: 10px; background: none; border: none; padding: 6px; cursor: pointer; color: var(--text); font-size: 13px; font-weight: 600; transition: color .15s ease; }
+  .launch-tile:hover { color: var(--text); }
+  .launch-ic { position: relative; width: 68px; height: 68px; border-radius: 20px; display: flex; align-items: center; justify-content: center; background: var(--tile-bg); color: var(--tile-fg); transition: transform .15s ease, box-shadow .15s ease; }
+  .launch-tile:hover .launch-ic { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,.25); }
+  .launch-label { line-height: 1.2; text-align: center; }
+  .tab-badge { position: absolute; top: -5px; right: -5px; min-width: 18px; padding: 1px 5px; border-radius: 999px; background: var(--danger); color: #fff; font-size: 10px; font-weight: 700; line-height: 1.5; text-align: center; box-shadow: 0 0 0 2px var(--surface); }
+  /* Back button that returns to the home menu from a section page. */
+  .back-btn {
+    width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text-dim); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: color .15s ease, border-color .15s ease;
   }
-  .tab-btn:hover { color: var(--text); }
-  .tab-btn.active { color: var(--signal); border-bottom-color: var(--signal); }
-  .tab-badge { margin-left: 2px; padding: 1px 6px; border-radius: 999px; background: var(--danger-bg); color: var(--danger); font-size: 11px; font-weight: 600; }
+  .back-btn:hover { color: var(--text); border-color: var(--chip-hover); }
+  .section-title { font-size: 19px; font-weight: 700; margin: 0; color: var(--text); line-height: 1.2; }
+  .section-ic { display: inline-flex; align-items: center; flex-shrink: 0; }
+  .header svg.icon-up { color: var(--success); }
+  .header svg.icon-down { color: var(--danger); }
 
   .content { padding: 20px; }
 
@@ -685,7 +711,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
   }
 
   .delete-page { max-width: 480px; }
-  .del-input { resize: none; line-height: 1.5; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .del-input { resize: none; line-height: 1.5; font-family: inherit; }
   .del-summary { font-size: 12px; color: var(--text-dim); margin: 0 0 10px; }
   .notfound-box {
     display: flex; gap: 8px; align-items: flex-start; padding: 10px 12px; margin-bottom: 12px;
@@ -742,7 +768,13 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
       min-height: 100vh; box-shadow: none;
     }
     html[data-theme="light"] .shell { box-shadow: none; }
-    .header { padding: 20px 32px 0; }
+    .header { padding: 20px 32px 18px; }
+    .launcher { max-width: none; }
+    .search-wrap.launcher-search { max-width: none; }
+    .launcher-grid { grid-template-columns: repeat(4, 1fr); gap: 16px; padding: 30px 26px; max-width: 1040px; margin: 0 auto; }
+    .launch-ic { width: 104px; height: 104px; border-radius: 26px; }
+    .launch-ic svg { width: 42px; height: 42px; }
+    .launch-tile { font-size: 14px; gap: 12px; }
     .content { padding: 24px 32px 40px; }
 
     .product-list {
@@ -1058,7 +1090,7 @@ const state = {
   transactions: [],
   productsLoaded: false,
   transactionsLoaded: false,
-  tab: "overview",
+  tab: "home",
   categoryFilter: "All",
   search: "",
   historyFilter: "all",
@@ -1648,7 +1680,7 @@ const I18N = {
     priceLabel: "Price (USD)", locationLabel: "Location", locationEg: "e.g. Shelf A2 (optional)",
     startingStock: "Starting stock", lowStockAlertAt: "Low stock alert at",
     nameEg: "e.g. AGV K1 Matte Black M",
-    save: "Save", back: "Back",
+    save: "Save", back: "Back", menuTitle: "Menu",
     switchToLight: "Switch to light mode", switchToDark: "Switch to dark mode",
     switchToEnglish: "English", switchToKhmer: "\u1781\u17d2\u1798\u17c2\u179a",
     errNameRequired: "Product name is required.",
@@ -1710,7 +1742,7 @@ const I18N = {
     dupItems: "ទំនិញប្រើដូចគ្នា",
     dupCheckWord: "ពិនិត្យ",
     all: "ទាំងអស់",
-    allCategories: "គ្រប់ប្រភេទទាំងអស់",
+    allCategories: "ទាំងអស់",
     addProduct: "បន្ថែមទំនិញ",
     editProduct: "កែសម្រួលទំនិញ",
     searchProducts: "ស្វែងរកឈ្មោះ លេខសម្គាល់ ឬបាកូដ…",
@@ -1843,6 +1875,7 @@ const I18N = {
     nameEg: "ឧ. AGV K1 Matte Black M",
     save: "រក្សាទុក",
     back: "ត្រឡប់",
+    menuTitle: "ម៉ឺនុយ",
     switchToLight: "ប្តូរទៅមុខងារភ្លឺ",
     switchToDark: "ប្តូរទៅមុខងារងងឹត",
     switchToEnglish: "English",
@@ -1978,7 +2011,8 @@ function renderAppHTML() {
     return '<div class="loading"><span class="spinner"></span> ' + t("loading") + '</div>';
   }
   let body = "";
-  if (state.tab === "overview") body = renderOverview();
+  if (state.tab === "home") body = renderLauncher();
+  else if (state.tab === "overview") body = renderOverview();
   else if (state.tab === "in") body = renderStockForm("in");
   else if (state.tab === "out") body = renderStockForm("out");
   else if (state.tab === "history") body = renderHistory();
@@ -1997,6 +2031,68 @@ function renderAppHTML() {
 }
 
 function renderHeader() {
+  // Overview keeps the logo and app name (no "Overview" title), and moves the
+  // category filter and Add Product button up into the header's top-right, so
+  // its search bar sits at the same spot as the home page's search bar.
+  if (state.tab === "overview") {
+    return (
+      '<div class="header">' +
+        '<div class="brand">' +
+          '<div class="brand-left">' +
+            '<button type="button" class="back-btn" data-action="set-tab" data-tab="home" title="' + escapeHtml(t("back")) + '" aria-label="' + escapeHtml(t("back")) + '">' + icon("chevronLeft", 20) + "</button>" +
+            '<div class="brand-mark">' + icon("box", 18) + "</div>" +
+            '<div class="brand-text">' +
+              "<h1>NIJA Helmets</h1>" +
+              t("appSub") +
+            "</div>" +
+          "</div>" +
+          '<div class="header-btns">' +
+            renderCategoryFilterSelect() +
+            '<button type="button" class="btn btn-primary header-add" data-action="open-add-modal">' + icon("plus", 13) + '<span class="btn-label">' + t("addProduct") + "</span></button>" +
+          "</div>" +
+        "</div>" +
+      "</div>"
+    );
+  }
+  // Stock In / Stock Out show their full titled heading (with the arrow icon)
+  // in the header instead of a short menu name.
+  if (state.tab === "in" || state.tab === "out") {
+    const isIn = state.tab === "in";
+    return (
+      '<div class="header">' +
+        '<div class="brand">' +
+          '<div class="brand-left">' +
+            '<button type="button" class="back-btn" data-action="set-tab" data-tab="home" title="' + escapeHtml(t("back")) + '" aria-label="' + escapeHtml(t("back")) + '">' + icon("chevronLeft", 20) + "</button>" +
+            icon(isIn ? "up" : "down", 20, isIn ? "icon-up" : "icon-down") +
+            '<h1 class="section-title">' + escapeHtml(isIn ? t("stockInTitle") : t("stockOutTitle")) + "</h1>" +
+          "</div>" +
+        "</div>" +
+      "</div>"
+    );
+  }
+  // Other section pages: back button + the menu's coloured icon + a title.
+  // Labels and Delete use their fuller in-page title; the rest use the menu name.
+  if (state.tab !== "home") {
+    const found = getMenuTabs().find(x => x.id === state.tab);
+    let title = found ? found.label : "";
+    let ic = found ? found.icon : "box";
+    const color = found ? found.fg : "var(--text)";
+    if (state.tab === "labels") title = t("labelsTitle");
+    else if (state.tab === "delete") title = t("deleteTitle");
+    else if (state.tab === "product-form") { title = state.editingProductId ? t("editProduct") : t("addProduct"); ic = "box"; }
+    const backTo = state.tab === "product-form" ? "overview" : "home";
+    return (
+      '<div class="header">' +
+        '<div class="brand">' +
+          '<div class="brand-left">' +
+            '<button type="button" class="back-btn" data-action="set-tab" data-tab="' + backTo + '" title="' + escapeHtml(t("back")) + '" aria-label="' + escapeHtml(t("back")) + '">' + icon("chevronLeft", 20) + "</button>" +
+            '<span class="section-ic" style="color:' + color + '">' + icon(ic, 20) + "</span>" +
+            '<h1 class="section-title">' + escapeHtml(title) + "</h1>" +
+          "</div>" +
+        "</div>" +
+      "</div>"
+    );
+  }
   return (
     '<div class="header">' +
       '<div class="brand">' +
@@ -2016,32 +2112,46 @@ function renderHeader() {
         "</button>" +
         "</div>" +
       "</div>" +
-      (state.tab === "product-form" ? "" : renderTabsInner()) +
     "</div>"
   );
 }
 
-function renderTabsInner() {
-  const tabs = [
-    { id: "overview", label: t("tabOverview"), icon: "box" },
-    { id: "in", label: t("tabIn"), icon: "up" },
-    { id: "out", label: t("tabOut"), icon: "down" },
-    { id: "history", label: t("tabHistory"), icon: "history" },
-    { id: "duplicates", label: t("tabDuplicates"), icon: "copy" },
-    { id: "labels", label: t("tabLabels"), icon: "tag" },
-    { id: "delete", label: t("tabDelete"), icon: "trash" },
+function getMenuTabs() {
+  return [
+    { id: "overview", label: t("tabOverview"), icon: "box", bg: "#dbe7fb", fg: "#2563eb" },
+    { id: "in", label: t("tabIn"), icon: "up", bg: "#d7f0e0", fg: "#16a34a" },
+    { id: "out", label: t("tabOut"), icon: "down", bg: "#fbdada", fg: "#ef4444" },
+    { id: "history", label: t("tabHistory"), icon: "history", bg: "#fcecc4", fg: "#d97706" },
+    { id: "duplicates", label: t("tabDuplicates"), icon: "copy", bg: "#e7dcf9", fg: "#9333ea" },
+    { id: "labels", label: t("tabLabels"), icon: "tag", bg: "#d2eef0", fg: "#0d9488" },
+    { id: "delete", label: t("tabDelete"), icon: "trash", bg: "#f9dbe9", fg: "#db2777" },
   ];
+}
+
+// Home screen: a grid of menu tiles. Tapping one opens that section as its own
+// page (the tiles are hidden and a back button returns here).
+function renderLauncher() {
+  const tabs = getMenuTabs();
   const low = lowStockCount();
   const dupCount = duplicateIssueCount();
   return (
-    '<div class="tabs">' +
-      tabs.map(t =>
-        '<button type="button" class="tab-btn' + (state.tab === t.id ? " active" : "") + '" data-action="set-tab" data-tab="' + t.id + '">' +
-          icon(t.icon, 14) + " " + t.label +
-          (t.id === "overview" && low > 0 ? '<span class="tab-badge">' + low + "</span>" : "") +
-          (t.id === "duplicates" && dupCount > 0 ? '<span class="tab-badge">' + dupCount + "</span>" : "") +
-        "</button>"
-      ).join("") +
+    '<div class="launcher">' +
+      '<div class="search-wrap launcher-search">' +
+        '<span class="search-icon">' + icon("search", 15) + "</span>" +
+        '<input id="search" data-field="search" value="' + escapeHtml(state.search) + '" placeholder="' + escapeHtml(t("searchProducts")) + '" class="input input-search input-scan" autocomplete="off" />' +
+        scanBtn("search") +
+      "</div>" +
+      '<div class="launcher-grid">' +
+        tabs.map(tb =>
+          '<button type="button" class="launch-tile" data-action="set-tab" data-tab="' + tb.id + '" style="--tile-bg:' + tb.bg + ';--tile-fg:' + tb.fg + '">' +
+            '<span class="launch-ic">' + icon(tb.icon, 34) +
+              (tb.id === "overview" && low > 0 ? '<span class="tab-badge">' + low + "</span>" : "") +
+              (tb.id === "duplicates" && dupCount > 0 ? '<span class="tab-badge">' + dupCount + "</span>" : "") +
+            "</span>" +
+            '<span class="launch-label">' + tb.label + "</span>" +
+          "</button>"
+        ).join("") +
+      "</div>" +
     "</div>"
   );
 }
@@ -2058,31 +2168,6 @@ function renderOverview() {
     })
     .sort((a, b) => a.name.localeCompare(b.name));
 
-  // Category filter as a dropdown -- nine chips wrapped onto two rows on a phone.
-  // Counts come from the full product list, not the filtered one.
-  const counts = {};
-  for (let i = 0; i < state.products.length; i++) {
-    const cat = state.products[i].category;
-    counts[cat] = (counts[cat] || 0) + 1;
-  }
-  // Products saved under a category that has since been retired must stay
-  // reachable, so append any leftover values found in the data.
-  const extraCats = [];
-  for (const cat in counts) {
-    if (CATEGORIES.indexOf(cat) === -1 && extraCats.indexOf(cat) === -1) extraCats.push(cat);
-  }
-  extraCats.sort();
-
-  const chips =
-    '<select id="categoryFilter" data-field="categoryFilter" class="input cat-select">' +
-      ["All"].concat(CATEGORIES, extraCats).map(c => {
-        const n = c === "All" ? state.products.length : (counts[c] || 0);
-        return '<option value="' + c + '"' + (state.categoryFilter === c ? " selected" : "") + ">" +
-          escapeHtml(c === "All" ? t("allCategories") : catLabel(c)) + " (" + n + ")" +
-        "</option>";
-      }).join("") +
-    "</select>";
-
   let listHtml;
   if (state.products.length === 0) {
     listHtml = renderEmptyState();
@@ -2093,15 +2178,37 @@ function renderOverview() {
   }
 
   return (
-    '<div class="filter-row filter-row-overview">' + chips +
-      '<button type="button" class="btn btn-primary chip-add" data-action="open-add-modal">' + icon("plus", 13) + " " + t("addProduct") + "</button>" +
-    "</div>" +
     '<div class="search-wrap search-wrap-overview">' +
       '<span class="search-icon">' + icon("search", 15) + "</span>" +
       '<input id="search" data-field="search" value="' + escapeHtml(state.search) + '" placeholder="' + escapeHtml(t("searchProducts")) + '" class="input input-search input-scan" />' +
       scanBtn("search") +
     "</div>" +
     listHtml
+  );
+}
+
+// The category dropdown ("All (4)") lives in the Overview header now, so it is
+// built here and reused there. Counts come from the full product list.
+function renderCategoryFilterSelect() {
+  const counts = {};
+  for (let i = 0; i < state.products.length; i++) {
+    const cat = state.products[i].category;
+    counts[cat] = (counts[cat] || 0) + 1;
+  }
+  const extraCats = [];
+  for (const cat in counts) {
+    if (CATEGORIES.indexOf(cat) === -1 && extraCats.indexOf(cat) === -1) extraCats.push(cat);
+  }
+  extraCats.sort();
+  return (
+    '<select id="categoryFilter" data-field="categoryFilter" class="input cat-select header-filter">' +
+      ["All"].concat(CATEGORIES, extraCats).map(c => {
+        const n = c === "All" ? state.products.length : (counts[c] || 0);
+        return '<option value="' + c + '"' + (state.categoryFilter === c ? " selected" : "") + ">" +
+          escapeHtml(c === "All" ? t("allCategories") : catLabel(c)) + " (" + n + ")" +
+        "</option>";
+      }).join("") +
+    "</select>"
   );
 }
 
@@ -2199,8 +2306,9 @@ function renderStockForm(mode) {
   const sorted = state.products.slice().sort((a, b) => a.name.localeCompare(b.name));
   const subMode = isIn ? state.inMode : state.outMode;
 
-  const heading = '<div class="form-icon-row">' + icon(isIn ? "up" : "down", 17, isIn ? "icon-up" : "icon-down") +
-    "<h2>" + (isIn ? t("stockInTitle") : t("stockOutTitle")) + "</h2></div>";
+  // The title (icon + "Stock In/Out — ...") now lives in the page header, so
+  // the form itself starts straight at the One item / From file / Scan toggle.
+  const heading = "";
 
   if (state.products.length === 0) {
     return heading + '<p class="muted">' + t("addProductFirst") + ' <button type="button" class="link-btn" data-action="open-add-modal">' + t("addOneNow") + "</button></p>";
@@ -2601,7 +2709,6 @@ function renderLabelsTab() {
 
   return (
     '<div class="labels-page">' +
-      '<div class="form-icon-row">' + icon("tag", 16) + "<h2>" + t("labelsTitle") + "</h2></div>" +
       '<div class="split">' +
         '<div class="split-side no-print">' +
           '<div class="form-group">' +
@@ -2731,9 +2838,7 @@ function renderDeleteTab() {
 
   return (
     '<div class="delete-page">' +
-      '<div class="form-icon-row">' + icon("trash", 16, "icon-down") + "<h2>" + t("deleteTitle") + "</h2></div>" +
       '<div class="form-group">' +
-        '<label for="deleteQuery">' + t("deleteIdsLabel") + "</label>" +
         '<div class="scan-wrap">' +
           '<textarea id="deleteQuery" data-field="deleteQuery" class="input del-input input-scan" rows="1" placeholder="' + escapeHtml(t("deleteIdsPlaceholder")) + '">' + escapeHtml(state.deleteQuery) + "</textarea>" +
           scanBtn("deleteQuery") +
@@ -3963,6 +4068,11 @@ appEl.addEventListener("submit", (e) => {
 // identically, so both go through here.
 function applyFieldValue(field, value) {
   state[field] = value;
+
+  // Searching from the home menu opens Overview so the matching products show.
+  if (field === "search" && state.tab === "home" && String(value).trim()) {
+    state.tab = "overview";
+  }
 
   if (field === "deleteQuery") {
     state.deleteConfirming = false;
