@@ -180,6 +180,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
     cursor: pointer; transition: color .15s ease, border-color .15s ease;
   }
   .back-btn:hover { color: var(--text); border-color: var(--chip-hover); }
+  .hist-btn { color: #f59e0b; }
   .section-title { font-size: 19px; font-weight: 700; margin: 0; color: var(--text); line-height: 1.2; }
   .section-ic { display: inline-flex; align-items: center; flex-shrink: 0; }
   .header svg.icon-up { color: var(--success); }
@@ -2089,6 +2090,9 @@ function renderHeader() {
             '<span class="section-ic" style="color:' + color + '">' + icon(ic, 20) + "</span>" +
             '<h1 class="section-title">' + escapeHtml(title) + "</h1>" +
           "</div>" +
+          (state.tab === "product-form" && state.editingProductId
+            ? '<div class="header-btns"><button type="button" class="theme-btn hist-btn" data-action="view-product-history" title="' + escapeHtml(t("tabHistory")) + '" aria-label="' + escapeHtml(t("tabHistory")) + '">' + icon("history", 18) + "</button></div>"
+            : "") +
         "</div>" +
       "</div>"
     );
@@ -3956,6 +3960,13 @@ appEl.addEventListener("click", (e) => {
   const action = el.dataset.action;
   if (action === "set-tab") setTab(el.dataset.tab);
   else if (action === "set-history-filter") { state.historyFilter = el.dataset.filter; render(); }
+  else if (action === "view-product-history") {
+    const p = state.products.find(x => x.id === state.editingProductId);
+    state.historySearch = p ? (p.productId || p.barcode || p.name || "") : "";
+    state.historyFilter = "all";
+    state.tab = "history";
+    render();
+  }
   else if (action === "toggle-history-sort") {
     state.historySort = state.historySort === "desc" ? "asc" : "desc";
     render();
