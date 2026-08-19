@@ -7,8 +7,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap" rel="stylesheet">
 <style>
   :root{
+    --emoji:'Apple Color Emoji','Noto Color Emoji','Segoe UI Emoji','Segoe UI Symbol';
     --ink:#14110E;
     --surface:#1E1A15;
     --raised:#2A241C;
@@ -26,13 +28,13 @@
   body{
     background:var(--ink);
     color:var(--text);
-    font-family:'Inter','Noto Sans Khmer',system-ui,-apple-system,sans-serif;
+    font-family:'Inter','Noto Sans Khmer',system-ui,-apple-system,sans-serif,var(--emoji);
     font-size:15px;
     line-height:1.5;
     padding:0 0 40px;
     -webkit-text-size-adjust:100%;
   }
-  .khmer,textarea{font-family:'Noto Sans Khmer','Inter',system-ui,sans-serif}
+  .khmer,textarea{font-family:'Noto Sans Khmer','Inter',system-ui,sans-serif,var(--emoji)}
   .wrap{max-width:560px;margin:0 auto;padding:0 16px}
 
   header{
@@ -110,7 +112,7 @@
     text-transform:uppercase;margin-bottom:9px;font-weight:600;
   }
   .btnrow{display:flex;gap:7px;margin-bottom:7px;align-items:center}
-  .btnrow input{padding:8px 10px;font-size:14px}
+  .btnrow input{padding:8px 10px;font-size:14px;font-family:'Inter','Noto Sans Khmer',system-ui,sans-serif,var(--emoji)}
   .btnrow .t{flex:0 0 34%}
   .btnrow .u{flex:1;min-width:0}
   .x{
@@ -138,6 +140,7 @@
   .bubble img{display:block;width:100%}
   .bubble .cap{
     padding:9px 11px 11px;font-size:15px;line-height:1.42;
+    font-family:'Noto Sans Khmer','Inter',system-ui,sans-serif,var(--emoji);
     white-space:pre-wrap;word-break:break-word;
   }
   .bubble .cap.empty{color:#9a9a9a}
@@ -145,6 +148,7 @@
   .kb .kbr{display:flex;gap:6px}
   .kb .kbb{
     flex:1;background:rgba(255,255,255,.26);
+    font-family:'Inter','Noto Sans Khmer',system-ui,sans-serif,var(--emoji);
     border:none;border-radius:10px;
     padding:11px 6px;text-align:center;
     color:#fff;font-weight:600;font-size:14px;
