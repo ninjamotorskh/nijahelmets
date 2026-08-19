@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NIJA Poster</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --emoji:'Apple Color Emoji','Noto Color Emoji','Segoe UI Emoji','Segoe UI Symbol';
+    --ink:#14110E;
+    --surface:#1E1A15;
+    --raised:#2A241C;
+    --line:#3A3128;
+    --amber:#F5A524;
+    --amber-dim:#8A5D12;
+    --text:#F3ECE1;
+    --muted:#9C9083;
+    --ok:#5FD48A;
+    --bad:#F58080;
+    --r:12px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--ink);
+    color:var(--text);
+    font-family:'Inter','Noto Sans Khmer',system-ui,-apple-system,sans-serif,var(--emoji);
+    font-size:15px;
+    line-height:1.5;
+    padding:0 0 40px;
+    -webkit-text-size-adjust:100%;
+  }
+  .khmer,textarea{font-family:'Noto Sans Khmer','Inter',system-ui,sans-serif,var(--emoji)}
+  .wrap{max-width:560px;margin:0 auto;padding:0 16px}
+
+  header{
+    padding:22px 0 18px;
+    border-bottom:1px solid var(--line);
+    margin-bottom:22px;
+    display:flex;align-items:baseline;gap:10px;
+  }
+  header h1{
+    font-size:19px;font-weight:700;margin:0;letter-spacing:-.01em;
+  }
+  header h1 span{color:var(--amber)}
+  header .to{
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    font-size:12px;color:var(--muted);margin-left:auto;
+  }
+
+  section{margin-bottom:22px}
+  .lbl{
+    display:block;
+    font-size:11px;font-weight:600;text-transform:uppercase;
+    letter-spacing:.08em;color:var(--muted);
+    margin-bottom:7px;
+  }
+  input[type=text],input[type=password],textarea{
+    width:100%;background:var(--surface);color:var(--text);
+    border:1px solid var(--line);border-radius:var(--r);
+    padding:11px 13px;font-size:15px;font-family:inherit;
+    outline:none;
+  }
+  input:focus,textarea:focus{border-color:var(--amber);box-shadow:0 0 0 3px rgba(245,165,36,.14)}
+  textarea{min-height:130px;resize:vertical;line-height:1.55}
+  .row2{display:flex;gap:10px}
+  .row2>div{flex:1;min-width:0}
+
+  details.setup{
+    background:var(--surface);border:1px solid var(--line);
+    border-radius:var(--r);padding:0;overflow:hidden;
+  }
+  details.setup summary{
+    padding:12px 14px;cursor:pointer;font-size:13px;color:var(--muted);
+    list-style:none;display:flex;align-items:center;gap:8px;
+  }
+  details.setup summary::-webkit-details-marker{display:none}
+  details.setup summary::before{content:'▸';color:var(--amber);transition:transform .15s}
+  details.setup[open] summary::before{transform:rotate(90deg)}
+  details.setup .body{padding:2px 14px 14px;display:flex;flex-direction:column;gap:12px}
+
+  /* photo */
+  .drop{
+    border:1px dashed var(--line);border-radius:var(--r);
+    background:var(--surface);
+    padding:26px 16px;text-align:center;cursor:pointer;
+    color:var(--muted);font-size:14px;
+  }
+  .drop:active{border-color:var(--amber)}
+  .shot{position:relative;border-radius:var(--r);overflow:hidden;border:1px solid var(--line)}
+  .shot img{display:block;width:100%}
+  .shot button{
+    position:absolute;top:8px;right:8px;
+    background:rgba(20,17,14,.82);color:var(--text);
+    border:1px solid var(--line);border-radius:8px;
+    padding:6px 11px;font-size:13px;cursor:pointer;
+  }
+  .meta{font-size:12px;color:var(--muted);margin-top:6px;font-family:ui-monospace,Menlo,monospace}
+
+  /* buttons editor */
+  .rowbox{
+    background:var(--surface);border:1px solid var(--line);
+    border-radius:var(--r);padding:11px;margin-bottom:9px;
+  }
+  .rowhead{
+    display:flex;align-items:center;justify-content:space-between;
+    font-size:11px;color:var(--muted);letter-spacing:.06em;
+    text-transform:uppercase;margin-bottom:9px;font-weight:600;
+  }
+  .btnrow{display:flex;gap:7px;margin-bottom:7px;align-items:center}
+  .btnrow input{padding:8px 10px;font-size:14px;font-family:'Inter','Noto Sans Khmer',system-ui,sans-serif,var(--emoji)}
+  .btnrow .t{flex:0 0 34%}
+  .btnrow .u{flex:1;min-width:0}
+  .x{
+    flex:0 0 auto;background:none;border:none;color:var(--muted);
+    font-size:19px;line-height:1;cursor:pointer;padding:4px 5px;
+  }
+  .x:active{color:var(--bad)}
+  .mini{
+    background:none;border:1px solid var(--line);color:var(--muted);
+    border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer;
+    font-family:inherit;
+  }
+  .mini:active{border-color:var(--amber);color:var(--amber)}
+
+  /* preview — the point of the whole thing */
+  .stage{
+    background:
+      linear-gradient(160deg,#7d9b63,#a8bd7e 55%,#8fae6c);
+    border-radius:16px;padding:16px 14px 18px;
+  }
+  .bubble{
+    background:#fff;color:#111;border-radius:12px;overflow:hidden;
+    box-shadow:0 1px 2px rgba(0,0,0,.18);
+  }
+  .bubble img{display:block;width:100%}
+  .bubble .cap{
+    padding:9px 11px 11px;font-size:15px;line-height:1.42;
+    font-family:'Noto Sans Khmer','Inter',system-ui,sans-serif,var(--emoji);
+    white-space:pre-wrap;word-break:break-word;
+  }
+  .bubble .cap.empty{color:#9a9a9a}
+  .kb{margin-top:6px;display:flex;flex-direction:column;gap:6px}
+  .kb .kbr{display:flex;gap:6px}
+  .kb .kbb{
+    flex:1;background:rgba(255,255,255,.26);
+    font-family:'Inter','Noto Sans Khmer',system-ui,sans-serif,var(--emoji);
+    border:none;border-radius:10px;
+    padding:11px 6px;text-align:center;
+    color:#fff;font-weight:600;font-size:14px;
+    text-shadow:0 1px 1px rgba(0,0,0,.22);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .kb .kbb.bad{background:rgba(220,90,90,.5)}
+
+  /* send */
+  .send{
+    width:100%;background:var(--amber);color:#221703;
+    border:none;border-radius:var(--r);
+    padding:15px;font-size:16px;font-weight:700;font-family:inherit;
+    cursor:pointer;margin-top:4px;
+  }
+  .send:disabled{background:var(--raised);color:var(--muted);cursor:default}
+  .out{
+    margin-top:12px;padding:12px 13px;border-radius:var(--r);
+    font-size:14px;display:none;border:1px solid var(--line);
+    background:var(--surface);
+  }
+  .out.show{display:block}
+  .out.good{border-color:rgba(95,212,138,.4);color:var(--ok)}
+  .out.err{border-color:rgba(245,128,128,.4);color:var(--bad)}
+  .out .hint{color:var(--muted);margin-top:6px;font-size:13px}
+  .out a{color:var(--amber)}
+  .count{float:right;font-size:11px;color:var(--muted);font-family:ui-monospace,Menlo,monospace}
+  .count.over{color:var(--bad)}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>NIJA <span>Poster</span></h1>
+    <div class="to" id="target">@nijahelmets</div>
+  </header>
+
+  <section>
+    <details class="setup" id="setup">
+      <summary>Bot token &amp; channel</summary>
+      <div class="body">
+        <div>
+          <label class="lbl" for="token">Bot token</label>
+          <input type="password" id="token" placeholder="8715076xxx:AAH..." autocomplete="off">
+        </div>
+        <div>
+          <label class="lbl" for="chan">Channel</label>
+          <input type="text" id="chan" value="@nijahelmets" autocomplete="off">
+        </div>
+        <div class="meta">Saved on this phone only. The bot must be an admin of the channel with Post Messages.</div>
+      </div>
+    </details>
+  </section>
+
+  <section>
+    <span class="lbl">Photo</span>
+    <div id="photoSlot">
+      <div class="drop" id="drop">Tap to choose a photo</div>
+    </div>
+    <input type="file" id="file" accept="image/*" hidden>
+  </section>
+
+  <section>
+    <label class="lbl" for="cap">Caption <span class="count" id="count">0</span></label>
+    <textarea id="cap" class="khmer" placeholder="Calyso Nijia ទីក្រុង 125cc Auto 2026&#10;Price: 35$"></textarea>
+  </section>
+
+  <section>
+    <span class="lbl">Buttons</span>
+    <div id="rows"></div>
+    <button class="mini" id="addRow">+ Add row</button>
+  </section>
+
+  <section>
+    <span class="lbl">Preview</span>
+    <div class="stage">
+      <div class="bubble">
+        <img id="pvImg" hidden>
+        <div class="cap empty" id="pvCap">Caption appears here</div>
+      </div>
+      <div class="kb" id="pvKb"></div>
+    </div>
+  </section>
+
+  <button class="send" id="send">Post to channel</button>
+  <div class="out" id="out"></div>
+
+</div>
+
+<script>
+/* ---------- storage that degrades quietly ---------- */
+const mem = {};
+const store = {
+  get(k){ try{ return localStorage.getItem(k); }catch(e){ return k in mem ? mem[k] : null; } },
+  set(k,v){ try{ localStorage.setItem(k,v); }catch(e){ mem[k]=v; } }
+};
+
+const $ = id => document.getElementById(id);
+const tokenEl=$('token'), chanEl=$('chan'), capEl=$('cap');
+
+/* ---------- restore ---------- */
+tokenEl.value = store.get('nija.token') || '';
+chanEl.value  = store.get('nija.chan4') || '@nijahelmets';
+if(!tokenEl.value) $('setup').open = true;
+$('target').textContent = chanEl.value;
+
+tokenEl.addEventListener('input',()=>store.set('nija.token',tokenEl.value.trim()));
+chanEl.addEventListener('input',()=>{
+  store.set('nija.chan4',chanEl.value.trim());
+  $('target').textContent = chanEl.value.trim() || '—';
+});
+
+/* ---------- buttons model ---------- */
+const DEFAULT = [
+  [{t:'Order Now', u:'https://t.me/sengphengto'}],
+  [{t:'Facebook',  u:'https://www.facebook.com/share/1EadDsWbHb/'},
+   {t:'Website',   u:'https://ninjamotorskh.github.io/nijahelmets/'},
+   {t:'TikTok',    u:'https://www.tiktok.com/@nijahelmets?_r=1&_t=ZS-990bzziDlem'}],
+  [{t:'Map',       u:'https://maps.app.goo.gl/R2py49iWPRMVk3T46?g_st=ac'}]
+];
+let rows;
+try { rows = JSON.parse(store.get('nija.rows4')) || DEFAULT; } catch(e){ rows = DEFAULT; }
+if(!Array.isArray(rows) || !rows.length) rows = DEFAULT;
+
+const saveRows = () => store.set('nija.rows4', JSON.stringify(rows));
+
+function drawRows(){
+  const box = $('rows');
+  box.innerHTML = '';
+  rows.forEach((row,ri)=>{
+    const d = document.createElement('div');
+    d.className = 'rowbox';
+    const head = document.createElement('div');
+    head.className = 'rowhead';
+    head.innerHTML = `<span>Row ${ri+1}</span>`;
+    const del = document.createElement('button');
+    del.className='mini'; del.textContent='Remove row';
+    del.onclick = ()=>{ rows.splice(ri,1); saveRows(); drawRows(); drawPreview(); };
+    head.appendChild(del);
+    d.appendChild(head);
+
+    row.forEach((b,bi)=>{
+      const line = document.createElement('div');
+      line.className = 'btnrow';
+      const t = document.createElement('input');
+      t.type='text'; t.className='t'; t.value=b.t; t.placeholder='Label';
+      t.oninput = ()=>{ b.t=t.value; saveRows(); drawPreview(); };
+      const u = document.createElement('input');
+      u.type='text'; u.className='u'; u.value=b.u; u.placeholder='https://…';
+      u.oninput = ()=>{ b.u=u.value; saveRows(); drawPreview(); };
+      const x = document.createElement('button');
+      x.className='x'; x.textContent='×'; x.title='Remove button';
+      x.onclick = ()=>{
+        row.splice(bi,1);
+        if(!row.length) rows.splice(ri,1);
+        saveRows(); drawRows(); drawPreview();
+      };
+      line.append(t,u,x);
+      d.appendChild(line);
+    });
+
+    if(row.length < 4){
+      const add = document.createElement('button');
+      add.className='mini'; add.textContent='+ Button in this row';
+      add.onclick = ()=>{ row.push({t:'',u:''}); saveRows(); drawRows(); drawPreview(); };
+      d.appendChild(add);
+    }
+    box.appendChild(d);
+  });
+}
+$('addRow').onclick = ()=>{ rows.push([{t:'',u:''}]); saveRows(); drawRows(); drawPreview(); };
+
+/* ---------- photo: pick, shrink, preview ---------- */
+let blob = null;
+
+$('drop').onclick = () => $('file').click();
+$('file').onchange = e => { const f = e.target.files[0]; if(f) shrink(f); };
+
+function shrink(file){
+  const img = new Image();
+  const url = URL.createObjectURL(file);
+  img.onload = () => {
+    const MAX = 1600;
+    let {width:w, height:h} = img;
+    if(Math.max(w,h) > MAX){ const s = MAX/Math.max(w,h); w = Math.round(w*s); h = Math.round(h*s); }
+    const c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    c.getContext('2d').drawImage(img,0,0,w,h);
+    c.toBlob(b => {
+      blob = b;
+      URL.revokeObjectURL(url);
+      showPhoto(URL.createObjectURL(b), w, h, b.size);
+      drawPreview();
+    }, 'image/jpeg', 0.85);
+  };
+  img.onerror = () => { URL.revokeObjectURL(url); say('err','That file could not be read as an image.'); };
+  img.src = url;
+}
+
+function showPhoto(src,w,h,size){
+  $('photoSlot').innerHTML = '';
+  const box = document.createElement('div');
+  box.className = 'shot';
+  const im = document.createElement('img'); im.src = src;
+  const rm = document.createElement('button'); rm.textContent = 'Remove';
+  rm.onclick = clearPhoto;
+  box.append(im,rm);
+  const meta = document.createElement('div');
+  meta.className = 'meta';
+  meta.textContent = `${w}×${h} · ${(size/1024).toFixed(0)} KB`;
+  $('photoSlot').append(box,meta);
+  $('pvImg').src = src; $('pvImg').hidden = false;
+  limitCaption();
+}
+
+function clearPhoto(){
+  blob = null;
+  $('photoSlot').innerHTML = '<div class="drop" id="drop">Tap to choose a photo</div>';
+  $('drop').onclick = () => $('file').click();
+  $('file').value = '';
+  $('pvImg').hidden = true;
+  limitCaption();
+  drawPreview();
+}
+
+/* ---------- caption ---------- */
+function limitCaption(){
+  const max = blob ? 1024 : 4096;
+  const n = capEl.value.length;
+  const c = $('count');
+  c.textContent = `${n} / ${max}`;
+  c.classList.toggle('over', n > max);
+  return n <= max;
+}
+capEl.addEventListener('input', ()=>{ limitCaption(); drawPreview(); });
+
+/* ---------- preview ---------- */
+function drawPreview(){
+  const cap = capEl.value;
+  const el = $('pvCap');
+  if(cap.trim()){ el.textContent = cap; el.classList.remove('empty'); }
+  else { el.textContent = 'Caption appears here'; el.classList.add('empty'); }
+
+  const kb = $('pvKb');
+  kb.innerHTML = '';
+  rows.forEach(row=>{
+    const live = row.filter(b => b.t.trim());
+    if(!live.length) return;
+    const r = document.createElement('div');
+    r.className = 'kbr';
+    live.forEach(b=>{
+      const el = document.createElement('div');
+      el.className = 'kbb' + (validUrl(b.u) ? '' : ' bad');
+      el.textContent = b.t;
+      r.appendChild(el);
+    });
+    kb.appendChild(r);
+  });
+}
+const validUrl = u => /^https?:\/\/.+\..+/.test((u||'').trim());
+
+/* ---------- send ---------- */
+function say(kind,msg,hint){
+  const o = $('out');
+  o.className = 'out show ' + (kind==='err'?'err':kind==='good'?'good':'');
+  o.innerHTML = msg + (hint ? `<div class="hint">${hint}</div>` : '');
+}
+
+$('send').onclick = async () => {
+  const token = tokenEl.value.trim();
+  const chat  = chanEl.value.trim();
+  const cap   = capEl.value;
+
+  if(!token) { $('setup').open = true; return say('err','Add your bot token first.'); }
+  if(!chat)  { $('setup').open = true; return say('err','Add your channel, like @nijahelmets.'); }
+  if(!blob && !cap.trim()) return say('err','Add a photo or a caption.');
+  if(!limitCaption()) return say('err','Caption is too long. Trim it to fit the counter.');
+
+  const keyboard = [];
+  for(const row of rows){
+    const live = [];
+    for(const b of row){
+      const t = b.t.trim(), u = b.u.trim();
+      if(!t && !u) continue;
+      if(!t) return say('err','One button has a link but no label.');
+      if(!validUrl(u)) return say('err',`Button “${t}” needs a full link.`,'It has to start with https:// and include a domain.');
+      live.push({text:t, url:u});
+    }
+    if(live.length) keyboard.push(live);
+  }
+
+  const btn = $('send');
+  btn.disabled = true; btn.textContent = 'Posting…';
+  say('', 'Sending to ' + chat + '…');
+
+  try{
+    const fd = new FormData();
+    fd.append('chat_id', chat);
+    if(keyboard.length) fd.append('reply_markup', JSON.stringify({inline_keyboard:keyboard}));
+
+    let method;
+    if(blob){
+      method = 'sendPhoto';
+      fd.append('photo', blob, 'nija.jpg');
+      if(cap.trim()) fd.append('caption', cap);
+    } else {
+      method = 'sendMessage';
+      fd.append('text', cap);
+    }
+
+    const res  = await fetch(`https://api.telegram.org/bot${token}/${method}`, {method:'POST', body:fd});
+    const data = await res.json();
+
+    if(data.ok){
+      const id = data.result.message_id;
+      const uname = chat.replace('@','');
+      const link = chat.startsWith('@') ? `https://t.me/${uname}/${id}` : null;
+      say('good','Posted.', link ? `<a href="${link}" target="_blank" rel="noopener">Open post ${id}</a>` : `Message ${id}`);
+      capEl.value = ''; limitCaption(); clearPhoto();
+    } else {
+      say('err', data.description || 'Telegram refused the post.', explain(data.description||''));
+    }
+  } catch(err){
+    say('err','Could not reach Telegram.','Check your connection and try again.');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Post to channel';
+  }
+};
+
+function explain(d){
+  d = d.toLowerCase();
+  if(d.includes('unauthorized'))        return 'The token is wrong. Copy it again from BotFather.';
+  if(d.includes('chat not found'))      return 'Check the channel name, and make sure the bot is an admin there.';
+  if(d.includes('not enough rights') ||
+     d.includes('chat_write_forbidden')) return 'The bot needs the Post Messages admin right in this channel.';
+  if(d.includes('button_url_invalid'))  return 'One link is malformed. Open it in a browser to test it.';
+  if(d.includes('caption is too long')) return 'Photo captions stop at 1024 characters.';
+  return '';
+}
+
+/* ---------- go ---------- */
+drawRows();
+drawPreview();
+limitCaption();
+</script>
+</body>
+</html>
