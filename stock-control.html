@@ -116,12 +116,19 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
   .header { padding: 20px 20px 16px; border-bottom: 1px solid var(--border); }
   .brand { display: flex; align-items: center; gap: 10px; flex-wrap: nowrap; }
   .cat-select.header-filter { min-width: 108px; max-width: 220px; }
+  /* Home header: the Add Product pill lines up with the 36px round EN and theme
+     buttons beside it, and keeps its label where there is room for it.
+     Declared before the phone breakpoint so that override wins there. */
+  .home-add { height: 36px; padding: 0 16px; font-size: 13px; gap: 6px; }
   /* On a phone, keep the filter + Add Product on the logo's row: the title can
      shrink, the filter gets narrow, and Add Product collapses to a + icon. */
   @media (max-width: 560px) {
     .cat-select.header-filter { min-width: 96px; max-width: 116px; padding-right: 22px; }
     .header-add .btn-label { display: none; }
     .header-add { padding: 8px 10px; }
+    /* On the home header it sits beside the round EN and theme buttons, so it
+       takes the same 36px circle rather than a short pill. */
+    .home-add { width: 36px; height: 36px; padding: 0; border-radius: 50%; justify-content: center; }
     .brand { gap: 8px; }
     .brand-left { gap: 8px; }
     .back-btn { width: 32px; height: 32px; }
@@ -2372,6 +2379,9 @@ function renderHeader() {
         "</button>" +
         '<button type="button" class="theme-btn" data-action="toggle-theme" title="' + escapeHtml(state.theme === "dark" ? t("switchToLight") : t("switchToDark")) + '">' +
           icon(state.theme === "dark" ? "sun" : "moon", 16) +
+        "</button>" +
+        '<button type="button" class="btn btn-primary header-add home-add" data-action="open-add-modal" title="' + escapeHtml(t("addProduct")) + '" aria-label="' + escapeHtml(t("addProduct")) + '">' +
+          icon("plus", 15) + '<span class="btn-label">' + t("addProduct") + "</span>" +
         "</button>" +
         "</div>" +
       "</div>" +
