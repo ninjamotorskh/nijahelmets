@@ -32,29 +32,20 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
     --danger-border: #3a1e20;
     --warn-bg: #2b2113; --warn-fg: #fbbf24; --warn-bd: #3f301b;
     --info-bg: #0c2333; --info-fg: #38bdf8; --info-bd: #143348;
+    /* Moving stock is neither a gain nor a loss, so it gets its own blue tone
+       rather than reusing the green/red of stock in and out. */
+    --move-bg: #0e2436; --move-fg: #38bdf8; --move-bd: #16354c; --move-ink: #04131f;
     --chip-hover: #3a3a44;
     --accent-tint: rgba(242,164,19,0.12);
     --accent-tint-border: rgba(242,164,19,0.4);
     --focus-ring: rgba(242,164,19,0.15);
     --empty-icon: #3a3a44;
-    --helmet-bg: #0c2333; --helmet-fg: #38bdf8; --helmet-bd: #143348;
-    --frame-bg: #10262b; --frame-fg: #2dd4bf; --frame-bd: #17383f;
-    --plastic-box-bg: #2b2113; --plastic-box-fg: #fbbf24; --plastic-box-bd: #3f301b;
-    --aluminum-box-bg: #1a2029; --aluminum-box-fg: #94a3b8; --aluminum-box-bd: #28303c;
-    --leather-bag-bg: #2b1d12; --leather-bag-fg: #fb923c; --leather-bag-bd: #3d2a1a;
-    --mirror-bg: #0c262b; --mirror-fg: #22d3ee; --mirror-bd: #12363d;
-    --phone-holders-bg: #221a2e; --phone-holders-fg: #a78bfa; --phone-holders-bd: #322745;
-    --water-bottle-holders-bg: #181b32; --water-bottle-holders-fg: #818cf8; --water-bottle-holders-bd: #242949;
-    --windshield-bg: #23260f; --windshield-fg: #a3e635; --windshield-bd: #333818;
-    --brake-pads-bg: #2b1616; --brake-pads-fg: #f87171; --brake-pads-bd: #3d2020;
-    --oil-bg: #12261a; --oil-fg: #4ade80; --oil-bd: #1b3826;
-    --accessory-bg: #2a1523; --accessory-fg: #f472b6; --accessory-bd: #3d1f32;
     --radius-sm: 6px;
     --radius: 10px;
     --radius-lg: 16px;
     /* Caps the one-per-row product list so lines stay comfortable to read on a
        wide monitor instead of stretching edge to edge. */
-    --list-max: 1180px;
+    --list-max: 1260px;
   }
   html[data-theme="light"] {
     --signal: #b45309;
@@ -76,24 +67,13 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
     --danger-border: #f6c9c9;
     --warn-bg: #fdf2df; --warn-fg: #a16207; --warn-bd: #f6e0b5;
     --info-bg: #e8f3fd; --info-fg: #0d6dc4; --info-bd: #c3e0f8;
+    --move-bg: #e8f3fd; --move-fg: #0369a1; --move-bd: #c3e0f8; --move-ink: #ffffff;
     --chip-hover: #b9c0c9;
     --accent-tint: rgba(180,83,9,0.08);
     --accent-tint-border: rgba(180,83,9,0.4);
     --focus-ring: rgba(180,83,9,0.18);
     --empty-icon: #c9ced6;
 
-    --helmet-bg: #e8f3fd; --helmet-fg: #0d6dc4; --helmet-bd: #c3e0f8;
-    --frame-bg: #e2f6f5; --frame-fg: #0d7d75; --frame-bd: #bce7e3;
-    --plastic-box-bg: #fdf2df; --plastic-box-fg: #a16207; --plastic-box-bd: #f6e0b5;
-    --aluminum-box-bg: #eef1f5; --aluminum-box-fg: #475569; --aluminum-box-bd: #d3dae3;
-    --leather-bag-bg: #fdefe2; --leather-bag-fg: #c2410c; --leather-bag-bd: #f8d7bd;
-    --mirror-bg: #e0f6fa; --mirror-fg: #0e7490; --mirror-bd: #b8e6ef;
-    --phone-holders-bg: #f2edfc; --phone-holders-fg: #6d28d9; --phone-holders-bd: #ddd0fa;
-    --water-bottle-holders-bg: #eceefd; --water-bottle-holders-fg: #4338ca; --water-bottle-holders-bd: #cfd4fa;
-    --windshield-bg: #eef7dd; --windshield-fg: #4d7c0f; --windshield-bd: #d5e9b4;
-    --brake-pads-bg: #fdeaea; --brake-pads-fg: #b91c1c; --brake-pads-bd: #f6c6c6;
-    --oil-bg: #e7f7ec; --oil-fg: #15803d; --oil-bd: #bfe6cb;
-    --accessory-bg: #fdecf4; --accessory-fg: #be185d; --accessory-bd: #f9c9de;
   }
   * { box-sizing: border-box; }
   html, body {
@@ -246,30 +226,24 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
   .product-row .row-thumb, .product-row .row-thumb-placeholder {
     width: var(--thumb); height: var(--thumb); border-radius: 8px;
   }
-  .product-name-row { display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; }
+  .product-name-row { display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; min-width: 0; }
   .product-name { font-size: 14px; font-weight: 600; letter-spacing: -.005em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; max-width: 100%; }
-  /* The tag sits right after the name rather than pinned to the far right,
-     so the eye reads "name + category" as one unit on every line. */
-  .cat-tag { flex-shrink: 0; white-space: nowrap; font-size: 11px; padding: 2px 7px; border-radius: 5px; border: 1px solid transparent; line-height: 1.5; }
-  .cat-helmet { background: var(--helmet-bg); color: var(--helmet-fg); border-color: var(--helmet-bd); }
-  .cat-frame { background: var(--frame-bg); color: var(--frame-fg); border-color: var(--frame-bd); }
-  .cat-plastic-box { background: var(--plastic-box-bg); color: var(--plastic-box-fg); border-color: var(--plastic-box-bd); }
-  .cat-aluminum-box { background: var(--aluminum-box-bg); color: var(--aluminum-box-fg); border-color: var(--aluminum-box-bd); }
-  .cat-leather-bag { background: var(--leather-bag-bg); color: var(--leather-bag-fg); border-color: var(--leather-bag-bd); }
-  .cat-mirror { background: var(--mirror-bg); color: var(--mirror-fg); border-color: var(--mirror-bd); }
-  .cat-phone-holders { background: var(--phone-holders-bg); color: var(--phone-holders-fg); border-color: var(--phone-holders-bd); }
-  .cat-water-bottle-holders { background: var(--water-bottle-holders-bg); color: var(--water-bottle-holders-fg); border-color: var(--water-bottle-holders-bd); }
-  .cat-windshield { background: var(--windshield-bg); color: var(--windshield-fg); border-color: var(--windshield-bd); }
-  .cat-brake-pads { background: var(--brake-pads-bg); color: var(--brake-pads-fg); border-color: var(--brake-pads-bd); }
-  .cat-oil { background: var(--oil-bg); color: var(--oil-fg); border-color: var(--oil-bd); }
-  .cat-accessory { background: var(--accessory-bg); color: var(--accessory-fg); border-color: var(--accessory-bd); }
   .low-flag { flex-shrink: 0; white-space: nowrap; display: inline-flex; align-items: center; gap: 3px; font-size: 11px; color: var(--danger); }
-  .product-meta { font-size: 12px; color: var(--text-dim); margin-top: 4px; font-variant-numeric: tabular-nums; }
+  /* Category, low flag and the reorder text share one line and never wrap, so
+     every row is exactly two lines tall whatever the name is. */
+  .product-meta {
+    display: flex; align-items: center; gap: 6px; flex-wrap: nowrap;
+    font-size: 12px; color: var(--text-dim); margin-top: 4px;
+    font-variant-numeric: tabular-nums; min-width: 0;
+  }
+  .meta-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
   /* Sits in the implicit second row, starting under the product name. When a
      product has no location or barcode the element is not rendered at all, so
      no empty row is left behind. */
+  /* On a phone the three chips wrap onto as many lines as they need; on desktop
+     each one takes its own grid column instead. */
   .product-extra {
-    grid-column: 2 / -1; display: flex; gap: 6px; flex-wrap: nowrap; min-width: 0;
+    grid-column: 2 / -1; display: flex; gap: 6px; flex-wrap: wrap; min-width: 0;
   }
   .extra-item {
     display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 500;
@@ -525,6 +499,72 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
   }
   .photo-processing { font-size: 12px; color: var(--text-dim); margin-top: 6px; }
   .hint { font-size: 12px; color: var(--text-dimmer); margin: 5px 0 0; font-variant-numeric: tabular-nums; }
+  .hint-warn { color: var(--warn-fg); }
+
+  /* ---- bins: a pick face and one reserve ---- */
+  /* The editor in Add/Edit Product: two labelled slots, not a growing list. */
+  .bin-slots { display: flex; flex-direction: column; gap: 8px; }
+  .bin-slot { display: flex; flex-direction: column; gap: 4px; }
+  .bin-slot-label { font-size: 11px; font-weight: 600; color: var(--text-dim); }
+  .bin-slot-fields { display: grid; grid-template-columns: minmax(0, 1fr) 84px; gap: 6px; }
+  .bin-slot-qty { text-align: right; font-variant-numeric: tabular-nums; }
+  /* Sits between the two slots, so its arrows read as "exchange these". */
+  .bin-swap {
+    align-self: flex-start; display: inline-flex; align-items: center; gap: 5px;
+    background: var(--surface-2); border: 1px solid var(--border); color: var(--text-dim);
+    border-radius: 999px; padding: 3px 10px; font-size: 11px; font-weight: 500;
+    cursor: pointer; font-family: inherit;
+  }
+  .bin-swap:hover { color: var(--text); border-color: var(--accent-tint-border); }
+  .bin-swap svg { transform: rotate(90deg); }
+  .bin-foot { display: flex; align-items: center; justify-content: flex-end; margin-top: 8px; }
+  .bin-total { font-size: 12px; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+  .bin-total strong { color: var(--text); font-weight: 700; }
+
+  /* The read-only pair shown on the Replenish page. */
+  .bin-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .bin-stat {
+    display: flex; flex-direction: column; gap: 2px;
+    background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 8px 10px; min-width: 0;
+  }
+  /* Both slots look the same: the labels say which is which, so tinting one of
+     them added colour without adding information. */
+  .bin-stat-label { font-size: 11px; font-weight: 600; color: var(--text-dim); }
+  .bin-stat-code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 14px; font-weight: 600; letter-spacing: .05em; color: var(--text);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .bin-stat-qty {
+    font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums;
+    line-height: 1.15; color: var(--text);
+  }
+
+  /* The quantity held in a slot, shown on the Overview row's chips. */
+  .bin-qty {
+    flex-shrink: 0; margin-left: auto; font-weight: 700;
+    font-variant-numeric: tabular-nums; color: var(--text);
+  }
+  /* An empty pick face is the one state that needs acting on, so it is the only
+     thing in the row that turns red. */
+  .extra-loc.is-empty .bin-qty { color: var(--danger); }
+  /* Only the font-family needs inheriting from the page; the `font` shorthand
+     would also reset size, weight and line-height, which .extra-item sets. */
+  .extra-reserve { cursor: pointer; font-family: inherit; text-align: left; color: var(--text); }
+  .extra-reserve .extra-text { color: var(--text-dim); }
+  .extra-reserve:hover { border-color: var(--accent-tint-border); }
+  /* Reserve stock behind an empty shelf: the chip becomes the Replenish button. */
+  .extra-reserve.is-due {
+    background: var(--move-bg); border-color: var(--move-bd);
+  }
+  .extra-reserve.is-due .extra-text { color: var(--move-fg); font-weight: 600; }
+  .extra-reserve.is-due svg { color: var(--move-fg); }
+  .extra-reserve.is-due .bin-qty { color: var(--move-fg); }
+
+  .qty-label-row { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .qty-label-row label { margin-bottom: 0; }
+
   .form-error { font-size: 12px; color: var(--danger); margin: 0 0 12px; }
   .muted { color: var(--text-dim); font-size: 13px; }
   .link-btn { background: none; border: none; color: var(--signal); font-weight: 500; font-size: 13px; cursor: pointer; padding: 0; }
@@ -534,16 +574,31 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
   .submit-btn:hover { filter: brightness(1.1); }
   .submit-in { background: var(--success); color: var(--success-ink); }
   .submit-out { background: var(--danger); color: var(--danger-ink); }
+  .submit-move { background: var(--move-fg); color: var(--move-ink); }
 
   .history-icon { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .history-icon-in { background: var(--success-bg); color: var(--success); }
   .history-icon-out { background: var(--danger-bg); color: var(--danger); }
+  .history-icon-move { background: var(--move-bg); color: var(--move-fg); }
   .history-info { flex: 1; min-width: 0; }
-  .history-name { font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .history-meta { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+  /* The movement leads: what moved where, when. The bin code is the anchor, so
+     it takes the monospace and the full-strength colour. */
+  .history-detail {
+    font-size: 13px; font-weight: 500; color: var(--text-dim);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .history-bin {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-weight: 600; letter-spacing: .03em; color: var(--text);
+  }
+  /* The product name is context on the second line now. */
+  .history-name { font-size: 12px; color: var(--text-dim); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .history-amount { font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; flex-shrink: 0; }
   .amount-in { color: var(--success); }
   .amount-out { color: var(--danger); }
+  /* A move doesn't change the total, so its figure stays neutral rather than
+     borrowing the green/red of a real stock change. */
+  .amount-move { color: var(--move-fg); }
 
   .product-form-page { max-width: 420px; }
   .page-actions { display: flex; gap: 8px; margin-top: 20px; }
@@ -670,6 +725,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
   .imp-pill-all { background: var(--surface-2); color: var(--text); border-color: var(--border); }
   .imp-pill-ok { background: var(--success-bg); color: var(--success); border-color: var(--success-border); }
   .imp-pill-bad { background: var(--danger-bg); color: var(--danger); border-color: var(--danger-border); }
+  .imp-pill-move { background: var(--move-bg); color: var(--move-fg); border-color: var(--move-bd); }
   .imp-example { max-width: 640px; }
   .imp-example-title { font-size: 13px; font-weight: 600; margin: 0 0 10px; }
   .imp-table {
@@ -776,7 +832,6 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
   @media (max-width: 560px) {
     .product-row { --thumb: 42px; column-gap: 10px; padding: 10px; align-items: start; }
     .product-name { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.3; }
-    .product-name-row { flex-wrap: wrap; }
     .row-stock { padding-top: 2px; }
     .row-actions { flex-wrap: wrap; justify-content: flex-end; max-width: 76px; }
     .icon-btn { padding: 6px; }
@@ -808,7 +863,8 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
     /* One shared track list keeps every row locked to the same columns. */
     :root {
       --thumb-d: 56px;
-      --product-cols: var(--thumb-d) minmax(0, 1fr) 116px 190px 88px 96px;
+      /* thumb | name | pick face | reserve | barcode | stock | actions */
+      --product-cols: var(--thumb-d) minmax(0, 1fr) 118px 118px 178px 84px 96px;
     }
     /* One product per row. The extra width goes into dedicated columns for
        location, barcode and stock rather than a second card, so the list reads
@@ -817,13 +873,14 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
     .product-row {
       --thumb: var(--thumb-d);
       grid-template-columns: var(--product-cols);
-      grid-template-areas: "thumb info loc code stock actions";
-      column-gap: 18px; padding: 12px 16px;
+      grid-template-areas: "thumb info loc res code stock actions";
+      column-gap: 16px; padding: 12px 16px;
     }
     /* The chips become grid items of the row itself, so they land in their own
        columns instead of wrapping onto a second line. */
     .product-extra { display: contents; }
     .extra-loc { grid-area: loc; }
+    .extra-reserve { grid-area: res; }
     .extra-barcode { grid-area: code; }
     /* A long digit string reads better with a slightly larger monospace face
        and wide tracking, so the digits separate instead of running together. */
@@ -1096,8 +1153,88 @@ function photosOf(p) {
   return p.photo ? [p.photo] : [];
 }
 
-function catSlug(cat) {
-  return "cat-" + String(cat || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+// ---------------- bins (stock per location) ----------------
+// A product's stock is broken down into bins: [{ code, qty }]. The first bin is
+// the primary (pick face) — stock in lands there and stock out draws from it
+// first. `stock` stays on the document as the cached total and `location` as
+// the primary bin's code, so every other screen (and the other KW20 apps that
+// read this collection) keeps working untouched.
+
+// Products saved before multi-bin support have only `location` + `stock`, so
+// synthesise a single bin from them rather than migrating the data.
+function binsOf(p) {
+  if (!p) return [];
+  if (Array.isArray(p.bins)) {
+    const out = [];
+    for (let i = 0; i < p.bins.length; i++) {
+      const code = String((p.bins[i] && p.bins[i].code) || "").trim();
+      if (!code) continue;
+      out.push({ code: code, qty: Math.max(0, parseInt(p.bins[i].qty, 10) || 0) });
+    }
+    if (out.length) return out;
+  }
+  const legacy = String(p.location || "").trim();
+  if (!legacy) return [];
+  return [{ code: legacy, qty: Math.max(0, parseInt(p.stock, 10) || 0) }];
+}
+
+function binsTotal(bins) {
+  let n = 0;
+  for (let i = 0; i < bins.length; i++) n += bins[i].qty;
+  return n;
+}
+
+// With a pick face and a reserve, bins[0] is always the shelf you pick from and
+// bins[1] the bulk backup. These accessors keep that convention in one place.
+function pickBin(p) { return binsOf(p)[0] || null; }
+function reserveBin(p) { return binsOf(p)[1] || null; }
+
+// The situation worth acting on: nothing left on the pick face while the
+// reserve still holds stock, so a replenish is due.
+function needsReplenish(p) {
+  const pick = pickBin(p);
+  const res = reserveBin(p);
+  return !!(pick && res && pick.qty === 0 && res.qty > 0);
+}
+
+// Builds the Firestore patch for a movement. Stock in lands in the target slot
+// — bulk deliveries default to the reserve, so the pick face isn't overfilled —
+// and stock out empties the pick face first, falling back to the reserve only
+// when the pick face can't cover it. Products with no location at all keep the
+// old behaviour of moving `stock` on its own.
+function allocateMovement(p, qty, mode, target) {
+  const bins = binsOf(p);
+  const current = Math.max(0, parseInt(p.stock, 10) || 0);
+  const newStock = mode === "in" ? current + qty : Math.max(0, current - qty);
+  if (!bins.length) return { patch: { stock: newStock }, moves: [] };
+
+  const moves = [];
+  if (mode === "in") {
+    const idx = (target === "reserve" && bins.length > 1) ? 1 : 0;
+    bins[idx].qty += qty;
+    moves.push({ code: bins[idx].code, qty: qty });
+  } else {
+    let left = qty;
+    for (let i = 0; i < bins.length && left > 0; i++) {
+      const take = Math.min(bins[i].qty, left);
+      if (take <= 0) continue;
+      bins[i].qty -= take;
+      left -= take;
+      moves.push({ code: bins[i].code, qty: take });
+    }
+  }
+  return {
+    patch: { stock: newStock, bins: bins, location: bins[0].code },
+    moves: moves,
+  };
+}
+
+// One readable string for the history row: "A2002" for the normal case, or
+// "A2002 (5) + B1104 (3)" when a stock out had to draw from more than one bin.
+function describeMoves(moves) {
+  if (!moves || !moves.length) return "";
+  if (moves.length === 1) return moves[0].code;
+  return moves.map(m => m.code + " (" + m.qty + ")").join(" + ");
 }
 
 const ICONS = {
@@ -1127,6 +1264,7 @@ const ICONS = {
   chevronRight: '<polyline points="9,4 17,12 9,20"/>',
   copy: '<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
   upload: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,9 12,4 17,9"/><line x1="12" y1="4" x2="12" y2="16"/>',
+  move: '<polyline points="16,3 20,7 16,11"/><path d="M20 7H9a4 4 0 0 0-4 4v1"/><polyline points="8,21 4,17 8,13"/><path d="M4 17h11a4 4 0 0 0 4-4v-1"/>',
 };
 function icon(name, size, extraClass) {
   return '<svg class="' + (extraClass || '') + '" width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICONS[name] || '') + '</svg>';
@@ -1179,6 +1317,15 @@ const state = {
   newBarcode: "",
   newPrice: "",
   newLocation: "",
+  newBins: [],
+  moveProductId: "",
+  moveSearch: "",
+  moveDir: "toPick",
+  moveNewCode: "",
+  moveQty: "",
+  moveNote: "",
+  moveError: "",
+  inTarget: "reserve",
   photoProcessing: false,
   labelSelected: {},
   labelCopies: "1",
@@ -1608,6 +1755,34 @@ const I18N = {
     setupTitle: "Firebase setup needed",
     tabOverview: "Overview", tabIn: "Stock In", tabOut: "Stock Out",
     tabHistory: "History", tabDelete: "Delete", tabDuplicates: "Duplicates", tabLabels: "Labels",
+    tabMove: "Replenish",
+    moveTitle: "Replenish the Pick Face",
+    binsLabel: "Locations",
+    pickFaceLabel: "Pick face",
+    reserveLabel: "Reserve",
+    reserveOptional: "Reserve (optional)",
+    pickFaceHint: "Picking takes from the pick face first. Deliveries go to the reserve, then you replenish forward as the shelf empties.",
+    swapBins: "Swap",
+    binCodePh: "e.g. A2002",
+    binReservePh: "e.g. B1104",
+    dirToPick: "Reserve \u2192 Pick face",
+    dirToReserve: "Pick face \u2192 Reserve",
+    newBinCode: "Reserve location code",
+    moveAll: "Move all",
+    moveBtn: "Move stock",
+    movedWord: "moved",
+    replenishWord: "Replenish",
+    needsReplenish: "Pick face empty",
+    reserveWord: "reserve",
+    putInto: "Put into",
+    moveNoteLabel: "Reason (optional)",
+    moveNoteEg: "e.g. replenish pick face",
+    errBinOnly: "That location only holds",
+    errNeedReserveCode: "Give the reserve location a code.",
+    errNeedBins: "This product has no locations yet. Add one in Edit Product first.",
+    errNothingToMove: "There is nothing in that location to move.",
+    toastMoved: "Moved",
+    binTotalMismatch: "Location quantities don't add up to the stock total \u2014 saving will set stock to",
     labelsTitle: "Print Barcode Labels",
     generateBarcode: "Generate a code",
     generateBarcodeHint: "for products with no supplier barcode.",
@@ -1677,6 +1852,8 @@ const I18N = {
     noDataRows: "No data rows found. Column 1 should be the product ID or barcode, column 2 the quantity.",
     noActivityTitle: "No activity yet",
     noActivitySub: "Stock in and out transactions will appear here.",
+    historyPromptTitle: "Search a product",
+    historyPromptSub: "Type or scan a product name, ID or barcode to see everything that has moved in and out of it.",
     searchHistory: "Search product, ID, barcode, or note\u2026",
     sortNewest: "Newest first", sortOldest: "Oldest first",
     noMatchingActivity: "No matching activity.",
@@ -1741,6 +1918,7 @@ const I18N = {
     toastAdded: "Added", toastUpdated: "Updated", toastDeleted: "Deleted",
     toastStockedIn: "Stocked in", toastStockedOut: "Stocked out",
     initialStock: "Initial stock", importedFrom: "Imported from",
+    adjustedNote: "Adjusted in Edit Product",
     impMissingId: "Missing product ID", impMissingQty: "Missing quantity",
     impNoMatch: "No product matches", impWholeNumber: "Quantity must be a whole number above 0",
     impOnlyLeftAfter: "left after earlier rows in this file", impOnly: "Only",
@@ -1758,6 +1936,34 @@ const I18N = {
     tabDelete: "លុប",
     tabDuplicates: "ស្ទួន",
     tabLabels: "ស្លាកបាកូដ",
+    tabMove: "បំពេញទីតាំងរើស",
+    moveTitle: "បំពេញទីតាំងរើស",
+    binsLabel: "ទីតាំងស្តុក",
+    pickFaceLabel: "ទីតាំងរើស",
+    reserveLabel: "ទីតាំងបម្រុង",
+    reserveOptional: "ទីតាំងបម្រុង (មិនចាំបាច់)",
+    pickFaceHint: "ការរើសទំនិញយកពីទីតាំងរើសមុនគេ។ ទំនិញចូលថ្មីទៅទីតាំងបម្រុង រួចបំពេញទៅមុខពេលធ្នើរអស់។",
+    swapBins: "ដូរគ្នា",
+    binCodePh: "ឧ. A2002",
+    binReservePh: "ឧ. B1104",
+    dirToPick: "បម្រុង → ទីតាំងរើស",
+    dirToReserve: "ទីតាំងរើស → បម្រុង",
+    newBinCode: "លេខកូដទីតាំងបម្រុង",
+    moveAll: "ផ្លាស់ទីទាំងអស់",
+    moveBtn: "ផ្លាស់ទីស្តុក",
+    movedWord: "បានផ្លាស់ទី",
+    replenishWord: "បំពេញ",
+    needsReplenish: "ទីតាំងរើសអស់",
+    reserveWord: "បម្រុង",
+    putInto: "ដាក់ចូល",
+    moveNoteLabel: "មូលហេតុ (មិនចាំបាច់)",
+    moveNoteEg: "ឧ. បំពេញទីតាំងរើស",
+    errBinOnly: "ទីតាំងនោះមានតែ",
+    errNeedReserveCode: "សូមបញ្ចូលលេខកូដទីតាំងបម្រុង។",
+    errNeedBins: "ទំនិញនេះមិនទាន់មានទីតាំងទេ។ សូមបន្ថែមក្នុងកែសម្រួលទំនិញជាមុនសិន។",
+    errNothingToMove: "ទីតាំងនោះគ្មានស្តុកសម្រាប់ផ្លាស់ទីទេ។",
+    toastMoved: "បានផ្លាស់ទី",
+    binTotalMismatch: "ចំនួនតាមទីតាំងមិនស្មើនឹងស្តុកសរុប — ការរក្សាទុកនឹងកំណត់ស្តុកទៅជា",
     labelsTitle: "បោះពុម្ពស្លាកបាកូដ",
     generateBarcode: "បង្កើតលេខកូដ",
     generateBarcodeHint: "សម្រាប់ទំនិញដែលគ្មានបាកូដពីអ្នកផ្គត់ផ្គង់។",
@@ -1848,6 +2054,8 @@ const I18N = {
     noDataRows: "រកមិនឃើញទិន្នន័យ។ ជួរឈរទី ១ គឺលេខសម្គាល់ ឬបាកូដ និងទី ២ គឺបរិមាណ។",
     noActivityTitle: "មិនទាន់មានសកម្មភាព",
     noActivitySub: "ប្រតិបត្តិការចូល និងចេញស្តុកនឹងបង្ហាញនៅទីនេះ។",
+    historyPromptTitle: "ស្វែងរកទំនិញ",
+    historyPromptSub: "វាយ ឬស្កែនឈ្មោះទំនិញ លេខសម្គាល់ ឬបាកូដ ដើម្បីមើលចលនាចូល-ចេញទាំងអស់របស់វា។",
     searchHistory: "ស្វែងរកទំនិញ លេខសម្គាល់ ឬកំណត់ចំណាំ…",
     sortNewest: "ថ្មីមុនគេ",
     sortOldest: "ចាស់មុនគេ",
@@ -1943,6 +2151,7 @@ const I18N = {
     toastStockedIn: "បានចូលស្តុក",
     toastStockedOut: "បានចេញស្តុក",
     initialStock: "ស្តុកដើម",
+    adjustedNote: "កែសម្រួលក្នុងទំព័រកែទំនិញ",
     importedFrom: "នាំចូលពី",
     impMissingId: "ខ្វះលេខសម្គាល់ទំនិញ",
     impMissingQty: "ខ្វះបរិមាណ",
@@ -1970,6 +2179,7 @@ function t(key) {
 const SYS_NOTE_INITIAL = "Initial stock";
 const SYS_NOTE_IMPORT_PREFIX = "Imported from ";
 const SYS_NOTE_SCAN = "Scanned";
+const SYS_NOTE_ADJUST = "Adjusted in Edit Product";
 
 // System-generated notes are stored in English so they never depend on the
 // language the entry was made in. User-typed notes pass through untouched.
@@ -1977,6 +2187,7 @@ function displayNote(note) {
   if (!note) return "";
   if (note === SYS_NOTE_INITIAL) return t("initialStock");
   if (note === SYS_NOTE_SCAN) return t("scannedNote");
+  if (note === SYS_NOTE_ADJUST) return t("adjustedNote");
   if (note.indexOf(SYS_NOTE_IMPORT_PREFIX) === 0) {
     return t("importedFrom") + " " + note.slice(SYS_NOTE_IMPORT_PREFIX.length);
   }
@@ -2062,6 +2273,7 @@ function renderAppHTML() {
   else if (state.tab === "overview") body = renderOverview();
   else if (state.tab === "in") body = renderStockForm("in");
   else if (state.tab === "out") body = renderStockForm("out");
+  else if (state.tab === "move") body = renderMoveForm();
   else if (state.tab === "history") body = renderHistory();
   else if (state.tab === "delete") body = renderDeleteTab();
   else if (state.tab === "duplicates") body = renderDuplicatesTab();
@@ -2126,6 +2338,7 @@ function renderHeader() {
     const color = found ? found.fg : "var(--text)";
     if (state.tab === "labels") title = t("labelsTitle");
     else if (state.tab === "delete") title = t("deleteTitle");
+    else if (state.tab === "move") title = t("moveTitle");
     else if (state.tab === "product-form") { title = state.editingProductId ? t("editProduct") : t("addProduct"); ic = "box"; }
     const backTo = state.tab === "product-form" ? "overview" : "home";
     return (
@@ -2171,6 +2384,7 @@ function getMenuTabs() {
     { id: "overview", label: t("tabOverview"), icon: "box", bg: "#dbe7fb", fg: "#2563eb" },
     { id: "in", label: t("tabIn"), icon: "up", bg: "#d7f0e0", fg: "#16a34a" },
     { id: "out", label: t("tabOut"), icon: "down", bg: "#fbdada", fg: "#ef4444" },
+    { id: "move", label: t("tabMove"), icon: "move", bg: "#dbe9f7", fg: "#0284c7" },
     { id: "history", label: t("tabHistory"), icon: "history", bg: "#fcecc4", fg: "#d97706" },
     { id: "duplicates", label: t("tabDuplicates"), icon: "copy", bg: "#e7dcf9", fg: "#9333ea" },
     { id: "labels", label: t("tabLabels"), icon: "tag", bg: "#d2eef0", fg: "#0d9488" },
@@ -2298,22 +2512,56 @@ function renderProductRow(p) {
   const low = p.stock <= p.threshold;
   const updated = formatRelativeTime(p.updatedAt || p.createdAt);
   const pics = photosOf(p);
+  const bins = binsOf(p);
   const thumb = pics.length
     ? '<button type="button" class="row-thumb-btn" data-action="open-lightbox" data-id="' + p.id + '">' +
         '<img class="row-thumb" src="' + pics[0] + '" alt="" />' +
       "</button>"
     : '<div class="row-thumb-placeholder">' + icon("camera", 16) + "</div>";
+
+  // Both slots show on the row: the pick face you go to, then the reserve
+  // behind it. When the pick face is empty the reserve chip turns into a
+  // one-tap Replenish, which is the whole job on a two-slot layout.
+  const pick = bins[0] || null;
+  const res = bins[1] || null;
+  const due = needsReplenish(p);
+
+  const pickCell = pick
+    ? '<span class="extra-item extra-loc' + (due ? " is-empty" : "") + '">' +
+        '<span class="extra-ico">' + icon("pin", 12) + "</span>" +
+        '<span class="extra-text">' + escapeHtml(pick.code) + "</span>" +
+        '<span class="bin-qty">' + pick.qty + "</span>" +
+      "</span>"
+    : "";
+
+  const resCell = res
+    ? (due
+        ? '<button type="button" class="extra-item extra-reserve is-due" data-action="replenish" data-id="' + p.id + '" title="' + escapeHtml(t("needsReplenish")) + '">' +
+            '<span class="extra-ico">' + icon("move", 12) + "</span>" +
+            '<span class="extra-text">' + t("replenishWord") + "</span>" +
+            '<span class="bin-qty">' + res.qty + "</span>" +
+          "</button>"
+        : '<button type="button" class="extra-item extra-reserve" data-action="replenish" data-id="' + p.id + '" title="' + escapeHtml(t("reserveLabel")) + '">' +
+            '<span class="extra-text">' + escapeHtml(res.code) + "</span>" +
+            '<span class="bin-qty">' + res.qty + "</span>" +
+          "</button>")
+    : "";
+
   return (
     '<div class="product-row' + (low ? " is-low" : "") + '">' +
       thumb +
       '<div class="product-info">' +
         '<div class="product-name-row">' +
           '<span class="product-name" title="' + escapeHtml(p.name) + '">' + escapeHtml(p.name) + "</span>" +
-          '<span class="cat-tag ' + catSlug(p.category) + '">' + escapeHtml(catLabel(p.category)) + "</span>" +
-          (low ? '<span class="low-flag">' + icon("alert", 12) + " " + t("low") + "</span>" : "") +
         "</div>" +
-        '<div class="product-meta">' + t("reorderAt") + " " + p.threshold +
-          (updated ? " \u00b7 " + t("updated") + " " + updated : "") +
+        // The tag rides on the meta line rather than after the name, so a long
+        // name can't push it onto a second line and stretch every row.
+        '<div class="product-meta">' +
+          (low ? '<span class="low-flag">' + icon("alert", 12) + " " + t("low") + "</span>" : "") +
+          '<span class="meta-text">' + escapeHtml(catLabel(p.category)) +
+            " \u00b7 " + t("reorderAt") + " " + p.threshold +
+            (updated ? " \u00b7 " + t("updated") + " " + updated : "") +
+          "</span>" +
         "</div>" +
       "</div>" +
       '<div class="row-stock">' +
@@ -2325,9 +2573,9 @@ function renderProductRow(p) {
         '<button type="button" class="icon-btn icon-btn-down" title="Stock out" data-action="quick-out" data-id="' + p.id + '">' + icon("down", 14) + "</button>" +
         '<button type="button" class="icon-btn" title="Edit" data-action="open-edit-modal" data-id="' + p.id + '">' + icon("pencil", 14) + "</button>" +
       "</div>" +
-      (p.location || p.barcode ?
+      (pickCell || resCell || p.barcode ?
         '<div class="product-extra">' +
-          (p.location ? '<span class="extra-item extra-loc"><span class="extra-ico">' + icon("pin", 12) + '</span><span class="extra-text">' + escapeHtml(p.location) + "</span></span>" : "") +
+          pickCell + resCell +
           (p.barcode ? '<span class="extra-item extra-barcode"><span class="extra-ico">' + icon("barcode", 12) + '</span><span class="extra-text">' + escapeHtml(p.barcode) + "</span></span>" : "") +
         "</div>" : ""
       ) +
@@ -2388,6 +2636,16 @@ function renderStockForm(mode) {
         renderProductPicker(mode, selected, sorted) +
       "</div>" +
       '<div class="form-col form-col-side">' +
+      (isIn && selected && reserveBin(selected) ?
+        '<div class="form-group">' +
+          "<label>" + t("putInto") + "</label>" +
+          '<div class="filter-row">' +
+            '<button type="button" class="chip' + (state.inTarget === "reserve" ? " chip-active" : "") + '" data-action="set-in-target" data-target="reserve">' +
+              t("reserveLabel") + " \u00b7 " + escapeHtml(reserveBin(selected).code) + "</button>" +
+            '<button type="button" class="chip' + (state.inTarget !== "reserve" ? " chip-active" : "") + '" data-action="set-in-target" data-target="pick">' +
+              t("pickFaceLabel") + " \u00b7 " + escapeHtml(pickBin(selected).code) + "</button>" +
+          "</div>" +
+        "</div>" : "") +
       '<div class="form-group">' +
         '<label for="' + mode + 'Qty">' + t("quantity") + "</label>" +
         '<input type="text" inputmode="numeric" pattern="[0-9]*" id="' + mode + 'Qty" data-field="' + mode + 'Qty" value="' + escapeHtml(qty) + '" placeholder="0" class="input" />' +
@@ -2404,8 +2662,100 @@ function renderStockForm(mode) {
   );
 }
 
+// Moving stock changes where it sits, never how much there is, so this page has
+// no effect on the product's total \u2014 only on the split between the two slots.
+// With just a pick face and a reserve there are only two possible directions, so
+// the page is a toggle and a quantity rather than a pair of dropdowns.
+function renderMoveForm() {
+  const selected = state.products.find(p => p.id === state.moveProductId);
+  const sorted = state.products.slice().sort((a, b) => a.name.localeCompare(b.name));
+
+  if (state.products.length === 0) {
+    return '<p class="muted">' + t("addProductFirst") + ' <button type="button" class="link-btn" data-action="open-add-modal">' + t("addOneNow") + "</button></p>";
+  }
+
+  let fields = "";
+  if (selected) {
+    const pick = pickBin(selected);
+    const res = reserveBin(selected);
+    if (!pick) {
+      fields = '<p class="hint hint-warn">' + t("errNeedBins") + "</p>";
+    } else {
+      // Without a reserve yet, the only sensible move is to create one, so the
+      // direction is fixed and a code field appears instead of the toggle.
+      const toPick = res ? state.moveDir !== "toReserve" : false;
+      const source = toPick ? res : pick;
+
+      const dirToggle = res
+        ? '<div class="filter-row">' +
+            '<button type="button" class="chip' + (toPick ? " chip-active" : "") + '" data-action="set-move-dir" data-dir="toPick">' + t("dirToPick") + "</button>" +
+            '<button type="button" class="chip' + (!toPick ? " chip-active" : "") + '" data-action="set-move-dir" data-dir="toReserve">' + t("dirToReserve") + "</button>" +
+          "</div>"
+        : '<div class="form-group">' +
+            '<label for="moveNewCode">' + t("newBinCode") + "</label>" +
+            '<input id="moveNewCode" data-field="moveNewCode" value="' + escapeHtml(state.moveNewCode) +
+              '" placeholder="' + escapeHtml(t("binReservePh")) + '" class="input" autocomplete="off" />' +
+          "</div>";
+
+      fields =
+        dirToggle +
+        '<div class="form-group">' +
+          '<div class="qty-label-row">' +
+            '<label for="moveQty">' + t("quantity") + "</label>" +
+            (source && source.qty > 0
+              ? '<button type="button" class="link-btn" data-action="move-all">' + t("moveAll") + " (" + source.qty + ")</button>"
+              : "") +
+          "</div>" +
+          '<input type="text" inputmode="numeric" pattern="[0-9]*" id="moveQty" data-field="moveQty" value="' + escapeHtml(state.moveQty) + '" placeholder="0" class="input" />' +
+          (source ? '<p class="hint">' + escapeHtml(source.code) + " \u00b7 " + source.qty + " " + t("currentlyInStock") + "</p>" : "") +
+        "</div>" +
+        '<div class="form-group">' +
+          '<label for="moveNote">' + t("moveNoteLabel") + "</label>" +
+          '<input id="moveNote" data-field="moveNote" value="' + escapeHtml(state.moveNote) +
+            '" placeholder="' + escapeHtml(t("moveNoteEg")) + '" class="input" />' +
+        "</div>" +
+        (state.moveError ? '<p class="form-error">' + escapeHtml(state.moveError) + "</p>" : "") +
+        '<button type="submit" class="submit-btn submit-move">' + t("moveBtn") + "</button>";
+    }
+  }
+
+  return (
+    '<form class="stock-form" data-action="submit-move">' +
+      '<div class="form-col form-col-main">' +
+        renderProductPicker("move", selected, sorted) +
+        (selected ? renderBinSummary(selected) : "") +
+      "</div>" +
+      '<div class="form-col form-col-side">' + fields + "</div>" +
+    "</form>"
+  );
+}
+
+// A labelled picture of where the product's stock sits right now, so the effect
+// of the move is visible before making it.
+function renderBinSummary(p) {
+  const pick = pickBin(p);
+  if (!pick) return "";
+  const res = reserveBin(p);
+  const cell = (bin, labelKey) =>
+    '<div class="bin-stat">' +
+      '<span class="bin-stat-label">' + t(labelKey) + "</span>" +
+      '<span class="bin-stat-code">' + escapeHtml(bin.code) + "</span>" +
+      '<span class="bin-stat-qty">' + bin.qty + "</span>" +
+    "</div>";
+  return (
+    '<div class="form-group">' +
+      "<label>" + t("binsLabel") + "</label>" +
+      '<div class="bin-stats">' +
+        cell(pick, "pickFaceLabel") +
+        (res ? cell(res, "reserveLabel") : "") +
+      "</div>" +
+      (needsReplenish(p) ? '<p class="hint hint-warn">' + t("needsReplenish") + "</p>" : "") +
+    "</div>"
+  );
+}
+
 function renderProductPicker(mode, selected, sorted) {
-  const searchVal = mode === "in" ? state.inSearch : state.outSearch;
+  const searchVal = state[mode + "Search"] || "";
 
   if (selected) {
     const thumb = selected.photo
@@ -2919,13 +3269,14 @@ function renderHistory() {
     if (!q) return true;
     const p = byDocId[t.productId];
     return (t.productName || "").toLowerCase().includes(q) ||
+      (t.bin || "").toLowerCase().includes(q) ||
       (t.note || "").toLowerCase().includes(q) ||
       displayNote(t.note).toLowerCase().includes(q) ||
       (p && (p.productId || "").toLowerCase().includes(q)) ||
       (p && (p.barcode || "").toLowerCase().includes(q));
   });
 
-  const filters = [["all", t("all")], ["in", t("tabIn")], ["out", t("tabOut")]];
+  const filters = [["all", t("all")], ["in", t("tabIn")], ["out", t("tabOut")], ["move", t("tabMove")]];
   const chips = filters.map(f =>
     '<button type="button" class="chip' + (state.historyFilter === f[0] ? " chip-active" : "") + '" data-action="set-history-filter" data-filter="' + f[0] + '">' + f[1] + "</button>"
   ).join("") +
@@ -2942,6 +3293,16 @@ function renderHistory() {
       scanBtn("historySearch") +
     "</div>";
 
+  // History is a per-product record, so it stays empty until a product is
+  // named. Scrolling the whole warehouse's movements answers no question.
+  if (!q) {
+    return '<div class="filter-row">' + chips + "</div>" + search +
+      '<div class="empty-state">' + icon("search", 30) +
+        '<p class="empty-title">' + t("historyPromptTitle") + "</p>" +
+        '<p class="empty-sub">' + t("historyPromptSub") + "</p>" +
+      "</div>";
+  }
+
   if (filtered.length === 0) {
     return '<div class="filter-row">' + chips + "</div>" + search +
       '<div class="empty-inline">' + t("noMatchingActivity") + "</div>";
@@ -2949,9 +3310,12 @@ function renderHistory() {
 
   if (state.historySort === "asc") filtered.reverse();
 
-  let totalIn = 0, totalOut = 0;
+  // A move shifts stock between shelves without changing the total, so it is
+  // counted on its own rather than folded into the in/out figures.
+  let totalIn = 0, totalOut = 0, totalMoved = 0;
   for (let i = 0; i < filtered.length; i++) {
     if (filtered[i].type === "in") totalIn += filtered[i].qty;
+    else if (filtered[i].type === "move") totalMoved += filtered[i].qty;
     else totalOut += filtered[i].qty;
   }
   const net = totalIn - totalOut;
@@ -2960,22 +3324,76 @@ function renderHistory() {
     '<div class="hist-summary">' +
       '<span class="imp-pill imp-pill-ok">+' + totalIn + " " + t("inWord") + "</span>" +
       '<span class="imp-pill imp-pill-bad">-' + totalOut + " " + t("outWord") + "</span>" +
+      (totalMoved ? '<span class="imp-pill imp-pill-move">' + totalMoved + " " + t("movedWord") + "</span>" : "") +
       '<span class="hist-net">' + t("netWord") + " " + (net >= 0 ? "+" : "") + net + " \u00b7 " + filtered.length + " " + (filtered.length === 1 ? t("recordOne") : t("recordMany")) + "</span>" +
     "</div>";
 
-  const rows = filtered.map(t =>
-    '<div class="history-row">' +
-      '<div class="history-icon ' + (t.type === "in" ? "history-icon-in" : "history-icon-out") + '">' + icon(t.type === "in" ? "up" : "down", 13) + "</div>" +
-      '<div class="history-info">' +
-        '<div class="history-name">' + escapeHtml(t.productName) + "</div>" +
-        '<div class="history-meta">' + formatDate(t.date) + (t.note ? " \u00b7 " + escapeHtml(displayNote(t.note)) : "") + "</div>" +
-      "</div>" +
-      '<div class="history-amount ' + (t.type === "in" ? "amount-in" : "amount-out") + '">' + (t.type === "in" ? "+" : "-") + t.qty + "</div>" +
-    "</div>"
-  ).join("");
+  const rows = filtered.map(t => {
+    const isMove = t.type === "move";
+    const isIn = t.type === "in";
+    const toneClass = isMove ? "history-icon-move" : (isIn ? "history-icon-in" : "history-icon-out");
+    const amtClass = isMove ? "amount-move" : (isIn ? "amount-in" : "amount-out");
+    const sign = isMove ? "" : (isIn ? "+" : "-");
+    // Once you've searched a product you already know its name, so the movement
+    // itself leads and the name drops to the second line as context.
+    const detail =
+      (t.bin ? '<span class="history-bin">' + escapeHtml(t.bin) + "</span> \u00b7 " : "") +
+      formatDate(t.date) +
+      (t.note ? " \u00b7 " + escapeHtml(displayNote(t.note)) : "");
+    return (
+      '<div class="history-row">' +
+        '<div class="history-icon ' + toneClass + '">' + icon(isMove ? "move" : (isIn ? "up" : "down"), 13) + "</div>" +
+        '<div class="history-info">' +
+          '<div class="history-detail">' + detail + "</div>" +
+          '<div class="history-name">' + escapeHtml(t.productName) + "</div>" +
+        "</div>" +
+        '<div class="history-amount ' + amtClass + '">' + sign + t.qty + "</div>" +
+      "</div>"
+    );
+  }).join("");
 
   return '<div class="filter-row">' + chips + "</div>" + search + summary +
     '<div class="history-list">' + rows + "</div>";
+}
+
+// Two fixed slots rather than an open-ended list: the pick face you sell from,
+// and one reserve holding the bulk behind it. The reserve can be left blank for
+// products that live in a single place.
+function renderBinEditor(editing) {
+  const slot = (i, labelKey, placeholderKey) =>
+    '<div class="bin-slot">' +
+      '<span class="bin-slot-label">' + t(labelKey) + "</span>" +
+      '<div class="bin-slot-fields">' +
+        '<input id="binCode' + i + '" data-bin-index="' + i + '" data-bin-part="code" value="' + escapeHtml(state.newBins[i].code) +
+          '" placeholder="' + escapeHtml(t(placeholderKey)) + '" class="input" autocomplete="off" />' +
+        '<input type="text" inputmode="numeric" pattern="[0-9]*" id="binQty' + i + '" data-bin-index="' + i +
+          '" data-bin-part="qty" value="' + escapeHtml(state.newBins[i].qty) + '" placeholder="0" class="input bin-slot-qty" />' +
+      "</div>" +
+    "</div>";
+
+  const filled = state.newBins.filter(b => String(b.code || "").trim());
+  const total = binsTotal(state.newBins.map(b => ({ code: b.code, qty: Math.max(0, parseInt(b.qty, 10) || 0) })));
+  const mismatch = editing && filled.length && total !== editing.stock
+    ? '<p class="hint hint-warn">' + t("binTotalMismatch") + " " + total + ".</p>"
+    : "";
+
+  return (
+    '<div class="form-group">' +
+      "<label>" + t("binsLabel") + "</label>" +
+      '<div class="bin-slots">' +
+        slot(0, "pickFaceLabel", "binCodePh") +
+        '<button type="button" class="bin-swap" data-action="swap-bins" title="' + escapeHtml(t("swapBins")) + '">' +
+          icon("move", 14) + t("swapBins") +
+        "</button>" +
+        slot(1, "reserveOptional", "binReservePh") +
+      "</div>" +
+      '<div class="bin-foot">' +
+        '<span class="bin-total">' + t("inStock") + ": <strong>" + total + "</strong></span>" +
+      "</div>" +
+      '<p class="hint">' + t("pickFaceHint") + "</p>" +
+      mismatch +
+    "</div>"
+  );
 }
 
 function renderProductForm() {
@@ -3035,11 +3453,8 @@ function renderProductForm() {
           '<label for="newPrice">' + t("priceLabel") + "</label>" +
           '<input type="text" inputmode="decimal" id="newPrice" data-field="newPrice" value="' + escapeHtml(state.newPrice) + '" placeholder="0.00" class="input" />' +
         "</div>" +
-        '<div class="form-group">' +
-          '<label for="newLocation">' + t("locationLabel") + "</label>" +
-          '<input id="newLocation" data-field="newLocation" value="' + escapeHtml(state.newLocation) + '" placeholder="' + escapeHtml(t("locationEg")) + '" class="input" />' +
-        "</div>" +
-        (!editing ?
+        renderBinEditor(editing) +
+        (!editing && state.newBins.length === 0 ?
           '<div class="form-group">' +
             '<label for="newStock">' + t("startingStock") + "</label>" +
             '<input type="text" inputmode="numeric" pattern="[0-9]*" id="newStock" data-field="newStock" value="' + escapeHtml(state.newStock) + '" placeholder="0" class="input" />' +
@@ -3093,6 +3508,7 @@ function openAddModal() {
   state.newBarcode = "";
   state.newPrice = "";
   state.newLocation = "";
+  state.newBins = [{ code: "", qty: "0" }, { code: "", qty: "0" }];
   state.photoProcessing = false;
   state.modalError = "";
   state.tab = "product-form";
@@ -3115,6 +3531,11 @@ function openEditModal(id) {
   state.newBarcode = p.barcode || "";
   state.newPrice = p.price !== undefined && p.price !== null ? String(p.price) : "";
   state.newLocation = p.location || "";
+  // Quantities become strings so the shared numeric input handling works, and
+  // the list is padded to the two fixed slots the form shows.
+  const loaded = binsOf(p).map(b => ({ code: b.code, qty: String(b.qty) }));
+  while (loaded.length < 2) loaded.push({ code: "", qty: "0" });
+  state.newBins = loaded.slice(0, 2);
   state.photoProcessing = false;
   state.modalError = "";
   state.tab = "product-form";
@@ -3392,12 +3813,12 @@ async function applyScanSession() {
     const r = rows[i];
     const p = state.products.find(x => x.id === r.id);
     if (!p) continue;
-    const newStock = mode === "in" ? p.stock + r.qty : Math.max(0, p.stock - r.qty);
+    const alloc = allocateMovement(p, r.qty, mode, "reserve");
     try {
-      await updateDoc(doc(db, "stock_products", p.id), { stock: newStock, updatedAt: now });
+      await updateDoc(doc(db, "stock_products", p.id), Object.assign({ updatedAt: now }, alloc.patch));
       await addDoc(collection(db, "stock_transactions"), {
         productId: p.id, productName: p.name, type: mode, qty: r.qty,
-        note: SYS_NOTE_SCAN, date: now,
+        bin: describeMoves(alloc.moves), note: SYS_NOTE_SCAN, date: now,
       });
       applied += r.qty;
     } catch (err) {
@@ -3760,18 +4181,51 @@ async function saveProduct() {
   const price = priceTrimmed === "" ? null : Math.max(0, parseFloat(priceTrimmed) || 0);
   const productId = state.newProductId.trim();
   const barcode = state.newBarcode.trim();
-  const location = state.newLocation.trim();
   const photos = state.newPhotos.slice();
   const photo = photos[0] || "";  // first image doubles as the thumbnail everywhere else
 
+  // Blank rows are dropped, and repeating a code merges into the first row that
+  // used it rather than creating two bins that fight over the same shelf.
+  const bins = [];
+  const seen = {};
+  for (let i = 0; i < state.newBins.length; i++) {
+    const code = String(state.newBins[i].code || "").trim();
+    if (!code) continue;
+    const qty = Math.max(0, parseInt(state.newBins[i].qty, 10) || 0);
+    const key = code.toUpperCase();
+    if (seen[key] !== undefined) { bins[seen[key]].qty += qty; continue; }
+    seen[key] = bins.length;
+    bins.push({ code: code, qty: qty });
+  }
+  const location = bins.length ? bins[0].code : "";
+
   if (state.editingProductId) {
+    const before = state.products.find(x => x.id === state.editingProductId);
+    const now = Date.now();
+    const patch = {
+      name: name, category: state.newCategory, threshold: threshold,
+      productId: productId, barcode: barcode, price: price, location: location,
+      photo: photo, photos: photos,
+      updatedAt: now,
+    };
+    // Editing a bin quantity is a real stock change, so it is written to the
+    // total and recorded in history instead of silently drifting.
+    let delta = 0;
+    if (bins.length) {
+      patch.bins = bins;
+      patch.stock = binsTotal(bins);
+      delta = patch.stock - Math.max(0, parseInt(before ? before.stock : 0, 10) || 0);
+    }
     try {
-      await updateDoc(doc(db, "stock_products", state.editingProductId), {
-        name: name, category: state.newCategory, threshold: threshold,
-        productId: productId, barcode: barcode, price: price, location: location,
-        photo: photo, photos: photos,
-        updatedAt: Date.now(),
-      });
+      await updateDoc(doc(db, "stock_products", state.editingProductId), patch);
+      if (delta !== 0) {
+        await addDoc(collection(db, "stock_transactions"), {
+          productId: state.editingProductId, productName: name,
+          type: delta > 0 ? "in" : "out", qty: Math.abs(delta),
+          bin: bins.length ? bins[0].code : "",
+          note: SYS_NOTE_ADJUST, date: now,
+        });
+      }
       showToast(t("toastUpdated") + " " + name);
       closeModal();
     } catch (err) {
@@ -3782,18 +4236,22 @@ async function saveProduct() {
     return;
   }
 
-  const startStock = Math.max(0, parseInt(state.newStock, 10) || 0);
+  // With bins filled in, their sum is the starting stock; the plain Starting
+  // Stock box only shows when no bin has been entered.
+  const startStock = bins.length ? binsTotal(bins) : Math.max(0, parseInt(state.newStock, 10) || 0);
   const now = Date.now();
   try {
     const ref = await addDoc(collection(db, "stock_products"), {
       name: name, category: state.newCategory, stock: startStock, threshold: threshold,
       productId: productId, barcode: barcode, price: price, location: location,
+      bins: bins,
       photo: photo, photos: photos,
       createdAt: now, updatedAt: now,
     });
     if (startStock > 0) {
       await addDoc(collection(db, "stock_transactions"), {
-        productId: ref.id, productName: name, type: "in", qty: startStock, note: SYS_NOTE_INITIAL, date: now,
+        productId: ref.id, productName: name, type: "in", qty: startStock,
+        bin: location, note: SYS_NOTE_INITIAL, date: now,
       });
     }
     showToast(t("toastAdded") + " " + name);
@@ -3865,9 +4323,10 @@ async function applyImport() {
 
   for (let i = 0; i < ids.length; i++) {
     const g = groups[ids[i]];
-    const newStock = mode === "in" ? g.product.stock + g.total : g.product.stock - g.total;
+    const alloc = allocateMovement(g.product, g.total, mode, "reserve");
+    const binText = describeMoves(alloc.moves);
     try {
-      await updateDoc(doc(db, "stock_products", g.product.id), { stock: newStock, updatedAt: now });
+      await updateDoc(doc(db, "stock_products", g.product.id), Object.assign({ updatedAt: now }, alloc.patch));
     } catch (err) {
       console.error("import stock update failed for", g.product.id, err);
       if (!firstErr) firstErr = err;
@@ -3881,6 +4340,7 @@ async function applyImport() {
           productName: g.product.name,
           type: mode,
           qty: r.qty,
+          bin: binText,
           note: r.note || (SYS_NOTE_IMPORT_PREFIX + state.importFileName),
           date: now,
         });
@@ -3959,10 +4419,12 @@ async function submitStockIn() {
   const qty = parseInt(state.inQty, 10);
   if (!product) { state.inError = t("errChooseProduct"); render(); return; }
   if (!qty || qty <= 0) { state.inError = t("errQtyPositive"); render(); return; }
+  const alloc = allocateMovement(product, qty, "in", state.inTarget);
   try {
-    await updateDoc(doc(db, "stock_products", product.id), { stock: product.stock + qty, updatedAt: Date.now() });
+    await updateDoc(doc(db, "stock_products", product.id), Object.assign({ updatedAt: Date.now() }, alloc.patch));
     await addDoc(collection(db, "stock_transactions"), {
-      productId: product.id, productName: product.name, type: "in", qty: qty, note: state.inNote.trim(), date: Date.now(),
+      productId: product.id, productName: product.name, type: "in", qty: qty,
+      bin: describeMoves(alloc.moves), note: state.inNote.trim(), date: Date.now(),
     });
     showToast("+" + qty + " " + product.name);
     state.inProductId = ""; state.inQty = ""; state.inNote = "";
@@ -3981,10 +4443,12 @@ async function submitStockOut() {
   if (!product) { state.outError = t("errChooseProduct"); render(); return; }
   if (!qty || qty <= 0) { state.outError = t("errQtyPositive"); render(); return; }
   if (qty > product.stock) { state.outError = t("errOnly") + " " + product.stock + " " + t("errInStock"); render(); return; }
+  const alloc = allocateMovement(product, qty, "out");
   try {
-    await updateDoc(doc(db, "stock_products", product.id), { stock: product.stock - qty, updatedAt: Date.now() });
+    await updateDoc(doc(db, "stock_products", product.id), Object.assign({ updatedAt: Date.now() }, alloc.patch));
     await addDoc(collection(db, "stock_transactions"), {
-      productId: product.id, productName: product.name, type: "out", qty: qty, note: state.outNote.trim(), date: Date.now(),
+      productId: product.id, productName: product.name, type: "out", qty: qty,
+      bin: describeMoves(alloc.moves), note: state.outNote.trim(), date: Date.now(),
     });
     showToast("-" + qty + " " + product.name);
     state.outProductId = ""; state.outQty = ""; state.outNote = "";
@@ -3992,6 +4456,64 @@ async function submitStockOut() {
   } catch (err) {
     console.error(err);
     state.outError = describeError(err);
+    render();
+  }
+}
+
+// Moves quantity between the pick face and the reserve. The product's total
+// never changes, so this writes only the two slots \u2014 and bins[0] stays the pick
+// face throughout, so the slots can never quietly swap round.
+async function submitMove() {
+  state.moveError = "";
+  const product = state.products.find(p => p.id === state.moveProductId);
+  if (!product) { state.moveError = t("errChooseProduct"); render(); return; }
+
+  const bins = binsOf(product);
+  if (!bins.length) { state.moveError = t("errNeedBins"); render(); return; }
+
+  const hasReserve = bins.length > 1;
+  const toPick = hasReserve ? state.moveDir !== "toReserve" : false;
+  const qty = parseInt(state.moveQty, 10);
+  if (!qty || qty <= 0) { state.moveError = t("errQtyPositive"); render(); return; }
+
+  // Moving into a reserve that doesn't exist yet creates it from the code box.
+  let reserveCode = hasReserve ? bins[1].code : state.moveNewCode.trim();
+  if (!toPick && !reserveCode) { state.moveError = t("errNeedReserveCode"); render(); return; }
+
+  const from = toPick ? bins[1] : bins[0];
+  if (from.qty <= 0) { state.moveError = t("errNothingToMove"); render(); return; }
+  if (qty > from.qty) { state.moveError = t("errBinOnly") + " " + from.qty + "."; render(); return; }
+
+  if (toPick) {
+    bins[1].qty -= qty;
+    bins[0].qty += qty;
+  } else {
+    bins[0].qty -= qty;
+    if (hasReserve) bins[1].qty += qty;
+    else bins.push({ code: reserveCode, qty: qty });
+  }
+
+  // An emptied reserve is dropped so it stops showing on the row; the pick face
+  // always stays, even at zero, because that is where picking happens.
+  const finalBins = bins.length > 1 && bins[1].qty === 0 ? [bins[0]] : bins;
+  const fromCode = toPick ? bins[1].code : bins[0].code;
+  const toCode = toPick ? bins[0].code : reserveCode;
+
+  const now = Date.now();
+  try {
+    await updateDoc(doc(db, "stock_products", product.id), {
+      bins: finalBins, location: finalBins[0].code, stock: binsTotal(finalBins), updatedAt: now,
+    });
+    await addDoc(collection(db, "stock_transactions"), {
+      productId: product.id, productName: product.name, type: "move", qty: qty,
+      bin: fromCode + " \u2192 " + toCode, note: state.moveNote.trim(), date: now,
+    });
+    showToast(t("toastMoved") + " " + qty + " \u00b7 " + fromCode + " \u2192 " + toCode);
+    state.moveQty = ""; state.moveNote = ""; state.moveNewCode = "";
+    render();
+  } catch (err) {
+    console.error(err);
+    state.moveError = describeError(err);
     render();
   }
 }
@@ -4022,38 +4544,59 @@ appEl.addEventListener("click", (e) => {
   else if (action === "close-modal") closeModal();
   else if (action === "select-stock-product") {
     const m = el.dataset.mode;
-    if (m === "in") { state.inProductId = el.dataset.id; state.inSearch = ""; state.inError = ""; }
-    else { state.outProductId = el.dataset.id; state.outSearch = ""; state.outError = ""; }
+    state[m + "ProductId"] = el.dataset.id;
+    state[m + "Search"] = "";
+    state[m + "Error"] = "";
+    // A different product means different bins, so the move fields start over.
+    if (m === "move") { state.moveDir = "toPick"; state.moveNewCode = ""; state.moveQty = ""; }
+    if (m === "in") state.inTarget = "reserve";
     render();
   }
   else if (action === "clear-stock-product") {
     const m = el.dataset.mode;
-    if (m === "in") { state.inProductId = ""; state.inSearch = ""; }
-    else { state.outProductId = ""; state.outSearch = ""; }
+    state[m + "ProductId"] = "";
+    state[m + "Search"] = "";
+    if (m === "move") { state.moveDir = "toPick"; state.moveNewCode = ""; state.moveQty = ""; }
     render();
-    const s = document.getElementById((m === "in" ? "in" : "out") + "Search");
+    const s = document.getElementById(m + "Search");
     if (s) s.focus();
   }
-  else if (action === "set-stock-mode") {
-    const m = el.dataset.mode;
-    const sub = el.dataset.sub;
-    if (m === "in") state.inMode = sub; else state.outMode = sub;
-    if (sub === "import" && state.importFor !== m) resetImport();
+  else if (action === "swap-bins") {
+    // Entered the wrong way round is a common slip, so swapping is one tap
+    // rather than retyping both codes and quantities.
+    const a = state.newBins[0], b = state.newBins[1];
+    state.newBins = [b, a];
     render();
   }
-  else if (action === "apply-import") applyImport();
-  else if (action === "download-template") downloadImportTemplate();
-  else if (action === "import-filter") {
-    const f = el.dataset.filter;
-    // Clicking the active filter again clears it back to showing all rows.
-    state.importFilter = state.importFilter === f ? "all" : f;
+  else if (action === "set-move-dir") {
+    state.moveDir = el.dataset.dir;
+    state.moveQty = "";
+    state.moveError = "";
     render();
   }
-  else if (action === "toggle-delete-select") {
-    const id = el.dataset.id;
-    if (state.deleteSelected[id]) delete state.deleteSelected[id];
-    else state.deleteSelected[id] = true;
-    state.deleteConfirming = false;
+  else if (action === "move-all") {
+    const p = state.products.find(x => x.id === state.moveProductId);
+    if (p) {
+      const res = reserveBin(p), pick = pickBin(p);
+      const src = (res && state.moveDir !== "toReserve") ? res : pick;
+      if (src) state.moveQty = String(src.qty);
+    }
+    render();
+  }
+  else if (action === "set-in-target") {
+    state.inTarget = el.dataset.target;
+    render();
+  }
+  else if (action === "replenish") {
+    // Straight from the Overview row into a pre-filled replenish.
+    const p = state.products.find(x => x.id === el.dataset.id);
+    state.tab = "move";
+    state.moveProductId = el.dataset.id;
+    state.moveDir = "toPick";
+    state.moveNewCode = "";
+    state.moveError = "";
+    const res = p ? reserveBin(p) : null;
+    state.moveQty = res ? String(res.qty) : "";
     render();
   }
   else if (action === "ask-bulk-delete") { state.deleteConfirming = true; state.deleteError = ""; render(); }
@@ -4118,6 +4661,7 @@ appEl.addEventListener("submit", (e) => {
   const action = el.dataset.action;
   if (action === "submit-stock-in") submitStockIn();
   else if (action === "submit-stock-out") submitStockOut();
+  else if (action === "submit-move") submitMove();
   else if (action === "submit-product") saveProduct();
 });
 
@@ -4143,15 +4687,17 @@ function applyFieldValue(field, value) {
 
   // A barcode scanner types the whole code then Enter. If what's typed exactly
   // matches one product's ID or barcode, pick it straight away.
-  if (field === "inSearch" || field === "outSearch") {
+  if (field === "inSearch" || field === "outSearch" || field === "moveSearch") {
     const key = String(value).trim().toLowerCase();
     if (key) {
       const hits = state.products.filter(p =>
         (p.productId || "").toLowerCase() === key || (p.barcode || "").toLowerCase() === key
       );
       if (hits.length === 1) {
-        if (field === "inSearch") { state.inProductId = hits[0].id; state.inSearch = ""; state.inError = ""; }
-        else { state.outProductId = hits[0].id; state.outSearch = ""; state.outError = ""; }
+        const m = field.slice(0, -6);   // "inSearch" -> "in", "moveSearch" -> "move"
+        state[m + "ProductId"] = hits[0].id;
+        state[m + "Search"] = "";
+        state[m + "Error"] = "";
       }
     }
   }
@@ -4159,8 +4705,9 @@ function applyFieldValue(field, value) {
 
 appEl.addEventListener("input", (e) => {
   if (e.target.tagName === "SELECT") return;
+  const binIndex = e.target.dataset.binIndex;
   const field = e.target.dataset.field;
-  if (!field) return;
+  if (binIndex === undefined && !field) return;
   let value = e.target.value;
   if (e.target.inputMode === "numeric") {
     value = value.replace(/[^0-9]/g, "");
@@ -4169,7 +4716,12 @@ appEl.addEventListener("input", (e) => {
     const dot = value.indexOf(".");
     if (dot !== -1) value = value.slice(0, dot + 1) + value.slice(dot + 1).replace(/\./g, "");
   }
-  applyFieldValue(field, value);
+  if (binIndex !== undefined) {
+    const row = state.newBins[parseInt(binIndex, 10)];
+    if (row) { row[e.target.dataset.binPart] = value; state.modalError = ""; }
+  } else {
+    applyFieldValue(field, value);
+  }
   render();
 });
 
