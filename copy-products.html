@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Copy Products — NIJA → Uncle</title>
+<style>
+  :root { --bg:#0e0f12; --card:#17181d; --line:#2a2c33; --text:#f2f2f4; --dim:#9aa0aa; --accent:#f0a91c; --accent-ink:#1a1200; --green:#22c55e; --red:#ef4444; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif; padding:24px; line-height:1.5; }
+  .wrap { max-width:680px; margin:0 auto; }
+  h1 { font-size:20px; margin:0 0 4px; }
+  .sub { color:var(--dim); font-size:13px; margin:0 0 20px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px; margin-bottom:16px; }
+  .card h2 { font-size:14px; margin:0 0 12px; }
+  label { display:block; font-size:12px; color:var(--dim); margin:10px 0 4px; }
+  input[type=text] { width:100%; padding:10px 12px; border-radius:9px; border:1px solid var(--line); background:#101216; color:var(--text); font-size:14px; font-family:ui-monospace,Menlo,Consolas,monospace; }
+  input[type=text]:focus { outline:none; border-color:var(--accent); }
+  .row { display:flex; align-items:center; gap:8px; margin-top:14px; font-size:13px; color:var(--dim); }
+  .row input { width:auto; }
+  button { margin-top:18px; width:100%; padding:13px; border:none; border-radius:11px; background:var(--accent); color:var(--accent-ink); font-size:15px; font-weight:700; cursor:pointer; }
+  button:disabled { opacity:.5; cursor:default; }
+  .log { margin-top:16px; font-size:13px; font-family:ui-monospace,Menlo,Consolas,monospace; white-space:pre-wrap; background:#0a0b0e; border:1px solid var(--line); border-radius:10px; padding:12px; max-height:260px; overflow:auto; min-height:40px; }
+  .ok { color:var(--green); } .err { color:var(--red); }
+  .note { font-size:12px; color:var(--dim); background:#1c1408; border:1px solid #3a2c0e; border-radius:10px; padding:10px 12px; margin-bottom:16px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Copy products → your uncle's shop</h1>
+  <p class="sub">Copies every product (name, ID, barcode, category, photo, location, reorder level) from your NIJA database into your uncle's database. Run this once.</p>
+
+  <div class="note">⚠️ Open this file in a normal browser tab (Chrome). It reads from your NIJA project and writes into your uncle's project. It only <b>adds</b> products — if you press the button twice you'll get duplicates.</div>
+
+  <div class="card">
+    <h2>1 · FROM — your NIJA database (pre-filled)</h2>
+    <label>apiKey</label>
+    <input type="text" id="srcKey" value="AIzaSyApyTWsALmtURKP73n8zYi6hAT7lzzgJOk" />
+    <label>projectId</label>
+    <input type="text" id="srcId" value="nija-helmets" />
+  </div>
+
+  <div class="card">
+    <h2>2 · TO — your uncle's database (paste his config)</h2>
+    <p class="sub" style="margin:0 0 6px">Get these from his <code>stock-control.html</code> file (the firebaseConfig block) or Firebase → Project settings.</p>
+    <label>apiKey</label>
+    <input type="text" id="dstKey" placeholder="AIza..." />
+    <label>projectId</label>
+    <input type="text" id="dstId" value="kmxhelmet" />
+    <div class="row"><input type="checkbox" id="resetStock" checked /><label for="resetStock" style="margin:0">Start every product's stock at 0 (recommended for a new shop)</label></div>
+  </div>
+
+  <button id="go">Copy products now</button>
+  <div class="log" id="log">Ready.</div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+
+const $ = id => document.getElementById(id);
+const logEl = $("log");
+function log(msg, cls) {
+  const line = document.createElement("div");
+  if (cls) line.className = cls;
+  line.textContent = msg;
+  logEl.appendChild(line);
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+$("go").addEventListener("click", async () => {
+  const srcCfg = { apiKey: $("srcKey").value.trim(), projectId: $("srcId").value.trim() };
+  const dstCfg = { apiKey: $("dstKey").value.trim(), projectId: $("dstId").value.trim() };
+  const resetStock = $("resetStock").checked;
+
+  if (!srcCfg.apiKey || !srcCfg.projectId) { log("Fill in the FROM (NIJA) apiKey and projectId.", "err"); return; }
+  if (!dstCfg.apiKey || !dstCfg.projectId) { log("Fill in the TO (uncle) apiKey and projectId.", "err"); return; }
+  if (srcCfg.projectId === dstCfg.projectId) { log("Source and destination are the same project — stopping.", "err"); return; }
+
+  $("go").disabled = true;
+  logEl.textContent = "";
+  try {
+    const srcDb = getFirestore(initializeApp(srcCfg, "src-" + Date.now()));
+    const dstDb = getFirestore(initializeApp(dstCfg, "dst-" + Date.now()));
+
+    log("Reading products from " + srcCfg.projectId + " …");
+    const snap = await getDocs(collection(srcDb, "stock_products"));
+    log("Found " + snap.size + " product(s).");
+    if (snap.size === 0) { log("Nothing to copy.", "err"); $("go").disabled = false; return; }
+
+    let done = 0;
+    for (const d of snap.docs) {
+      const data = d.data();
+      delete data.id; // let the new project assign its own id
+      if (resetStock) data.stock = 0;
+      data.updatedAt = Date.now();
+      try {
+        await addDoc(collection(dstDb, "stock_products"), data);
+        done++;
+        log("✓ " + (data.name || data.productId || "product") + "  (" + done + "/" + snap.size + ")", "ok");
+      } catch (e) {
+        log("✗ Failed: " + (data.name || "product") + " — " + (e && e.message ? e.message : e), "err");
+      }
+    }
+    log("\nDone. Copied " + done + " of " + snap.size + " products into " + dstCfg.projectId + ".", "ok");
+    log("Open your uncle's app and refresh — the products should be there.");
+  } catch (e) {
+    log("Error: " + (e && e.message ? e.message : e), "err");
+    log("Check the apiKey/projectId are correct and that both Firestore databases allow read/write.");
+  }
+  $("go").disabled = false;
+});
+</script>
+</body>
+</html>
