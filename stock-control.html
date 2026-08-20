@@ -52,6 +52,9 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
     --radius-sm: 6px;
     --radius: 10px;
     --radius-lg: 16px;
+    /* Caps the one-per-row product list so lines stay comfortable to read on a
+       wide monitor instead of stretching edge to edge. */
+    --list-max: 1180px;
   }
   html[data-theme="light"] {
     --signal: #b45309;
@@ -213,18 +216,41 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
   .input-search { padding-left: 34px; }
 
   .product-list, .history-list { display: flex; flex-direction: column; gap: 8px; }
-  .product-row, .history-row {
+  .history-row {
     display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: var(--radius);
     background: var(--surface); border: 1px solid var(--border);
   }
-  .product-row { flex-wrap: wrap; }
+  /* One product per line. Every field owns a named grid area, so names,
+     locations, barcodes and stock numbers line up straight down the list
+     instead of drifting with the length of each product name. */
+  .product-row {
+    --thumb: 46px;
+    display: grid; align-items: center;
+    grid-template-columns: var(--thumb) minmax(0, 1fr) auto auto;
+    grid-template-areas: "thumb info stock actions";
+    column-gap: 12px; row-gap: 8px;
+    padding: 12px; border-radius: var(--radius);
+    background: var(--surface); border: 1px solid var(--border);
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .product-row:hover { border-color: var(--accent-tint-border); background: var(--surface-2); }
+  /* A red edge marks a row that needs reordering, so it reads at a glance
+     without hunting for the small number on the right. */
+  .product-row.is-low { box-shadow: inset 3px 0 0 var(--danger); }
   html[data-theme="light"] .product-row, html[data-theme="light"] .history-row { background: var(--bg); }
-  .product-info { flex: 1; min-width: 0; }
+  html[data-theme="light"] .product-row:hover { background: var(--surface-2); }
+  .product-row > .row-thumb-btn, .product-row > .row-thumb-placeholder { grid-area: thumb; }
+  .product-info { grid-area: info; min-width: 0; }
   .row-thumb { width: 42px; height: 42px; border-radius: var(--radius-sm); object-fit: cover; flex-shrink: 0; background: var(--surface-2); border: 1px solid var(--border); }
   .row-thumb-placeholder { width: 42px; height: 42px; border-radius: var(--radius-sm); flex-shrink: 0; background: var(--surface-2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--text-dimmer); }
+  .product-row .row-thumb, .product-row .row-thumb-placeholder {
+    width: var(--thumb); height: var(--thumb); border-radius: 8px;
+  }
   .product-name-row { display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; }
-  .product-name { font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; max-width: 100%; }
-  .cat-tag { flex-shrink: 0; margin-left: auto; white-space: nowrap; font-size: 11px; padding: 2px 7px; border-radius: 5px; border: 1px solid transparent; line-height: 1.5; }
+  .product-name { font-size: 14px; font-weight: 600; letter-spacing: -.005em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; max-width: 100%; }
+  /* The tag sits right after the name rather than pinned to the far right,
+     so the eye reads "name + category" as one unit on every line. */
+  .cat-tag { flex-shrink: 0; white-space: nowrap; font-size: 11px; padding: 2px 7px; border-radius: 5px; border: 1px solid transparent; line-height: 1.5; }
   .cat-helmet { background: var(--helmet-bg); color: var(--helmet-fg); border-color: var(--helmet-bd); }
   .cat-frame { background: var(--frame-bg); color: var(--frame-fg); border-color: var(--frame-bd); }
   .cat-plastic-box { background: var(--plastic-box-bg); color: var(--plastic-box-fg); border-color: var(--plastic-box-bd); }
@@ -239,10 +265,11 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
   .cat-accessory { background: var(--accessory-bg); color: var(--accessory-fg); border-color: var(--accessory-bd); }
   .low-flag { flex-shrink: 0; white-space: nowrap; display: inline-flex; align-items: center; gap: 3px; font-size: 11px; color: var(--danger); }
   .product-meta { font-size: 12px; color: var(--text-dim); margin-top: 4px; font-variant-numeric: tabular-nums; }
+  /* Sits in the implicit second row, starting under the product name. When a
+     product has no location or barcode the element is not rendered at all, so
+     no empty row is left behind. */
   .product-extra {
-    display: flex; gap: 6px; flex-wrap: nowrap; margin-top: 2px; min-width: 0;
-    /* 42px thumbnail + 12px row gap keeps it aligned with the product name. */
-    flex: 0 0 calc(100% - 54px); margin-left: 54px; box-sizing: border-box;
+    grid-column: 2 / -1; display: flex; gap: 6px; flex-wrap: nowrap; min-width: 0;
   }
   .extra-item {
     display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 500;
@@ -255,14 +282,14 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
   .extra-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
   .extra-barcode .extra-text { font-variant-numeric: tabular-nums; }
   /* The location is short, so let the barcode take the leftover room. */
-  .extra-item:first-child { flex-shrink: 0; }
+  .extra-loc { flex-shrink: 0; }
   .extra-barcode { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: .02em; }
-  .row-stock { flex-shrink: 0; text-align: right; padding: 0 2px; }
+  .row-stock { grid-area: stock; text-align: right; padding: 0 2px; }
   .row-stock-num { font-size: 20px; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; color: var(--text); }
   .row-stock-num.low { color: var(--danger); }
   .row-stock-label { font-size: 10px; color: var(--text-dimmer); margin-top: 1px; white-space: nowrap; }
 
-  .row-actions { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+  .row-actions { grid-area: actions; display: flex; align-items: center; gap: 2px; }
   .icon-btn { background: none; border: none; color: var(--text-dim); padding: 7px; border-radius: var(--radius-sm); cursor: pointer; display: flex; }
   .icon-btn:hover { background: var(--surface-2); color: var(--text); }
   .icon-btn-up:hover { background: var(--success-bg); color: var(--success); }
@@ -747,9 +774,9 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
   .submit-btn[disabled], .btn[disabled] { opacity: .5; cursor: not-allowed; filter: none; }
 
   @media (max-width: 560px) {
-    .product-row { gap: 10px; padding: 10px; align-items: flex-start; }
-    .product-extra { flex-basis: calc(100% - 52px); margin-left: 52px; }
+    .product-row { --thumb: 42px; column-gap: 10px; padding: 10px; align-items: start; }
     .product-name { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.3; }
+    .product-name-row { flex-wrap: wrap; }
     .row-stock { padding-top: 2px; }
     .row-actions { flex-wrap: wrap; justify-content: flex-end; max-width: 76px; }
     .icon-btn { padding: 6px; }
@@ -778,17 +805,40 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
     .launch-tile { font-size: 14px; gap: 12px; }
     .content { padding: 24px 32px 40px; }
 
-    .product-list {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(460px, 1fr));
-      gap: 10px; align-items: start;
+    /* One shared track list keeps every row locked to the same columns. */
+    :root {
+      --thumb-d: 56px;
+      --product-cols: var(--thumb-d) minmax(0, 1fr) 116px 190px 88px 96px;
     }
+    /* One product per row. The extra width goes into dedicated columns for
+       location, barcode and stock rather than a second card, so the list reads
+       like a table and every value is in the same place on every line. */
+    .product-list { max-width: var(--list-max); }
+    .product-row {
+      --thumb: var(--thumb-d);
+      grid-template-columns: var(--product-cols);
+      grid-template-areas: "thumb info loc code stock actions";
+      column-gap: 18px; padding: 12px 16px;
+    }
+    /* The chips become grid items of the row itself, so they land in their own
+       columns instead of wrapping onto a second line. */
+    .product-extra { display: contents; }
+    .extra-loc { grid-area: loc; }
+    .extra-barcode { grid-area: code; }
+    /* A long digit string reads better with a slightly larger monospace face
+       and wide tracking, so the digits separate instead of running together. */
+    .product-row .extra-barcode .extra-text {
+      font-size: 13px; font-weight: 500; letter-spacing: .1em;
+    }
+    .product-row .row-actions { justify-content: flex-end; }
+    .product-row .row-stock-num { font-size: 22px; }
     /* History stays a single column: a grid would run left-to-right then wrap,
        which scrambles the date order. Capped so rows stay readable. */
     .history-list { max-width: 1100px; }
     .hist-summary, .history-list, .filter-row, .search-wrap { max-width: 1100px; }
-    /* Overview's toolbar and search run full width so they line up with the
-       edges of the product grid below, rather than stopping short of it. */
-    .filter-row.filter-row-overview, .search-wrap.search-wrap-overview { max-width: none; }
+    /* Overview's toolbar and search share the list's width so their edges line
+       up with the rows below. */
+    .filter-row.filter-row-overview, .search-wrap.search-wrap-overview { max-width: var(--list-max); }
 
     /* Stock In/Out and the product form: two working columns. */
     .stock-form, .product-form-page form {
@@ -825,10 +875,6 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
     .dup-section { margin-bottom: 8px; }
     .dup-groups { display: block; }
     .dup-note { grid-column: 1 / -1; margin-top: 4px; }
-  }
-
-  @media (min-width: 1600px) {
-    .product-list { grid-template-columns: repeat(auto-fill, minmax(520px, 1fr)); }
   }
 
   input:focus-visible, select:focus-visible, button:focus-visible {
@@ -2258,7 +2304,7 @@ function renderProductRow(p) {
       "</button>"
     : '<div class="row-thumb-placeholder">' + icon("camera", 16) + "</div>";
   return (
-    '<div class="product-row">' +
+    '<div class="product-row' + (low ? " is-low" : "") + '">' +
       thumb +
       '<div class="product-info">' +
         '<div class="product-name-row">' +
@@ -2281,7 +2327,7 @@ function renderProductRow(p) {
       "</div>" +
       (p.location || p.barcode ?
         '<div class="product-extra">' +
-          (p.location ? '<span class="extra-item"><span class="extra-ico">' + icon("pin", 12) + '</span><span class="extra-text">' + escapeHtml(p.location) + "</span></span>" : "") +
+          (p.location ? '<span class="extra-item extra-loc"><span class="extra-ico">' + icon("pin", 12) + '</span><span class="extra-text">' + escapeHtml(p.location) + "</span></span>" : "") +
           (p.barcode ? '<span class="extra-item extra-barcode"><span class="extra-ico">' + icon("barcode", 12) + '</span><span class="extra-text">' + escapeHtml(p.barcode) + "</span></span>" : "") +
         "</div>" : ""
       ) +
