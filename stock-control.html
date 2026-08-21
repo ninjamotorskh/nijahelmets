@@ -1967,7 +1967,7 @@ const I18N = {
     tabMove: "Replenish",
     moveTitle: "Replenish the Pick Face",
     binsLabel: "Locations",
-    pickFaceLabel: "Pick face Location",
+    pickFaceLabel: "Pick face", pickFaceFieldLabel: "Pick face Location",
     reserveLabel: "Reserve",
     reserveOptional: "Reserve Location (optional)",
     binReservePh: "e.g. B1104",
@@ -2143,7 +2143,8 @@ const I18N = {
     tabMove: "បំពេញទីតាំងរើស",
     moveTitle: "បំពេញទីតាំងរើស",
     binsLabel: "ទីតាំងស្តុក",
-    pickFaceLabel: "ទីតាំងរើសទំនិញ",
+    pickFaceLabel: "ទីតាំងរើស",
+    pickFaceFieldLabel: "ទីតាំងរើសទំនិញ",
     reserveLabel: "ទីតាំងបម្រុង",
     reserveOptional: "ទីតាំងបម្រុង (មិនចាំបាច់)",
     binReservePh: "ឧ. B1104",
@@ -3603,7 +3604,7 @@ function renderBinEditor(editing) {
   return (
     '<div class="form-group">' +
       '<div class="bin-slots">' +
-        slot(0, "pickFaceLabel") +
+        slot(0, "pickFaceFieldLabel") +
         slot(1, "reserveOptional") +
       "</div>" +
       '<div class="bin-foot">' +
