@@ -41,6 +41,9 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
     /* The barcode tag, sampled from the reference label: the same muted grey in
        both themes, so it looks identical wherever it appears. */
     --slot3: #7f8c8d; --slot3-ink: #ffffff;
+    /* Solid panel-header fills for the Duplicates groups. Darker than the text
+       accents so white sits on them cleanly in both themes. */
+    --danger-bar: #c0392b; --warn-bar: #b45309; --info-bar: #0f766e;
     /* Placeholder text sits at roughly 4.6:1 against the field, the same weight
        as the reference. --text-dimmer is for decoration and is far too faint to
        read a prompt in. */
@@ -335,6 +338,11 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
   .empty-state svg { color: var(--empty-icon); margin-bottom: 12px; }
   .empty-title { font-size: 14px; color: var(--text); margin: 0 0 4px; }
   .empty-sub { font-size: 12px; color: var(--text-dimmer); margin: 0 0 16px; max-width: 320px; margin-left: auto; margin-right: auto; }
+  .list-more {
+    font-size: 12px; color: var(--text-dim); text-align: center;
+    margin: 14px 0 0; padding: 10px; background: var(--surface-2);
+    border: 1px solid var(--border); border-radius: var(--radius);
+  }
   .empty-inline { text-align: center; padding: 40px 0; color: var(--text-dim); font-size: 14px; }
 
   .stock-form { max-width: 420px; }
@@ -707,21 +715,23 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
   .dup-danger { border-color: var(--danger-border); }
   .dup-warn { border-color: var(--warn-bd); }
   .dup-info { border-color: var(--info-bd); }
+  /* A solid colour bar across the top of each group, with the value on the left
+     and the count on the right — a panel header rather than a tinted strip, so
+     the severity of a finding reads from across the room. */
   .dup-value {
     display: flex; align-items: center; justify-content: space-between; gap: 10px;
-    padding: 8px 10px; background: var(--surface-2); border-bottom: 1px solid var(--border);
+    padding: 10px 14px; background: var(--dup-bar); color: var(--dup-bar-ink);
+    border-bottom: none;
   }
-  .dup-danger .dup-value { background: var(--danger-bg); border-bottom-color: var(--danger-border); }
-  .dup-warn .dup-value { background: var(--warn-bg); border-bottom-color: var(--warn-bd); }
-  .dup-info .dup-value { background: var(--info-bg); border-bottom-color: var(--info-bd); }
-  .dup-danger .dup-value-text { color: var(--danger); }
-  .dup-warn .dup-value-text { color: var(--warn-fg); }
-  .dup-info .dup-value-text { color: var(--info-fg); }
+  .dup-danger { --dup-bar: var(--danger-bar); --dup-bar-ink: #ffffff; }
+  .dup-warn   { --dup-bar: var(--warn-bar); --dup-bar-ink: #ffffff; }
+  .dup-info   { --dup-bar: var(--info-bar); --dup-bar-ink: #ffffff; }
   .dup-value-text {
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    font-size: 14px; font-weight: 700; letter-spacing: .03em; color: inherit;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
-  .dup-count { font-size: 11px; color: var(--text-dim); white-space: nowrap; flex-shrink: 0; }
+  .dup-count { font-size: 12px; font-weight: 500; color: inherit; opacity: .85; white-space: nowrap; flex-shrink: 0; }
   .dup-items { display: flex; flex-direction: column; }
   .dup-item {
     display: flex; align-items: center; gap: 12px; padding: 12px 14px; width: 100%; text-align: left;
@@ -996,10 +1006,10 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
     .filter-row.filter-row-stock {
       max-width: var(--list-max); margin-left: auto; margin-right: auto;
     }
-    /* Import mode swaps in a wider panel, so the chips widen with it and their
-       left edge keeps lining up with the content below. */
-    .filter-row.filter-row-stock-wide { max-width: 1400px; }
-    .import-page { margin-left: auto; margin-right: auto; }
+    /* Import mode used to swap in a wider panel, which shifted the mode chips
+       sideways when you switched to it. Everything shares the one content width
+       now, so the chips stay put. */
+    .import-page { max-width: var(--list-max); margin-left: auto; margin-right: auto; }
     .product-form-page { max-width: none; }
     /* The left column is much shorter than the right, so the buttons used to
        dangle in a row of their own below both. Letting the right column span a
@@ -1015,7 +1025,6 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
       display: grid; grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
       gap: 36px; align-items: start;
     }
-    .import-page { max-width: 1400px; }
     /* Fixed upload-panel height so it stays the same size no matter what's on
        the right (example table, or a longer/shorter row list per filter). */
     .import-page .import-drop { height: 175px; margin-bottom: 14px; }
@@ -1048,6 +1057,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
 import {
   getFirestore, collection, doc, addDoc, updateDoc, deleteDoc,
+  getDoc, setDoc, deleteField,
   onSnapshot, query, orderBy
 } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 
@@ -1249,10 +1259,101 @@ function scanBtn(field) {
     icon("scan", 24) + "</button>";
 }
 
-function photosOf(p) {
-  if (!p) return [];
-  if (Array.isArray(p.photos) && p.photos.length) return p.photos;
-  return p.photo ? [p.photo] : [];
+// ---------------- photos ----------------
+// Full-size images live in their own collection, one document per product, and
+// are fetched only when something actually displays them. The product document
+// keeps a small thumbnail in `photo` — a few KB instead of tens — which is what
+// every list renders. Firestore sends whole documents, so leaving full images
+// inside the product record meant every list load dragged the entire photo
+// library down with it.
+const PHOTO_COLLECTION = "stock_photos";
+const THUMB_DIM = 120;
+const THUMB_QUALITY = 0.6;
+
+// Products saved before the split still carry their images inline, so every
+// read path falls back to them and they migrate the next time the product is
+// saved.
+function legacyPhotos(p) {
+  return p && Array.isArray(p.photos) && p.photos.length ? p.photos : null;
+}
+
+// The small image for lists. Never triggers a fetch.
+function thumbOf(p) {
+  if (!p) return "";
+  if (p.photo) return p.photo;
+  const legacy = legacyPhotos(p);
+  return legacy ? legacy[0] : "";
+}
+
+// How many full photos exist, without loading any of them.
+function photoCountOf(p) {
+  if (!p) return 0;
+  if (typeof p.photoCount === "number") return p.photoCount;
+  const legacy = legacyPhotos(p);
+  if (legacy) return legacy.length;
+  return p.photo ? 1 : 0;
+}
+
+// Fetched once per product per session; the gallery and the edit form are the
+// only things that need full-size images.
+const photoCache = {};
+
+async function loadPhotos(id) {
+  if (photoCache[id]) return photoCache[id];
+  const p = state.products.find(x => x.id === id);
+  const legacy = legacyPhotos(p);
+  if (legacy) { photoCache[id] = legacy.slice(); return photoCache[id]; }
+  try {
+    const snap = await getDoc(doc(db, PHOTO_COLLECTION, id));
+    const data = snap.exists() ? snap.data() : null;
+    const arr = data && Array.isArray(data.photos) ? data.photos : [];
+    photoCache[id] = arr;
+    return arr;
+  } catch (err) {
+    console.error("could not load photos for", id, err);
+    // Fall back to the thumbnail so the gallery still shows something.
+    const th = thumbOf(p);
+    return th ? [th] : [];
+  }
+}
+
+// Builds the list thumbnail from an already-resized full photo. Falling back to
+// an empty thumbnail is safe: the product still saves and its photos are still
+// stored, the list just shows the camera placeholder for it.
+function dataUrlToThumb(dataUrl) {
+  return new Promise((resolve) => {
+    // A decode that never completes would otherwise leave Save hanging with no
+    // feedback, so the wait is bounded.
+    let settled = false;
+    const finish = (value) => { if (!settled) { settled = true; resolve(value); } };
+    setTimeout(() => finish(""), 4000);
+    try {
+      const img = new Image();
+      img.onerror = () => finish("");
+      img.onload = () => {
+        try {
+          const size = calcResizedDimensions(img.naturalWidth || img.width, img.naturalHeight || img.height, THUMB_DIM);
+          const canvas = document.createElement("canvas");
+          canvas.width = size.width;
+          canvas.height = size.height;
+          canvas.getContext("2d").drawImage(img, 0, 0, size.width, size.height);
+          finish(canvas.toDataURL("image/jpeg", THUMB_QUALITY));
+        } catch (err) { finish(""); }
+      };
+      img.src = dataUrl;
+    } catch (err) { finish(""); }
+  });
+}
+
+// Writes the photo document alongside a product, or removes it when the last
+// photo is deleted so orphaned images don't accumulate.
+async function savePhotoDoc(id, photos) {
+  if (photos.length) {
+    await setDoc(doc(db, PHOTO_COLLECTION, id), { photos: photos, updatedAt: Date.now() });
+  } else {
+    try { await deleteDoc(doc(db, PHOTO_COLLECTION, id)); } catch (err) { /* nothing stored */ }
+  }
+  photoCache[id] = photos.slice();
 }
 
 // ---------------- bins (stock per location) ----------------
@@ -1436,6 +1537,8 @@ const state = {
   labelSearch: "",
   lightboxProductId: null,
   lightboxIndex: 0,
+  lightboxPics: [],
+  photosLoading: false,
   theme: "dark",
   lang: "kh",
 };
@@ -1516,6 +1619,10 @@ function resizeImageToBase64(file, maxDim, quality) {
     reader.readAsDataURL(file);
   });
 }
+
+// How many product rows the Overview draws at once. Everything above this is
+// still searchable and still counted; it just isn't handed to the layout engine.
+const LIST_PAGE = 150;
 
 const MAX_PHOTOS = 6;
 // Firestore caps a document at 1MB. Photos are stored inside the product
@@ -1884,7 +1991,6 @@ const I18N = {
     binTotalMismatch: "Location quantities don't add up to the stock total \u2014 saving will set stock to",
     labelsTitle: "Print Barcode Labels",
     generateBarcode: "Generate a code",
-    generateBarcodeHint: "for products with no supplier barcode.",
     generateFor: "Generate codes for",
     generatedCodes: "Generated codes for",
     allHaveCodes: "Every product already has a code.",
@@ -1918,6 +2024,7 @@ const I18N = {
     noProductsTitle: "No products yet",
     noProductsSub: "Add your first product to start tracking stock.",
     noMatch: "No products match your search.",
+    showingOf: "Showing the first {a} of {b}. Search or filter to narrow it down.",
     inStock: "in stock", reorderAt: "reorder at", updated: "updated", low: "Low",
     stockInTitle: "Stock In \u2014 Supplier Delivery",
     stockOutTitle: "Stock Out \u2014 Customer Sale",
@@ -2060,7 +2167,6 @@ const I18N = {
     binTotalMismatch: "ចំនួនតាមទីតាំងមិនស្មើនឹងស្តុកសរុប — ការរក្សាទុកនឹងកំណត់ស្តុកទៅជា",
     labelsTitle: "បោះពុម្ពស្លាកបាកូដ",
     generateBarcode: "បង្កើតលេខកូដ",
-    generateBarcodeHint: "សម្រាប់ទំនិញដែលគ្មានបាកូដពីអ្នកផ្គត់ផ្គង់។",
     generateFor: "បង្កើតលេខកូដសម្រាប់",
     generatedCodes: "បានបង្កើតលេខកូដសម្រាប់",
     allHaveCodes: "ទំនិញទាំងអស់មានលេខកូដរួចហើយ។",
@@ -2095,6 +2201,7 @@ const I18N = {
     noProductsTitle: "មិនទាន់មានទំនិញ",
     noProductsSub: "បន្ថែមទំនិញដំបូងរបស់អ្នក ដើម្បីចាប់ផ្តើមតាមដានស្តុក។",
     noMatch: "មិនមានទំនិញត្រូវនឹងការស្វែងរក។",
+    showingOf: "កំពុងបង្ហាញ {a} ដំបូងក្នុងចំណោម {b}។ សូមស្វែងរក ឬត្រងដើម្បីបង្រួម។",
     inStock: "ក្នុងស្តុក",
     reorderAt: "បញ្ជាទិញនៅ",
     updated: "ធ្វើបច្ចុប្បន្នភាព",
@@ -2538,7 +2645,16 @@ function renderOverview() {
   } else if (filtered.length === 0) {
     listHtml = '<div class="empty-inline">' + t("noMatch") + "</div>";
   } else {
-    listHtml = '<div class="product-list">' + filtered.map(renderProductRow).join("") + "</div>";
+    // Building 2,000 rows of markup is quick; handing 5MB of it to the browser
+    // to lay out is not, and that is what locks the page up. Only the first
+    // page is rendered — search and the category filter still work across the
+    // whole catalogue, so nothing becomes unreachable.
+    const shown = filtered.slice(0, LIST_PAGE);
+    const hidden = filtered.length - shown.length;
+    listHtml = '<div class="product-list">' + shown.map(renderProductRow).join("") + "</div>" +
+      (hidden > 0
+        ? '<p class="list-more">' + t("showingOf").replace("{a}", shown.length).replace("{b}", filtered.length) + "</p>"
+        : "");
   }
 
   return (
@@ -2579,7 +2695,11 @@ function renderCategoryFilterSelect() {
 function renderLightbox() {
   const p = state.products.find(x => x.id === state.lightboxProductId);
   if (!p) return "";
-  const pics = photosOf(p);
+  // Full photos arrive asynchronously; until they do, show the thumbnail
+  // enlarged rather than an empty frame.
+  const loaded = state.lightboxPics;
+  const th = thumbOf(p);
+  const pics = loaded.length ? loaded : (th ? [th] : []);
   if (!pics.length) return "";
   const i = Math.min(Math.max(state.lightboxIndex, 0), pics.length - 1);
   const many = pics.length > 1;
@@ -2611,11 +2731,11 @@ function renderLightbox() {
 function renderProductRow(p) {
   const low = p.stock <= p.threshold;
   const updated = formatRelativeTime(p.updatedAt || p.createdAt);
-  const pics = photosOf(p);
+  const th = thumbOf(p);
   const bins = binsOf(p);
-  const thumb = pics.length
+  const thumb = th
     ? '<button type="button" class="row-thumb-btn" data-action="open-lightbox" data-id="' + p.id + '">' +
-        '<img class="row-thumb" src="' + pics[0] + '" alt="" />' +
+        '<img class="row-thumb" src="' + th + '" alt="" />' +
       "</button>"
     : '<div class="row-thumb-placeholder">' + icon("camera", 16) + "</div>";
 
@@ -2717,7 +2837,7 @@ function renderStockForm(mode) {
   }
 
   const modeToggle =
-    '<div class="filter-row filter-row-stock' + (subMode === "import" ? " filter-row-stock-wide" : "") + '">' +
+    '<div class="filter-row filter-row-stock">' +
       '<button type="button" class="chip' + (subMode === "single" ? " chip-active" : "") + '" data-action="set-stock-mode" data-mode="' + mode + '" data-sub="single">' + t("modeSingle") + "</button>" +
       '<button type="button" class="chip' + (subMode === "import" ? " chip-active" : "") + '" data-action="set-stock-mode" data-mode="' + mode + '" data-sub="import">' + t("modeImport") + "</button>" +
       '<button type="button" class="chip chip-scan" data-action="start-scan-session" data-mode="' + mode + '">' +
@@ -3098,7 +3218,9 @@ function renderDuplicatesTab() {
       '<p class="empty-sub">' + t("noProductsSub") + "</p></div>";
   }
 
-  const clean = idGroups.length === 0 && barcodeGroups.length === 0;
+  // The banner is an all-clear, so it only shows when there is nothing at all to
+  // report — including shared locations. Showing it above a table contradicts it.
+  const clean = idGroups.length === 0 && barcodeGroups.length === 0 && locationGroups.length === 0;
 
   return (
     '<div class="dup-page">' +
@@ -3309,8 +3431,8 @@ function renderDeleteTab() {
   } else {
     const rows = list.map(p => {
       const checked = !!state.deleteSelected[p.id];
-      const thumb = photosOf(p).length
-        ? '<img class="row-thumb" src="' + photosOf(p)[0] + '" alt="" />'
+      const thumb = thumbOf(p)
+        ? '<img class="row-thumb" src="' + thumbOf(p) + '" alt="" />'
         : '<div class="row-thumb-placeholder">' + icon("camera", 16) + "</div>";
       return (
         '<button type="button" class="del-row' + (checked ? " del-row-on" : "") + '" data-action="toggle-delete-select" data-id="' + p.id + '">' +
@@ -3540,7 +3662,7 @@ function renderProductForm() {
             '<input id="newBarcode" data-field="newBarcode" value="' + escapeHtml(state.newBarcode) + '" class="input input-scan" />' +
             scanBtn("newBarcode") +
           "</div>" +
-          '<p class="hint"><button type="button" class="link-btn" data-action="generate-barcode">' + t("generateBarcode") + "</button> " + t("generateBarcodeHint") + "</p>" +
+          '<p class="hint"><button type="button" class="link-btn" data-action="generate-barcode">' + t("generateBarcode") + "</button></p>" +
         "</div>" +
         '<div class="form-group">' +
           '<label for="newPrice">' + t("priceLabel") + "</label>" +
@@ -3612,7 +3734,7 @@ function openAddModal() {
   if (el) el.focus();
 }
 
-function openEditModal(id) {
+async function openEditModal(id) {
   const p = state.products.find(p => p.id === id);
   if (!p) return;
   state.returnTab = state.tab;
@@ -3637,6 +3759,15 @@ function openEditModal(id) {
   render();
   const el = document.getElementById("newName");
   if (el) el.focus();
+
+  if (state.photosLoading) {
+    const pics = await loadPhotos(id);
+    // The form may have been closed, or another product opened, meanwhile.
+    if (state.editingProductId !== id) return;
+    state.newPhotos = pics.slice();
+    state.photosLoading = false;
+    render();
+  }
 }
 
 function toggleTheme() {
@@ -3872,7 +4003,7 @@ function renderSessList() {
         // The photo is looked up live rather than copied into the cart row, so
         // it stays correct if the product is edited mid-session.
         const prod = state.products.find(x => x.id === r.id);
-        const pic = photosOf(prod)[0];
+        const pic = thumbOf(prod);
         const thumb = pic
           ? '<img class="sess-thumb" src="' + pic + '" alt="" />'
           : '<div class="sess-thumb sess-thumb-none">' + icon("camera", 14) + "</div>";
@@ -4289,18 +4420,26 @@ async function startScan(field) {
   scanTimer = setTimeout(tick, 250);
 }
 
-function openLightbox(id) {
+async function openLightbox(id) {
   const p = state.products.find(x => x.id === id);
-  if (!p || photosOf(p).length === 0) return;
+  if (!p || photoCountOf(p) === 0) return;
   state.lightboxProductId = id;
   state.lightboxIndex = 0;
+  state.lightboxPics = [];
   try { document.body.style.overflow = "hidden"; } catch (e) { /* no body yet */ }
+  render();   // opens straight away on the thumbnail
+  const pics = await loadPhotos(id);
+  // The gallery may have been closed, or another product opened, while the
+  // fetch was in flight.
+  if (state.lightboxProductId !== id) return;
+  state.lightboxPics = pics;
   render();
 }
 
 function closeLightbox() {
   state.lightboxProductId = null;
   state.lightboxIndex = 0;
+  state.lightboxPics = [];
   try { document.body.style.overflow = ""; } catch (e) { /* no body */ }
   render();
 }
@@ -4308,7 +4447,7 @@ function closeLightbox() {
 function stepLightbox(delta) {
   const p = state.products.find(x => x.id === state.lightboxProductId);
   if (!p) return;
-  const pics = photosOf(p);
+  const pics = state.lightboxPics;
   if (pics.length < 2) return;
   state.lightboxIndex = (state.lightboxIndex + delta + pics.length) % pics.length;
   render();
@@ -4337,7 +4476,9 @@ async function saveProduct() {
   const productId = state.newProductId.trim();
   const barcode = state.newBarcode.trim();
   const photos = state.newPhotos.slice();
-  const photo = photos[0] || "";  // first image doubles as the thumbnail everywhere else
+  // The product document carries only a small thumbnail; the full-size images
+  // are written to their own document below.
+  const photo = photos.length ? await dataUrlToThumb(photos[0]) : "";
 
   // Blank rows are dropped, and repeating a code merges into the first row that
   // used it rather than creating two bins that fight over the same shelf.
@@ -4360,7 +4501,9 @@ async function saveProduct() {
     const patch = {
       name: name, category: state.newCategory, threshold: threshold,
       productId: productId, barcode: barcode, price: price, location: location,
-      photo: photo, photos: photos,
+      photo: photo, photoCount: photos.length,
+      // Clears the inline array on products saved before photos were split out.
+      photos: deleteField(),
       updatedAt: now,
     };
     // Editing a bin quantity is a real stock change, so it is written to the
@@ -4372,6 +4515,7 @@ async function saveProduct() {
       delta = patch.stock - Math.max(0, parseInt(before ? before.stock : 0, 10) || 0);
     }
     try {
+      await savePhotoDoc(state.editingProductId, photos);
       await updateDoc(doc(db, "stock_products", state.editingProductId), patch);
       if (delta !== 0) {
         await addDoc(collection(db, "stock_transactions"), {
@@ -4400,9 +4544,10 @@ async function saveProduct() {
       name: name, category: state.newCategory, stock: startStock, threshold: threshold,
       productId: productId, barcode: barcode, price: price, location: location,
       bins: bins,
-      photo: photo, photos: photos,
+      photo: photo, photoCount: photos.length,
       createdAt: now, updatedAt: now,
     });
+    if (photos.length) await savePhotoDoc(ref.id, photos);
     if (startStock > 0) {
       await addDoc(collection(db, "stock_transactions"), {
         productId: ref.id, productName: name, type: "in", qty: startStock,
@@ -4548,6 +4693,9 @@ async function performBulkDelete() {
   for (let i = 0; i < selected.length; i++) {
     try {
       await deleteDoc(doc(db, "stock_products", selected[i].id));
+      // Otherwise the images stay behind as orphans nothing can reach.
+      try { await deleteDoc(doc(db, PHOTO_COLLECTION, selected[i].id)); } catch (e) { /* none stored */ }
+      delete photoCache[selected[i].id];
       done++;
     } catch (err) {
       console.error("delete failed for", selected[i].id, err);
