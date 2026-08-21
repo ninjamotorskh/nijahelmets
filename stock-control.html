@@ -35,6 +35,20 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
     /* Moving stock is neither a gain nor a loss, so it gets its own blue tone
        rather than reusing the green/red of stock in and out. */
     --move-bg: #0e2436; --move-fg: #38bdf8; --move-bd: #16354c; --move-ink: #04131f;
+    /* The reserve tag: a second hue so pick face and reserve are told apart at a
+       glance, not by reading the code. */
+    --slot2: #2dd4bf; --slot2-ink: #04231f;
+    /* The barcode tag, sampled from the reference label: the same muted grey in
+       both themes, so it looks identical wherever it appears. */
+    --slot3: #7f8c8d; --slot3-ink: #ffffff;
+    /* Placeholder text sits at roughly 4.6:1 against the field, the same weight
+       as the reference. --text-dimmer is for decoration and is far too faint to
+       read a prompt in. */
+    --placeholder: #7c7c86;
+    /* Field labels sit above larger input text, so a grey that measures fine in
+       isolation still reads as faint next to it. They get their own darker
+       token rather than the general dim grey. */
+    --label: #c9c9d1;
     --chip-hover: #3a3a44;
     --accent-tint: rgba(242,164,19,0.12);
     --accent-tint-border: rgba(242,164,19,0.4);
@@ -68,6 +82,9 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
     --warn-bg: #fdf2df; --warn-fg: #a16207; --warn-bd: #f6e0b5;
     --info-bg: #e8f3fd; --info-fg: #0d6dc4; --info-bd: #c3e0f8;
     --move-bg: #e8f3fd; --move-fg: #0369a1; --move-bd: #c3e0f8; --move-ink: #ffffff;
+    --slot2: #0f766e; --slot2-ink: #ffffff;
+    --placeholder: #757575;
+    --label: #374151;
     --chip-hover: #b9c0c9;
     --accent-tint: rgba(180,83,9,0.08);
     --accent-tint-border: rgba(180,83,9,0.4);
@@ -193,12 +210,14 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
   .chip-add { margin-left: auto; }
 
   .search-wrap { position: relative; margin-bottom: 16px; }
-  .search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--text-dimmer); display: flex; }
+  /* The magnifier sits inside the field with the placeholder, so it takes the
+     same weight — left fainter it would look washed out beside the text. */
+  .search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--placeholder); display: flex; }
   .input {
     width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
     padding: 9px 12px; font-size: 14px; color: var(--text); outline: none; transition: border-color .15s ease;
   }
-  .input::placeholder { color: var(--text-dimmer); }
+  .input::placeholder { color: var(--placeholder); }
   .input:focus { border-color: var(--signal); box-shadow: 0 0 0 3px var(--focus-ring); }
   .input-search { padding-left: 34px; }
 
@@ -250,21 +269,53 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
   /* On a phone the three chips wrap onto as many lines as they need; on desktop
      each one takes its own grid column instead. */
   .product-extra {
-    grid-column: 2 / -1; display: flex; gap: 6px; flex-wrap: wrap; min-width: 0;
+    grid-column: 2 / -1; display: flex; column-gap: 18px; row-gap: 8px;
+    flex-wrap: wrap; min-width: 0;
   }
-  .extra-item {
-    display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 500;
-    color: var(--text); background: var(--surface-2); border: 1px solid var(--border);
-    padding: 3px 8px; border-radius: var(--radius-sm); line-height: 1.4;
-    min-width: 0; flex: 0 1 auto;
+  /* A labelled column, not a chip: a small colour-coded tag naming the field,
+     with the value plainly beneath it. The tag identifies, so the value needs no
+     box \u2014 which is what stops three filled blocks fighting for attention. */
+  .slot { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; min-width: 0; }
+  /* Geometry taken from the reference label: 6px corners, white ink, and enough
+     padding to sit at roughly the same height. All three share it so the set
+     stays uniform \u2014 only the fill colour differs. */
+  .slot-tag {
+    font-size: 11px; font-weight: 600; line-height: 1.5; letter-spacing: .01em;
+    padding: 2px 9px; border-radius: 6px; white-space: nowrap; flex-shrink: 0;
+    border: 1px solid transparent;
   }
-  .extra-ico { display: flex; flex-shrink: 0; }
-  .extra-item svg { flex-shrink: 0; color: var(--signal); }
-  .extra-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
-  .extra-barcode .extra-text { font-variant-numeric: tabular-nums; }
-  /* The location is short, so let the barcode take the leftover room. */
-  .extra-loc { flex-shrink: 0; }
-  .extra-barcode { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: .02em; }
+  html[lang="km"] .slot-tag { font-size: 10px; }
+  /* Pick face keeps the brand orange \u2014 the shelf you actually walk to. */
+  .slot-tag-pick { background: var(--signal); color: var(--signal-ink); }
+  /* Reserve takes the second hue, so the two are distinguished by colour rather
+     than by reading the code. */
+  .slot-tag-res { background: var(--slot2); color: var(--slot2-ink); }
+  /* The barcode gets a solid tag too, so all three read as one set \u2014 but in
+     slate, so it still sits behind the two shelf codes. */
+  .slot-tag-code { background: var(--slot3); color: var(--slot3-ink); }
+
+  .slot-value { display: flex; align-items: baseline; gap: 7px; min-width: 0; max-width: 100%; line-height: 1.4; }
+  .slot-code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 13px; font-weight: 500; letter-spacing: .05em; color: var(--text);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
+  }
+  .slot-qty { font-weight: 700; font-size: 13px; font-variant-numeric: tabular-nums; color: var(--text); flex-shrink: 0; }
+  .extra-barcode .slot-code { font-size: 12.5px; letter-spacing: .08em; }
+
+  /* The reserve column is the tap target for Replenish, so it is a button but
+     carries none of a button's own styling. */
+  .extra-reserve {
+    background: none; border: none; padding: 0; cursor: pointer;
+    font-family: inherit; text-align: left;
+  }
+  .extra-reserve:hover .slot-code { text-decoration: underline; }
+  /* Nothing on the pick face while the reserve holds stock: the pick tag turns
+     red and the reserve tag becomes a blue call to action. */
+  .extra-loc.is-empty .slot-tag { background: var(--danger); color: var(--danger-ink); }
+  .extra-loc.is-empty .slot-qty { color: var(--danger); }
+  .extra-reserve.is-due .slot-tag { background: var(--move-fg); color: var(--move-ink); }
+
   .row-stock { grid-area: stock; text-align: right; padding: 0 2px; }
   .row-stock-num { font-size: 20px; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; color: var(--text); }
   .row-stock-num.low { color: var(--danger); }
@@ -287,12 +338,16 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
   .empty-inline { text-align: center; padding: 40px 0; color: var(--text-dim); font-size: 14px; }
 
   .stock-form { max-width: 420px; }
-  .form-icon-row { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
-  .form-icon-row h2 { font-size: 14px; font-weight: 600; margin: 0; }
-  .form-icon-row svg.icon-up { color: var(--success); }
-  .form-icon-row svg.icon-down { color: var(--danger); }
+  /* A small colour chip ties each field to its tag on the Overview row: orange
+     for the pick face, teal for the reserve. */
+  .bin-slot-label { display: inline-flex; align-items: center; gap: 6px; }
+  .bin-slot-label::before {
+    content: ""; width: 8px; height: 8px; border-radius: 3px; flex-shrink: 0;
+  }
+  .bin-slot-pick::before { background: var(--signal); }
+  .bin-slot-res::before { background: var(--slot2); }
   .form-group { margin-bottom: 12px; }
-  .form-group label { display: block; font-size: 12px; color: var(--text-dim); margin-bottom: 5px; }
+  .form-group label { display: block; font-size: 12.5px; font-weight: 600; color: var(--label); margin-bottom: 5px; }
   .row-thumb-btn {
     position: relative; padding: 0; border: none; background: none; cursor: pointer;
     flex-shrink: 0; display: block; line-height: 0; border-radius: var(--radius-sm);
@@ -384,7 +439,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
     font-family: inherit;
   }
   .sess-hw-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-tint); }
-  .sess-hw-input::placeholder { color: var(--text-dimmer); }
+  .sess-hw-input::placeholder { color: var(--placeholder); }
   /* No camera (e.g. a computer): drop the video panel entirely and let the
      list fill the space -- the scan box above is all that's needed. */
   .sess-cam.sess-cam-off { display: none; }
@@ -486,18 +541,27 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
     position: absolute; left: 4px; bottom: 4px; padding: 1px 6px; border-radius: 4px;
     background: var(--signal); color: var(--signal-ink); font-size: 10px; font-weight: 600; pointer-events: none;
   }
+  /* The tile is separated from the page by its fill rather than by a heavy
+     outline, so the dash stays as light as it was. */
   .photo-box {
-    width: 84px; height: 84px; border-radius: var(--radius); border: 1px dashed var(--border);
-    background: var(--surface); display: flex; align-items: center; justify-content: center; flex-direction: column;
-    gap: 4px; cursor: pointer; overflow: hidden; color: var(--text-dimmer); text-align: center; flex-shrink: 0;
+    width: 88px; height: 88px; border-radius: var(--radius);
+    border: 1px dashed var(--border); background: var(--surface-2);
+    display: flex; align-items: center; justify-content: center; flex-direction: column;
+    gap: 5px; cursor: pointer; overflow: hidden; color: var(--text-dim); text-align: center; flex-shrink: 0;
+    transition: border-color .15s ease, color .15s ease, background .15s ease;
   }
-  .photo-box:hover { border-color: var(--chip-hover); color: var(--text-dim); }
-  .photo-box span { font-size: 10px; }
+  .photo-box:hover {
+    border-color: var(--signal); color: var(--signal); background: var(--accent-tint);
+  }
+  .photo-box span { font-size: 11px; font-weight: 500; }
   /* This tile is a <label>, so the generic ".form-group label" rule was
      forcing display:block and flattening the icon and text onto one line.
      Restore the flex column so the camera icon sits centered with "Add photo"
-     directly beneath it. */
-  .form-group label.photo-box { display: flex; margin-bottom: 0; }
+     directly beneath it. It is a drop target rather than a field label, so it
+     also keeps its own quieter colour and weight. */
+  .form-group label.photo-box {
+    display: flex; margin-bottom: 0; color: var(--text-dim); font-weight: 500;
+  }
   .photo-file-input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
   .photo-remove {
     position: absolute; top: -6px; right: -6px; width: 20px; height: 20px; border-radius: 50%;
@@ -512,21 +576,18 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
   /* The editor in Add/Edit Product: two labelled slots, not a growing list. */
   .bin-slots { display: flex; flex-direction: column; gap: 8px; }
   .bin-slot { display: flex; flex-direction: column; gap: 4px; }
-  .bin-slot-label { font-size: 11px; font-weight: 600; color: var(--text-dim); }
+  .bin-slot-label { font-size: 11.5px; font-weight: 600; color: var(--label); }
   .bin-slot-fields { display: grid; grid-template-columns: minmax(0, 1fr) 84px; gap: 6px; }
   .bin-slot-qty { text-align: right; font-variant-numeric: tabular-nums; }
-  /* Sits between the two slots, so its arrows read as "exchange these". */
-  .bin-swap {
-    align-self: flex-start; display: inline-flex; align-items: center; gap: 5px;
-    background: var(--surface-2); border: 1px solid var(--border); color: var(--text-dim);
-    border-radius: 999px; padding: 3px 10px; font-size: 11px; font-weight: 500;
-    cursor: pointer; font-family: inherit;
-  }
-  .bin-swap:hover { color: var(--text); border-color: var(--accent-tint-border); }
-  .bin-swap svg { transform: rotate(90deg); }
   .bin-foot { display: flex; align-items: center; justify-content: flex-end; margin-top: 8px; }
-  .bin-total { font-size: 12px; color: var(--text-dim); font-variant-numeric: tabular-nums; }
-  .bin-total strong { color: var(--text); font-weight: 700; }
+  /* The only computed value on the form, so it reads as a result rather than
+     another line of grey text. */
+  .bin-total {
+    font-size: 12px; color: var(--text-dim); font-variant-numeric: tabular-nums;
+    background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 999px; padding: 3px 11px;
+  }
+  .bin-total strong { color: var(--signal); font-weight: 700; }
 
   /* The read-only pair shown on the Replenish page. */
   .bin-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
@@ -547,27 +608,6 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
     font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums;
     line-height: 1.15; color: var(--text);
   }
-
-  /* The quantity held in a slot, shown on the Overview row's chips. */
-  .bin-qty {
-    flex-shrink: 0; margin-left: auto; font-weight: 700;
-    font-variant-numeric: tabular-nums; color: var(--text);
-  }
-  /* An empty pick face is the one state that needs acting on, so it is the only
-     thing in the row that turns red. */
-  .extra-loc.is-empty .bin-qty { color: var(--danger); }
-  /* Only the font-family needs inheriting from the page; the `font` shorthand
-     would also reset size, weight and line-height, which .extra-item sets. */
-  .extra-reserve { cursor: pointer; font-family: inherit; text-align: left; color: var(--text); }
-  .extra-reserve .extra-text { color: var(--text-dim); }
-  .extra-reserve:hover { border-color: var(--accent-tint-border); }
-  /* Reserve stock behind an empty shelf: the chip becomes the Replenish button. */
-  .extra-reserve.is-due {
-    background: var(--move-bg); border-color: var(--move-bd);
-  }
-  .extra-reserve.is-due .extra-text { color: var(--move-fg); font-weight: 600; }
-  .extra-reserve.is-due svg { color: var(--move-fg); }
-  .extra-reserve.is-due .bin-qty { color: var(--move-fg); }
 
   .qty-label-row { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
   .qty-label-row label { margin-bottom: 0; }
@@ -681,10 +721,10 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
   .dup-item-edit { color: var(--text-dimmer); flex-shrink: 0; display: flex; }
   .dup-item:hover .dup-item-edit { color: var(--signal); }
   .dup-note { font-size: 11px; color: var(--text-dimmer); margin: -12px 0 0; line-height: 1.5; }
-  /* On a phone the sections stack, so an empty check (e.g. no duplicate
-     barcodes) would sit between two real sections as a gap. Hide the empty
-     ones on narrow screens; on desktop they usefully fill their column. */
-  @media (max-width: 1023px) { .dup-section-empty { display: none; } }
+  /* A check with nothing to report says nothing worth reading — the green
+     "all unique" banner already covers that case. Hiding empty sections at
+     every width keeps the page to just its findings. */
+  .dup-section-empty { display: none; }
 
   .cat-select { width: auto; min-width: 150px; max-width: 60%; flex: 0 1 auto; padding-right: 30px; }
   .pick-search { margin-bottom: 8px; }
@@ -792,7 +832,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
 
   @media print {
     html, body { background: #fff !important; }
-    .no-print, .header, .shell > .header, .form-icon-row, .toast, .scan-overlay, .lb-overlay { display: none !important; }
+    .no-print, .header, .shell > .header, .toast, .scan-overlay, .lb-overlay { display: none !important; }
     .shell { border: none !important; margin: 0 !important; min-height: 0 !important; }
     .content { padding: 0 !important; }
     .split { display: block !important; }
@@ -871,12 +911,12 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
     :root {
       --thumb-d: 56px;
       /* thumb | name | pick face | reserve | barcode | stock | actions */
-      --product-cols: var(--thumb-d) minmax(0, 1fr) 118px 118px 178px 84px 96px;
+      --product-cols: var(--thumb-d) minmax(0, 1fr) 112px 112px 152px 84px 96px;
     }
     /* One product per row. The extra width goes into dedicated columns for
        location, barcode and stock rather than a second card, so the list reads
        like a table and every value is in the same place on every line. */
-    .product-list { max-width: var(--list-max); }
+    .product-list { max-width: var(--list-max); margin-left: auto; margin-right: auto; }
     .product-row {
       --thumb: var(--thumb-d);
       grid-template-columns: var(--product-cols);
@@ -889,30 +929,72 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
     .extra-loc { grid-area: loc; }
     .extra-reserve { grid-area: res; }
     .extra-barcode { grid-area: code; }
-    /* A long digit string reads better with a slightly larger monospace face
-       and wide tracking, so the digits separate instead of running together. */
-    .product-row .extra-barcode .extra-text {
-      font-size: 13px; font-weight: 500; letter-spacing: .1em;
-    }
     .product-row .row-actions { justify-content: flex-end; }
     .product-row .row-stock-num { font-size: 22px; }
     /* History stays a single column: a grid would run left-to-right then wrap,
        which scrambles the date order. Capped so rows stay readable. */
-    .history-list { max-width: 1100px; }
-    .hist-summary, .history-list, .filter-row, .search-wrap { max-width: 1100px; }
-    /* Overview's toolbar and search share the list's width so their edges line
-       up with the rows below. */
-    .filter-row.filter-row-overview, .search-wrap.search-wrap-overview { max-width: var(--list-max); }
+    /* Width caps only. .filter-row and .search-wrap are shared with the Stock
+       In/Out and Replenish pages, where the form is left-aligned \u2014 centring them
+       here would pull the mode chips and product picker away from it. */
+    .filter-row, .search-wrap { max-width: 1100px; }
+    /* Inside a form the container already sets the width; the shared 1100px cap
+       would leave the picker's search bar narrower than its own results list. */
+    .stock-form .search-wrap, .stock-form .filter-row,
+    .product-form-page .search-wrap, .product-form-page .filter-row { max-width: none; }
+    /* History's own column is centred, and sits on the same content width as
+       Overview and the forms so every page's search bar is the same length. */
+    .hist-summary, .history-list,
+    .filter-row.filter-row-history, .search-wrap.search-wrap-history {
+      max-width: var(--list-max); margin-left: auto; margin-right: auto;
+    }
+    /* Overview's toolbar and search share the list's width and centring, so
+       their edges line up with the rows below instead of hugging the left. */
+    .filter-row.filter-row-overview, .search-wrap.search-wrap-overview {
+      max-width: var(--list-max); margin-left: auto; margin-right: auto;
+    }
 
     /* Stock In/Out and the product form: two working columns. */
     .stock-form, .product-form-page form {
-      max-width: 1000px; display: grid;
+      max-width: 1000px; margin-left: auto; margin-right: auto; display: grid;
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
       gap: 0 36px; align-items: start;
     }
-    .stock-form { max-width: 940px; }
+    /* Stock In/Out and Replenish share the Overview's content width, so the app
+       has one column everywhere instead of a narrow form floating in white
+       space. The product sits on its own full-width row and the short fields
+       share the row beneath it, which is what removes the empty block that a
+       fixed two-column split left under the picker. */
+    .stock-form {
+      max-width: var(--list-max); margin-left: auto; margin-right: auto;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      column-gap: 24px;
+    }
+    .stock-form > .form-wide { grid-column: 1 / -1; }
+    /* Takes the spare column when a neighbour is absent, so the row still fills
+       instead of leaving a gap at the right. */
+    .stock-form > .form-grow { grid-column: span 2; }
+    /* A submit spanning the full width would be enormous at this size. */
+    /* .submit-btn is width:100% by default, so justify-self alone cannot shrink
+       it — the width has to be released as well. */
+    .stock-form > .submit-btn { justify-self: start; width: auto; min-width: 240px; }
+    /* The mode chips sit above the form and share its column, so they centre to
+       the same width and their left edge lines up with the Product field. */
+    .filter-row.filter-row-stock {
+      max-width: var(--list-max); margin-left: auto; margin-right: auto;
+    }
+    /* Import mode swaps in a wider panel, so the chips widen with it and their
+       left edge keeps lining up with the content below. */
+    .filter-row.filter-row-stock-wide { max-width: 1400px; }
+    .import-page { margin-left: auto; margin-right: auto; }
     .product-form-page { max-width: none; }
-    .form-span { grid-column: 1 / -1; max-width: 420px; }
+    /* The left column is much shorter than the right, so the buttons used to
+       dangle in a row of their own below both. Letting the right column span a
+       second row and pinning the footer to that row's bottom brings Back/Save
+       up level with the last field opposite them. */
+    .product-form-page > form > .form-col-side { grid-row: 1 / span 2; }
+    .product-form-page > form > .form-foot {
+      grid-column: 1; grid-row: 2; align-self: end; max-width: 420px;
+    }
 
     /* Delete and file import: controls on the left, results on the right. */
     .split {
@@ -923,7 +1005,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
     /* Fixed upload-panel height so it stays the same size no matter what's on
        the right (example table, or a longer/shorter row list per filter). */
     .import-page .import-drop { height: 175px; margin-bottom: 14px; }
-    .delete-page { max-width: none; }
+    .delete-page { max-width: var(--list-max); margin-left: auto; margin-right: auto; }
     .imp-list, .del-list { max-height: none; }
     .del-list {
       display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 8px;
@@ -1765,12 +1847,9 @@ const I18N = {
     tabMove: "Replenish",
     moveTitle: "Replenish the Pick Face",
     binsLabel: "Locations",
-    pickFaceLabel: "Pick face",
+    pickFaceLabel: "Pick face Location",
     reserveLabel: "Reserve",
-    reserveOptional: "Reserve (optional)",
-    pickFaceHint: "Picking takes from the pick face first. Deliveries go to the reserve, then you replenish forward as the shelf empties.",
-    swapBins: "Swap",
-    binCodePh: "e.g. A2002",
+    reserveOptional: "Reserve Location (optional)",
     binReservePh: "e.g. B1104",
     dirToPick: "Reserve \u2192 Pick face",
     dirToReserve: "Pick face \u2192 Reserve",
@@ -1906,11 +1985,10 @@ const I18N = {
     photoFailed: "Could not process that image.",
     processingImage: "Processing image\u2026",
     name: "Name", category: "Category",
-    productIdLabel: "Product ID", productIdEg: "e.g. HLM-014 (optional)",
-    barcodeLabel: "Barcode", barcodeEg: "Scan or type (optional)",
+    productIdLabel: "Product ID (optional)",
+    barcodeLabel: "Barcode", barcodeFieldLabel: "Barcode (optional)",
     priceLabel: "Price (USD)", locationLabel: "Location", locationEg: "e.g. Shelf A2 (optional)",
     startingStock: "Starting stock", lowStockAlertAt: "Low stock alert at",
-    nameEg: "e.g. AGV K1 Matte Black M",
     save: "Save", back: "Back", menuTitle: "Menu",
     switchToLight: "Switch to light mode", switchToDark: "Switch to dark mode",
     switchToEnglish: "English", switchToKhmer: "\u1781\u17d2\u1798\u17c2\u179a",
@@ -1946,12 +2024,9 @@ const I18N = {
     tabMove: "បំពេញទីតាំងរើស",
     moveTitle: "បំពេញទីតាំងរើស",
     binsLabel: "ទីតាំងស្តុក",
-    pickFaceLabel: "ទីតាំងរើស",
+    pickFaceLabel: "ទីតាំងរើសទំនិញ",
     reserveLabel: "ទីតាំងបម្រុង",
     reserveOptional: "ទីតាំងបម្រុង (មិនចាំបាច់)",
-    pickFaceHint: "ការរើសទំនិញយកពីទីតាំងរើសមុនគេ។ ទំនិញចូលថ្មីទៅទីតាំងបម្រុង រួចបំពេញទៅមុខពេលធ្នើរអស់។",
-    swapBins: "ដូរគ្នា",
-    binCodePh: "ឧ. A2002",
     binReservePh: "ឧ. B1104",
     dirToPick: "បម្រុង → ទីតាំងរើស",
     dirToReserve: "ទីតាំងរើស → បម្រុង",
@@ -2125,16 +2200,14 @@ const I18N = {
     processingImage: "កំពុងដំណើរការរូបភាព…",
     name: "ឈ្មោះ",
     category: "ប្រភេទ",
-    productIdLabel: "លេខសម្គាល់ទំនិញ",
-    productIdEg: "ឧ. HLM-014 (ស្រេចចិត្ត)",
+    productIdLabel: "លេខសម្គាល់ទំនិញ (មិនចាំបាច់)",
     barcodeLabel: "បាកូដ",
-    barcodeEg: "ស្កែនបាកូដអីវ៉ាន់",
+    barcodeFieldLabel: "បាកូដ (មិនចាំបាច់)",
     priceLabel: "តម្លៃ (ដុល្លារ)",
     locationLabel: "ទីតាំង",
     locationEg: "ឧ. Shelf A2 (ស្រេចចិត្ត)",
     startingStock: "ស្តុកចាប់ផ្តើម",
     lowStockAlertAt: "ជូនដំណឹងស្តុកតិចនៅ",
-    nameEg: "ឧ. AGV K1 Matte Black M",
     save: "រក្សាទុក",
     back: "ត្រឡប់",
     menuTitle: "ម៉ឺនុយ",
@@ -2342,11 +2415,17 @@ function renderHeader() {
     const found = getMenuTabs().find(x => x.id === state.tab);
     let title = found ? found.label : "";
     let ic = found ? found.icon : "box";
-    const color = found ? found.fg : "var(--text)";
+    let color = found ? found.fg : "var(--text)";
     if (state.tab === "labels") title = t("labelsTitle");
     else if (state.tab === "delete") title = t("deleteTitle");
     else if (state.tab === "move") title = t("moveTitle");
-    else if (state.tab === "product-form") { title = state.editingProductId ? t("editProduct") : t("addProduct"); ic = "box"; }
+    else if (state.tab === "product-form") {
+      title = state.editingProductId ? t("editProduct") : t("addProduct");
+      ic = "box";
+      // Not a menu tile, so it has no colour of its own to inherit. Match the
+      // badge on the page itself: amber when adding, blue when editing.
+      color = state.editingProductId ? "var(--move-fg)" : "var(--signal)";
+    }
     const backTo = state.tab === "product-form" ? "overview" : "home";
     return (
       '<div class="header">' +
@@ -2529,32 +2608,39 @@ function renderProductRow(p) {
       "</button>"
     : '<div class="row-thumb-placeholder">' + icon("camera", 16) + "</div>";
 
-  // Both slots show on the row: the pick face you go to, then the reserve
-  // behind it. When the pick face is empty the reserve chip turns into a
-  // one-tap Replenish, which is the whole job on a two-slot layout.
+  // Each field is a labelled column: a small colour-coded tag naming what it is,
+  // with the value plainly below it. The tag does the identifying, so the values
+  // need no boxes and no icons competing with them.
   const pick = bins[0] || null;
   const res = bins[1] || null;
   const due = needsReplenish(p);
 
   const pickCell = pick
-    ? '<span class="extra-item extra-loc' + (due ? " is-empty" : "") + '">' +
-        '<span class="extra-ico">' + icon("pin", 12) + "</span>" +
-        '<span class="extra-text">' + escapeHtml(pick.code) + "</span>" +
-        '<span class="bin-qty">' + pick.qty + "</span>" +
-      "</span>"
+    ? '<div class="slot extra-loc' + (due ? " is-empty" : "") + '">' +
+        '<span class="slot-tag slot-tag-pick">' + t("pickFaceLabel") + "</span>" +
+        '<span class="slot-value">' +
+          '<span class="slot-code">' + escapeHtml(pick.code) + "</span>" +
+          '<span class="slot-qty">' + pick.qty + "</span>" +
+        "</span>" +
+      "</div>"
     : "";
 
   const resCell = res
-    ? (due
-        ? '<button type="button" class="extra-item extra-reserve is-due" data-action="replenish" data-id="' + p.id + '" title="' + escapeHtml(t("needsReplenish")) + '">' +
-            '<span class="extra-ico">' + icon("move", 12) + "</span>" +
-            '<span class="extra-text">' + t("replenishWord") + "</span>" +
-            '<span class="bin-qty">' + res.qty + "</span>" +
-          "</button>"
-        : '<button type="button" class="extra-item extra-reserve" data-action="replenish" data-id="' + p.id + '" title="' + escapeHtml(t("reserveLabel")) + '">' +
-            '<span class="extra-text">' + escapeHtml(res.code) + "</span>" +
-            '<span class="bin-qty">' + res.qty + "</span>" +
-          "</button>")
+    ? '<button type="button" class="slot extra-reserve' + (due ? " is-due" : "") + '" data-action="replenish" data-id="' + p.id +
+        '" title="' + escapeHtml(due ? t("needsReplenish") : t("reserveLabel")) + '">' +
+        '<span class="slot-tag slot-tag-res">' + (due ? t("replenishWord") : t("reserveLabel")) + "</span>" +
+        '<span class="slot-value">' +
+          '<span class="slot-code">' + escapeHtml(res.code) + "</span>" +
+          '<span class="slot-qty">' + res.qty + "</span>" +
+        "</span>" +
+      "</button>"
+    : "";
+
+  const codeCell = p.barcode
+    ? '<div class="slot extra-barcode">' +
+        '<span class="slot-tag slot-tag-code">' + t("barcodeLabel") + "</span>" +
+        '<span class="slot-value"><span class="slot-code">' + escapeHtml(p.barcode) + "</span></span>" +
+      "</div>"
     : "";
 
   return (
@@ -2583,11 +2669,8 @@ function renderProductRow(p) {
         '<button type="button" class="icon-btn icon-btn-down" title="Stock out" data-action="quick-out" data-id="' + p.id + '">' + icon("down", 14) + "</button>" +
         '<button type="button" class="icon-btn" title="Edit" data-action="open-edit-modal" data-id="' + p.id + '">' + icon("pencil", 14) + "</button>" +
       "</div>" +
-      (pickCell || resCell || p.barcode ?
-        '<div class="product-extra">' +
-          pickCell + resCell +
-          (p.barcode ? '<span class="extra-item extra-barcode"><span class="extra-ico">' + icon("barcode", 12) + '</span><span class="extra-text">' + escapeHtml(p.barcode) + "</span></span>" : "") +
-        "</div>" : ""
+      (pickCell || resCell || codeCell ?
+        '<div class="product-extra">' + pickCell + resCell + codeCell + "</div>" : ""
       ) +
     "</div>"
   );
@@ -2623,7 +2706,7 @@ function renderStockForm(mode) {
   }
 
   const modeToggle =
-    '<div class="filter-row">' +
+    '<div class="filter-row filter-row-stock' + (subMode === "import" ? " filter-row-stock-wide" : "") + '">' +
       '<button type="button" class="chip' + (subMode === "single" ? " chip-active" : "") + '" data-action="set-stock-mode" data-mode="' + mode + '" data-sub="single">' + t("modeSingle") + "</button>" +
       '<button type="button" class="chip' + (subMode === "import" ? " chip-active" : "") + '" data-action="set-stock-mode" data-mode="' + mode + '" data-sub="import">' + t("modeImport") + "</button>" +
       '<button type="button" class="chip chip-scan" data-action="start-scan-session" data-mode="' + mode + '">' +
@@ -2642,10 +2725,9 @@ function renderStockForm(mode) {
   return (
     heading + modeToggle +
     '<form class="stock-form" data-action="submit-stock-' + mode + '">' +
-      '<div class="form-col form-col-main">' +
+      '<div class="form-wide">' +
         renderProductPicker(mode, selected, sorted) +
       "</div>" +
-      '<div class="form-col form-col-side">' +
       (isIn && selected && reserveBin(selected) ?
         '<div class="form-group">' +
           "<label>" + t("putInto") + "</label>" +
@@ -2661,13 +2743,12 @@ function renderStockForm(mode) {
         '<input type="text" inputmode="numeric" pattern="[0-9]*" id="' + mode + 'Qty" data-field="' + mode + 'Qty" value="' + escapeHtml(qty) + '" placeholder="0" class="input" />' +
         (selected && !isIn ? '<p class="hint">' + selected.stock + " " + t("currentlyInStock") + "</p>" : "") +
       "</div>" +
-      '<div class="form-group">' +
+      '<div class="form-group' + (isIn && selected && reserveBin(selected) ? "" : " form-grow") + '">' +
         '<label for="' + mode + 'Note">' + (isIn ? t("supplierNote") : t("customerNote")) + "</label>" +
         '<input id="' + mode + 'Note" data-field="' + mode + 'Note" value="' + escapeHtml(note) + '" placeholder="' + escapeHtml(isIn ? t("supplierEg") : t("customerEg")) + '" class="input" />' +
       "</div>" +
-      (error ? '<p class="form-error">' + escapeHtml(error) + "</p>" : "") +
-      '<button type="submit" class="submit-btn ' + (isIn ? "submit-in" : "submit-out") + '">' + (isIn ? t("addStock") : t("removeStock")) + "</button>" +
-      "</div>" +
+      (error ? '<p class="form-error form-wide">' + escapeHtml(error) + "</p>" : "") +
+      '<button type="submit" class="submit-btn form-wide ' + (isIn ? "submit-in" : "submit-out") + '">' + (isIn ? t("addStock") : t("removeStock")) + "</button>" +
     "</form>"
   );
 }
@@ -2689,7 +2770,7 @@ function renderMoveForm() {
     const pick = pickBin(selected);
     const res = reserveBin(selected);
     if (!pick) {
-      fields = '<p class="hint hint-warn">' + t("errNeedBins") + "</p>";
+      fields = '<p class="hint hint-warn form-wide">' + t("errNeedBins") + "</p>";
     } else {
       // Without a reserve yet, the only sensible move is to create one, so the
       // direction is fixed and a code field appears instead of the toggle.
@@ -2697,7 +2778,7 @@ function renderMoveForm() {
       const source = toPick ? res : pick;
 
       const dirToggle = res
-        ? '<div class="filter-row">' +
+        ? '<div class="filter-row form-wide">' +
             '<button type="button" class="chip' + (toPick ? " chip-active" : "") + '" data-action="set-move-dir" data-dir="toPick">' + t("dirToPick") + "</button>" +
             '<button type="button" class="chip' + (!toPick ? " chip-active" : "") + '" data-action="set-move-dir" data-dir="toReserve">' + t("dirToReserve") + "</button>" +
           "</div>"
@@ -2719,23 +2800,23 @@ function renderMoveForm() {
           '<input type="text" inputmode="numeric" pattern="[0-9]*" id="moveQty" data-field="moveQty" value="' + escapeHtml(state.moveQty) + '" placeholder="0" class="input" />' +
           (source ? '<p class="hint">' + escapeHtml(source.code) + " \u00b7 " + source.qty + " " + t("currentlyInStock") + "</p>" : "") +
         "</div>" +
-        '<div class="form-group">' +
+        '<div class="form-group form-grow">' +
           '<label for="moveNote">' + t("moveNoteLabel") + "</label>" +
           '<input id="moveNote" data-field="moveNote" value="' + escapeHtml(state.moveNote) +
             '" placeholder="' + escapeHtml(t("moveNoteEg")) + '" class="input" />' +
         "</div>" +
-        (state.moveError ? '<p class="form-error">' + escapeHtml(state.moveError) + "</p>" : "") +
-        '<button type="submit" class="submit-btn submit-move">' + t("moveBtn") + "</button>";
+        (state.moveError ? '<p class="form-error form-wide">' + escapeHtml(state.moveError) + "</p>" : "") +
+        '<button type="submit" class="submit-btn form-wide submit-move">' + t("moveBtn") + "</button>";
     }
   }
 
   return (
     '<form class="stock-form" data-action="submit-move">' +
-      '<div class="form-col form-col-main">' +
+      '<div class="form-wide">' +
         renderProductPicker("move", selected, sorted) +
-        (selected ? renderBinSummary(selected) : "") +
       "</div>" +
-      '<div class="form-col form-col-side">' + fields + "</div>" +
+      (selected ? '<div class="form-wide">' + renderBinSummary(selected) + "</div>" : "") +
+      fields +
     "</form>"
   );
 }
@@ -3296,7 +3377,7 @@ function renderHistory() {
   "</button>";
 
   const search =
-    '<div class="search-wrap">' +
+    '<div class="search-wrap search-wrap-history">' +
       '<span class="search-icon">' + icon("search", 15) + "</span>" +
       '<input id="historySearch" data-field="historySearch" value="' + escapeHtml(state.historySearch) +
         '" placeholder="' + escapeHtml(t("searchHistory")) + '" class="input input-search input-scan" autocomplete="off" />' +
@@ -3306,7 +3387,7 @@ function renderHistory() {
   // History is a per-product record, so it stays empty until a product is
   // named. Scrolling the whole warehouse's movements answers no question.
   if (!q) {
-    return '<div class="filter-row">' + chips + "</div>" + search +
+    return '<div class="filter-row filter-row-history">' + chips + "</div>" + search +
       '<div class="empty-state">' + icon("search", 30) +
         '<p class="empty-title">' + t("historyPromptTitle") + "</p>" +
         '<p class="empty-sub">' + t("historyPromptSub") + "</p>" +
@@ -3314,7 +3395,7 @@ function renderHistory() {
   }
 
   if (filtered.length === 0) {
-    return '<div class="filter-row">' + chips + "</div>" + search +
+    return '<div class="filter-row filter-row-history">' + chips + "</div>" + search +
       '<div class="empty-inline">' + t("noMatchingActivity") + "</div>";
   }
 
@@ -3362,7 +3443,7 @@ function renderHistory() {
     );
   }).join("");
 
-  return '<div class="filter-row">' + chips + "</div>" + search + summary +
+  return '<div class="filter-row filter-row-history">' + chips + "</div>" + search + summary +
     '<div class="history-list">' + rows + "</div>";
 }
 
@@ -3370,12 +3451,12 @@ function renderHistory() {
 // and one reserve holding the bulk behind it. The reserve can be left blank for
 // products that live in a single place.
 function renderBinEditor(editing) {
-  const slot = (i, labelKey, placeholderKey) =>
+  const slot = (i, labelKey) =>
     '<div class="bin-slot">' +
-      '<span class="bin-slot-label">' + t(labelKey) + "</span>" +
+      '<span class="bin-slot-label bin-slot-' + (i === 0 ? "pick" : "res") + '">' + t(labelKey) + "</span>" +
       '<div class="bin-slot-fields">' +
         '<input id="binCode' + i + '" data-bin-index="' + i + '" data-bin-part="code" value="' + escapeHtml(state.newBins[i].code) +
-          '" placeholder="' + escapeHtml(t(placeholderKey)) + '" class="input" autocomplete="off" />' +
+          '" class="input" autocomplete="off" />' +
         '<input type="text" inputmode="numeric" pattern="[0-9]*" id="binQty' + i + '" data-bin-index="' + i +
           '" data-bin-part="qty" value="' + escapeHtml(state.newBins[i].qty) + '" placeholder="0" class="input bin-slot-qty" />' +
       "</div>" +
@@ -3389,18 +3470,13 @@ function renderBinEditor(editing) {
 
   return (
     '<div class="form-group">' +
-      "<label>" + t("binsLabel") + "</label>" +
       '<div class="bin-slots">' +
-        slot(0, "pickFaceLabel", "binCodePh") +
-        '<button type="button" class="bin-swap" data-action="swap-bins" title="' + escapeHtml(t("swapBins")) + '">' +
-          icon("move", 14) + t("swapBins") +
-        "</button>" +
-        slot(1, "reserveOptional", "binReservePh") +
+        slot(0, "pickFaceLabel") +
+        slot(1, "reserveOptional") +
       "</div>" +
       '<div class="bin-foot">' +
         '<span class="bin-total">' + t("inStock") + ": <strong>" + total + "</strong></span>" +
       "</div>" +
-      '<p class="hint">' + t("pickFaceHint") + "</p>" +
       mismatch +
     "</div>"
   );
@@ -3410,9 +3486,6 @@ function renderProductForm() {
   const editing = state.editingProductId ? state.products.find(p => p.id === state.editingProductId) : null;
   return (
     '<div class="product-form-page">' +
-      '<div class="form-icon-row">' + icon(editing ? "pencil" : "plus", 16) +
-        "<h2>" + (editing ? t("editProduct") : t("addProduct")) + "</h2>" +
-      "</div>" +
       '<form data-action="submit-product">' +
         '<div class="form-col form-col-main">' +
         '<div class="form-group">' +
@@ -3437,7 +3510,7 @@ function renderProductForm() {
         "</div>" +
         '<div class="form-group">' +
           '<label for="newName">' + t("name") + "</label>" +
-          '<input id="newName" data-field="newName" value="' + escapeHtml(state.newName) + '" placeholder="' + escapeHtml(t("nameEg")) + '" class="input" />' +
+          '<input id="newName" data-field="newName" value="' + escapeHtml(state.newName) + '" class="input" />' +
         "</div>" +
         '<div class="form-group">' +
           '<label for="newCategory">' + t("category") + "</label>" +
@@ -3449,12 +3522,12 @@ function renderProductForm() {
         '<div class="form-col form-col-side">' +
         '<div class="form-group">' +
           '<label for="newProductId">' + t("productIdLabel") + "</label>" +
-          '<input id="newProductId" data-field="newProductId" value="' + escapeHtml(state.newProductId) + '" placeholder="' + escapeHtml(t("productIdEg")) + '" class="input" />' +
+          '<input id="newProductId" data-field="newProductId" value="' + escapeHtml(state.newProductId) + '" class="input" />' +
         "</div>" +
         '<div class="form-group">' +
-          '<label for="newBarcode">' + t("barcodeLabel") + "</label>" +
+          '<label for="newBarcode">' + t("barcodeFieldLabel") + "</label>" +
           '<div class="scan-wrap">' +
-            '<input id="newBarcode" data-field="newBarcode" value="' + escapeHtml(state.newBarcode) + '" placeholder="' + escapeHtml(t("barcodeEg")) + '" class="input input-scan" />' +
+            '<input id="newBarcode" data-field="newBarcode" value="' + escapeHtml(state.newBarcode) + '" class="input input-scan" />' +
             scanBtn("newBarcode") +
           "</div>" +
           '<p class="hint"><button type="button" class="link-btn" data-action="generate-barcode">' + t("generateBarcode") + "</button> " + t("generateBarcodeHint") + "</p>" +
@@ -3475,10 +3548,12 @@ function renderProductForm() {
           '<input type="text" inputmode="numeric" pattern="[0-9]*" id="newThreshold" data-field="newThreshold" value="' + escapeHtml(state.newThreshold) + '" class="input" />' +
         "</div>" +
         "</div>" +
-        (state.modalError ? '<p class="form-error form-span">' + escapeHtml(state.modalError) + "</p>" : "") +
-        '<div class="page-actions form-span">' +
-          '<button type="button" class="btn btn-secondary" data-action="close-modal">' + t("back") + "</button>" +
-          '<button type="submit" class="btn btn-primary"' + (state.photoProcessing ? " disabled" : "") + '>' + t("save") + "</button>" +
+        '<div class="form-foot">' +
+          (state.modalError ? '<p class="form-error">' + escapeHtml(state.modalError) + "</p>" : "") +
+          '<div class="page-actions">' +
+            '<button type="button" class="btn btn-secondary" data-action="close-modal">' + t("back") + "</button>" +
+            '<button type="submit" class="btn btn-primary"' + (state.photoProcessing ? " disabled" : "") + '>' + t("save") + "</button>" +
+          "</div>" +
         "</div>" +
       "</form>" +
     "</div>"
@@ -3562,6 +3637,52 @@ function toggleTheme() {
 }
 
 // ---------------- barcode scanning ----------------
+// ---------------- scan beep ----------------
+// A 160ms 22kHz tone, embedded so it works with no network and never lags the
+// scan waiting on a fetch. One shared element is reused: creating an Audio per
+// scan leaks on long sessions, and phones cap how many can exist at once.
+const SCAN_BEEP_SRC = "data:audio/wav;base64,UklGRrQbAABXQVZFZm10IBAAAAABAAEAIlYAAESsAAACABAAZGF0YZAbAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD8/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA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";
+let scanBeepEl = null;
+
+// iOS and Android both refuse to play audio until the page has had a real user
+// gesture. Opening the camera is one, so the element is primed there: a muted
+// play/pause unlocks it, and later beeps then sound instantly.
+function primeScanBeep() {
+  try {
+    if (!scanBeepEl) {
+      scanBeepEl = new Audio(SCAN_BEEP_SRC);
+      scanBeepEl.preload = "auto";
+    }
+    scanBeepEl.muted = true;
+    const p = scanBeepEl.play();
+    if (p && p.then) {
+      p.then(() => {
+        scanBeepEl.pause();
+        scanBeepEl.currentTime = 0;
+        scanBeepEl.muted = false;
+      }).catch(() => { scanBeepEl.muted = false; });
+    } else {
+      scanBeepEl.pause();
+      scanBeepEl.currentTime = 0;
+      scanBeepEl.muted = false;
+    }
+  } catch (e) { /* audio unavailable; scanning still works silently */ }
+}
+
+// Sounds on a successful read, alongside the existing vibration.
+function scanBeep() {
+  try {
+    if (!scanBeepEl) scanBeepEl = new Audio(SCAN_BEEP_SRC);
+    scanBeepEl.muted = false;
+    // Rewinding lets rapid consecutive scans each get their own beep instead of
+    // the second one being swallowed while the first is still playing.
+    scanBeepEl.currentTime = 0;
+    const p = scanBeepEl.play();
+    if (p && p.catch) p.catch(() => { /* blocked until a user gesture */ });
+  } catch (e) { /* not supported */ }
+  try { if (navigator.vibrate) navigator.vibrate(35); } catch (e) { /* not supported */ }
+}
+
 // The scanner overlay lives OUTSIDE #app and is managed imperatively: render()
 // replaces #app's innerHTML, which would tear down the <video> and drop the
 // camera stream mid-scan.
@@ -3777,7 +3898,7 @@ function sessAddCode(code) {
     sessFlash(t("scanNotFound") + " " + code, true);
     return;
   }
-  try { if (navigator.vibrate) navigator.vibrate(35); } catch (e) { /* not supported */ }
+  scanBeep();
 
   const existing = sessCart.find(r => r.id === p.id);
   if (existing) {
@@ -3848,6 +3969,7 @@ async function applyScanSession() {
 
 async function startScanSession(mode) {
   if (sessEl) return;
+  primeScanBeep();
   sessMode = mode;
   sessCart = [];
   sessLastCode = null; sessLastAt = 0; sessCodeInView = false; sessAbsentFrames = 0;
@@ -4050,6 +4172,9 @@ function applyScan(field, code) {
 async function startScan(field) {
   if (scanEl) return;
   scanTarget = field;
+  // Tapping the scan button is the user gesture phones require before audio
+  // will play, so the beep is unlocked here rather than at the first scan.
+  primeScanBeep();
 
   scanEl = document.createElement("div");
   scanEl.className = "scan-overlay";
@@ -4127,7 +4252,7 @@ async function startScan(field) {
         misses = 0;
         if (code === pending) pendingCount++;
         else { pending = code; pendingCount = 1; }
-        if (pendingCount >= needed) { applyScan(scanTarget, code); return; }
+        if (pendingCount >= needed) { scanBeep(); applyScan(scanTarget, code); return; }
       } else {
         // The JS decoder often returns nothing between two good reads; wiping
         // the count on the first blank frame is what made this take seconds.
@@ -4570,13 +4695,6 @@ appEl.addEventListener("click", (e) => {
     render();
     const s = document.getElementById(m + "Search");
     if (s) s.focus();
-  }
-  else if (action === "swap-bins") {
-    // Entered the wrong way round is a common slip, so swapping is one tap
-    // rather than retyping both codes and quantities.
-    const a = state.newBins[0], b = state.newBins[1];
-    state.newBins = [b, a];
-    render();
   }
   else if (action === "set-move-dir") {
     state.moveDir = el.dataset.dir;
