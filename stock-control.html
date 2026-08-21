@@ -366,7 +366,13 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
   .scan-btn:hover, .scan-btn:active { background: var(--accent-tint); border-color: var(--accent-tint-border); }
   .input-scan { padding-right: 58px; padding-top: 12px; padding-bottom: 12px; }
 
-  .chip-scan { display: inline-flex; align-items: center; gap: 5px; border-color: var(--accent-tint-border); color: var(--signal); }
+  /* "Scan many" opens the camera; it is an action, not one of the two modes you
+     can be in. It borrowed chip-active's border and text colour, so it read as
+     selected. Only its icon carries the accent now, leaving the orange chip to
+     mean "this is the mode you are in" and nothing else. */
+  .chip-scan { display: inline-flex; align-items: center; gap: 5px; }
+  .chip-scan svg { color: var(--signal); }
+  .chip-scan:hover { border-color: var(--signal); color: var(--text); }
 
   /* Continuous scan session: list on top, live camera pinned at the bottom. */
   .sess-overlay {
@@ -386,6 +392,15 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
     background: var(--surface); margin-bottom: 8px;
   }
   html[data-theme="light"] .sess-row { background: var(--surface); }
+  /* Matches the Overview row's thumbnail so a scanned item looks the same here
+     as it does in the list. */
+  .sess-thumb {
+    width: 40px; height: 40px; border-radius: 8px; object-fit: cover; flex-shrink: 0;
+    background: var(--surface-2); border: 1px solid var(--border);
+  }
+  .sess-thumb-none {
+    display: flex; align-items: center; justify-content: center; color: var(--text-dimmer);
+  }
   .sess-info { flex: 1; min-width: 0; }
   .sess-name { font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .sess-meta { font-size: 11px; color: var(--text-dim); margin-top: 2px; font-variant-numeric: tabular-nums; }
@@ -720,7 +735,6 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
   .dup-item-meta { font-size: 12px; color: var(--text-dim); }
   .dup-item-edit { color: var(--text-dimmer); flex-shrink: 0; display: flex; }
   .dup-item:hover .dup-item-edit { color: var(--signal); }
-  .dup-note { font-size: 11px; color: var(--text-dimmer); margin: -12px 0 0; line-height: 1.5; }
   /* A check with nothing to report says nothing worth reading — the green
      "all unique" banner already covers that case. Hiding empty sections at
      every width keeps the page to just its findings. */
@@ -1020,7 +1034,6 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
     }
     .dup-section { margin-bottom: 8px; }
     .dup-groups { display: block; }
-    .dup-note { grid-column: 1 / -1; margin-top: 4px; }
   }
 
   input:focus-visible, select:focus-visible, button:focus-visible {
@@ -1891,7 +1904,6 @@ const I18N = {
     dupIdSection: "Duplicate Product IDs",
     dupBarcodeSection: "Duplicate Barcodes",
     dupLocationSection: "Shared Locations",
-    dupLocationNote: "Not a problem \u2014 just products stored in the same place.",
     dupNoneTitle: "No duplicates found",
     dupNoneSub: "Every product ID and barcode is unique.",
     dupNoneIds: "No duplicate product IDs.",
@@ -2068,7 +2080,6 @@ const I18N = {
     dupIdSection: "លេខសម្គាល់ទំនិញស្ទួន",
     dupBarcodeSection: "បាកូដស្ទួន",
     dupLocationSection: "ទីតាំងដូចគ្នា",
-    dupLocationNote: "មិនមែនជាបញ្ហាទេ — គ្រាន់តែជាទំនិញដាក់នៅកន្លែងតែមួយ។",
     dupNoneTitle: "រកមិនឃើញទិន្នន័យស្ទួន",
     dupNoneSub: "លេខសម្គាល់ និងបាកូដទាំងអស់មិនស្ទួនគ្នាទេ។",
     dupNoneIds: "គ្មានលេខសម្គាល់ស្ទួន។",
@@ -3099,7 +3110,6 @@ function renderDuplicatesTab() {
         renderDupSection("dupBarcodeSection", "barcode", barcodeGroups, "warn", "dupNoneBarcodes") +
         renderDupSection("dupLocationSection", "pin", locationGroups, "info", "dupNoneLocations") +
       "</div>" +
-      (locationGroups.length ? '<p class="dup-note">' + t("dupLocationNote") + "</p>" : "") +
     "</div>"
   );
 }
@@ -3858,8 +3868,17 @@ function renderSessList() {
 
   listEl.innerHTML = sessCart.length === 0
     ? '<div class="sess-empty">' + escapeHtml(t("scanCartEmpty")) + "</div>"
-    : sessCart.map((r, i) =>
+    : sessCart.map((r, i) => {
+        // The photo is looked up live rather than copied into the cart row, so
+        // it stays correct if the product is edited mid-session.
+        const prod = state.products.find(x => x.id === r.id);
+        const pic = photosOf(prod)[0];
+        const thumb = pic
+          ? '<img class="sess-thumb" src="' + pic + '" alt="" />'
+          : '<div class="sess-thumb sess-thumb-none">' + icon("camera", 14) + "</div>";
+        return (
         '<div class="sess-row">' +
+          thumb +
           '<div class="sess-info">' +
             '<div class="sess-name">' + escapeHtml(r.name) + "</div>" +
             '<div class="sess-meta">' + escapeHtml(r.code) +
@@ -3873,7 +3892,8 @@ function renderSessList() {
           "</div>" +
           '<button type="button" class="sess-del" data-sess="del" data-i="' + i + '">' + icon("x", 14) + "</button>" +
         "</div>"
-      ).join("");
+        );
+      }).join("");
 
   const n = sessTotal();
   const label = sessMode === "in" ? t("addStockForRows") : t("removeStockForRows");
@@ -4725,6 +4745,29 @@ appEl.addEventListener("click", (e) => {
     state.moveError = "";
     const res = p ? reserveBin(p) : null;
     state.moveQty = res ? String(res.qty) : "";
+    render();
+  }
+  // Stock In/Out sub-mode: One item vs From file.
+  else if (action === "set-stock-mode") {
+    const m = el.dataset.mode;
+    const sub = el.dataset.sub;
+    if (m === "in") state.inMode = sub; else state.outMode = sub;
+    if (sub === "import" && state.importFor !== m) resetImport();
+    render();
+  }
+  else if (action === "apply-import") applyImport();
+  else if (action === "download-template") downloadImportTemplate();
+  else if (action === "import-filter") {
+    const f = el.dataset.filter;
+    // Clicking the active filter again clears it back to showing all rows.
+    state.importFilter = state.importFilter === f ? "all" : f;
+    render();
+  }
+  else if (action === "toggle-delete-select") {
+    const id = el.dataset.id;
+    if (state.deleteSelected[id]) delete state.deleteSelected[id];
+    else state.deleteSelected[id] = true;
+    state.deleteConfirming = false;
     render();
   }
   else if (action === "ask-bulk-delete") { state.deleteConfirming = true; state.deleteError = ""; render(); }
