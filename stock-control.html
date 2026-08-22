@@ -455,8 +455,17 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
   /* Hardware scanner (USB/Bluetooth "gun") input: it types the code and hits
      Enter. Kept focused so a scan always lands here; also lets you type. */
   .sess-hw { padding: 10px 14px 0; flex-shrink: 0; }
+  /* .scan-btn positions itself absolutely against its nearest positioned
+     ancestor, so the input needs a relative wrapper of its own — without one
+     the button escapes and floats over the page. */
+  .sess-hw-wrap { position: relative; }
+  .sess-cam-btn.is-on {
+    background: var(--signal); border-color: var(--signal); color: var(--signal-ink);
+  }
+  .sess-cam-btn.is-on svg { color: var(--signal-ink); }
   .sess-hw-input {
-    width: 100%; box-sizing: border-box; padding: 12px 14px;
+    /* Right padding clears the scan button sitting inside the field. */
+    width: 100%; box-sizing: border-box; padding: 12px 58px 12px 14px;
     border: 1px solid var(--accent-tint-border); border-radius: var(--radius);
     background: var(--surface); color: var(--text); font-size: 15px;
     font-family: inherit;
@@ -465,7 +474,16 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
   .sess-hw-input::placeholder { color: var(--placeholder); }
   /* No camera (e.g. a computer): drop the video panel entirely and let the
      list fill the space -- the scan box above is all that's needed. */
-  .sess-cam.sess-cam-off { display: none; }
+  /* Not hidden but explained: the panel shrinks to a line of text saying why
+     the camera can't be used. */
+  .sess-cam.sess-cam-off {
+    height: auto; min-height: 0; background: var(--surface-2);
+  }
+  .sess-cam-msg { display: none; padding: 14px; text-align: center; font-size: 12px; color: var(--text-dim); line-height: 1.5; }
+  .sess-cam-off .sess-cam-msg { display: block; }
+  .sess-cam-off .sess-video, .sess-cam-off .sess-frame { display: none; }
+  /* Closed rather than unavailable: the scan button brings it back. */
+  .sess-cam.sess-cam-hidden { display: none; }
   /* The close button is shared with the dark image viewer, where white is
      right. On the light session header it needs theme-aware contrast. */
   .sess-bar .lb-close {
@@ -4135,15 +4153,22 @@ async function startScanSession(mode) {
       '<button type="button" class="lb-close" data-sess="close" aria-label="' + escapeHtml(t("close")) + '">' + icon("x", 18) + "</button>" +
     "</div>" +
     '<div class="sess-hw">' +
-      '<input class="sess-hw-input" type="text" inputmode="text" autocomplete="off" ' +
-        'autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" ' +
-        'placeholder="' + escapeHtml(t("hwScanPlaceholder")) + '">' +
+      '<div class="sess-hw-wrap">' +
+        '<input class="sess-hw-input" type="text" inputmode="text" autocomplete="off" ' +
+          'autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" ' +
+          'placeholder="' + escapeHtml(t("hwScanPlaceholder")) + '">' +
+        '<button type="button" class="scan-btn sess-cam-btn" data-sess="cam" ' +
+          'title="' + escapeHtml(t("scanBarcode")) + '" aria-label="' + escapeHtml(t("scanBarcode")) + '">' +
+          icon("scan", 22) +
+        "</button>" +
+      "</div>" +
     "</div>" +
     '<div class="sess-flash"></div>' +
     '<div class="sess-list"></div>' +
     '<div class="sess-cam">' +
       '<video class="sess-video" playsinline muted autoplay></video>' +
       '<div class="sess-frame"></div>' +
+      '<div class="sess-cam-msg"></div>' +
     "</div>" +
     '<div class="sess-foot"></div>';
   document.body.appendChild(sessEl);
@@ -4155,6 +4180,7 @@ async function startScanSession(mode) {
     const act = btn.dataset.sess;
     if (act === "close") { stopScanSession(); render(); return; }
     if (act === "apply") { applyScanSession(); return; }
+    if (act === "cam") { toggleSessCam(); return; }
     const i = parseInt(btn.dataset.i, 10);
     const row = sessCart[i];
     if (!row) return;
@@ -4208,82 +4234,135 @@ async function startScanSession(mode) {
   renderSessList();
   focusHwInput();
 
-  // The camera is a bonus, not a requirement. When it isn't there (e.g. a
-  // computer with no webcam or with permission blocked), the black panel turns
-  // into a calm "scanner ready" panel and the hardware input carries on.
-  function camUnavailable() {
+  // ----- camera -----
+  // On a computer the camera is opt-in. A webcam points at the operator, not at
+  // the shelf, so opening it automatically is both startling and useless there;
+  // the hardware scanner or typing does the job. Phones open it straight away,
+  // because on a phone the camera IS the scanner.
+  let camOn = false;
+
+  // When the camera isn't available (no webcam, permission denied), the black
+  // panel becomes a calm "scanner ready" panel and the input carries on.
+  function camUnavailable(reason) {
     const cam = sessEl && sessEl.querySelector(".sess-cam");
-    if (cam) cam.classList.add("sess-cam-off");
+    if (cam) {
+      cam.classList.add("sess-cam-off");
+      cam.classList.remove("sess-cam-hidden");
+      const msg = cam.querySelector(".sess-cam-msg");
+      // Saying why beats a panel that simply isn't there: the usual cause is
+      // the page being opened as a local file, where browsers block the camera.
+      if (msg) msg.textContent = reason || t("scanNoCamera");
+    }
+    camOn = false;
+    syncCamBtn();
     focusHwInput();
   }
 
-  if (!isSecureOrigin() || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { camUnavailable(); return; }
-
-  try {
-    sessStream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        facingMode: { ideal: "environment" },
-        width: { ideal: 1280 }, height: { ideal: 720 },
-        focusMode: { ideal: "continuous" },
-      }, audio: false,
-    });
-  } catch (err) {
-    console.error("camera failed", err);
-    camUnavailable();
-    return;
-  }
-  if (!sessEl) { sessStream.getTracks().forEach(tr => tr.stop()); sessStream = null; return; }
-
-  const video = sessEl.querySelector(".sess-video");
-  video.srcObject = sessStream;
-  try { await video.play(); } catch (e) { /* autoplay attribute covers this */ }
-
-  let reader;
-  try {
-    if (typeof BarcodeDetector === "undefined") sessFlash(t("scanLoading"), false);
-    reader = await createBarcodeReader();
-    if (!sessEl) return;
-  } catch (err) {
-    console.error("barcode reader failed to load", err);
-    sessFlash(t("scanReaderFailed"), true);
-    return;
+  function syncCamBtn() {
+    const btn = sessEl && sessEl.querySelector(".sess-cam-btn");
+    if (btn) btn.classList.toggle("is-on", camOn);
   }
 
-  // Same rule as the single scanner: confirm a code across a couple of frames
-  // before trusting it, so one bad decode can't add the wrong product. The
-  // check digit ZXing validates makes two reads a safe, fast bar.
-  const needed = 2;
-  let misses = 0;
+  function stopSessCam() {
+    if (sessTimer) { clearTimeout(sessTimer); sessTimer = null; }
+    if (sessStream) {
+      sessStream.getTracks().forEach(tr => { try { tr.stop(); } catch (e) { /* already stopped */ } });
+      sessStream = null;
+    }
+    camOn = false;
+    const cam = sessEl && sessEl.querySelector(".sess-cam");
+    if (cam) { cam.classList.add("sess-cam-hidden"); cam.classList.remove("sess-cam-off"); }
+    syncCamBtn();
+    focusHwInput();
+  }
 
-  const tick = async () => {
-    if (!sessEl) return;
+  function toggleSessCam() {
+    if (camOn) stopSessCam(); else startSessCam();
+  }
+
+  async function startSessCam() {
+    if (camOn || !sessEl) return;
+    camOn = true;
+    syncCamBtn();
+    const cam = sessEl.querySelector(".sess-cam");
+    if (cam) { cam.classList.remove("sess-cam-hidden"); cam.classList.remove("sess-cam-off"); }
+    if (!isSecureOrigin()) { camUnavailable(t("scanInsecure")); return; }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { camUnavailable(t("scanNoCamera")); return; }
+
     try {
-      const code = await reader.detect(video);
-      if (code) {
-        misses = 0;
-        sessAbsentFrames = 0;
-        const trimmed = String(code).trim();
-        if (trimmed === sessPendingCode) sessPendingCount++;
-        else { sessPendingCode = trimmed; sessPendingCount = 1; }
-        if (sessPendingCount >= needed) sessAddCode(trimmed);
-      } else {
-        // The JS decoder often drops a frame between two good reads, so only
-        // forget the pending code after several blank frames -- otherwise it
-        // never reaches the confirmation count and the scan drags on.
-        if (++misses >= 4) { sessPendingCode = null; sessPendingCount = 0; misses = 0; }
-        // A few clear frames in a row means the item really has left the view,
-        // so the same code may be scanned again as a new item.
-        sessAbsentFrames++;
-        if (sessAbsentFrames >= 3) sessCodeInView = false;
-      }
+      sessStream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: { ideal: "environment" },
+          width: { ideal: 1280 }, height: { ideal: 720 },
+          focusMode: { ideal: "continuous" },
+        }, audio: false,
+      });
     } catch (err) {
-      console.error("scanning stopped", err);
+      console.error("camera failed", err);
+      camUnavailable(t("scanNoCamera"));
+      return;
+    }
+    if (!sessEl) { sessStream.getTracks().forEach(tr => tr.stop()); sessStream = null; return; }
+
+    const video = sessEl.querySelector(".sess-video");
+    video.srcObject = sessStream;
+    try { await video.play(); } catch (e) { /* autoplay attribute covers this */ }
+
+    let reader;
+    try {
+      if (typeof BarcodeDetector === "undefined") sessFlash(t("scanLoading"), false);
+      reader = await createBarcodeReader();
+      if (!sessEl) return;
+    } catch (err) {
+      console.error("barcode reader failed to load", err);
       sessFlash(t("scanReaderFailed"), true);
       return;
     }
-    sessTimer = setTimeout(tick, reader.native ? 120 : 60);
-  };
-  sessTimer = setTimeout(tick, 250);
+
+    // Same rule as the single scanner: confirm a code across a couple of frames
+    // before trusting it, so one bad decode can't add the wrong product. The
+    // check digit ZXing validates makes two reads a safe, fast bar.
+    const needed = 2;
+    let misses = 0;
+
+    const tick = async () => {
+      if (!sessEl) return;
+      try {
+        const code = await reader.detect(video);
+        if (code) {
+          misses = 0;
+          sessAbsentFrames = 0;
+          const trimmed = String(code).trim();
+          if (trimmed === sessPendingCode) sessPendingCount++;
+          else { sessPendingCode = trimmed; sessPendingCount = 1; }
+          if (sessPendingCount >= needed) sessAddCode(trimmed);
+        } else {
+          // The JS decoder often drops a frame between two good reads, so only
+          // forget the pending code after several blank frames -- otherwise it
+          // never reaches the confirmation count and the scan drags on.
+          if (++misses >= 4) { sessPendingCode = null; sessPendingCount = 0; misses = 0; }
+          // A few clear frames in a row means the item really has left the view,
+          // so the same code may be scanned again as a new item.
+          sessAbsentFrames++;
+          if (sessAbsentFrames >= 3) sessCodeInView = false;
+        }
+      } catch (err) {
+        console.error("scanning stopped", err);
+        sessFlash(t("scanReaderFailed"), true);
+        return;
+      }
+      sessTimer = setTimeout(tick, reader.native ? 120 : 60);
+    };
+    sessTimer = setTimeout(tick, 250);
+  }
+
+  // Phones scan with the camera, so it opens with the session. Computers wait
+  // for the scan button.
+  if (isTouch) startSessCam();
+  else {
+    const cam = sessEl.querySelector(".sess-cam");
+    if (cam) cam.classList.add("sess-cam-hidden");
+  }
 }
 
 function scanMessage(text) {
