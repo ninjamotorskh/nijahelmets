@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>NIJA Helmets — Stock Control</title>
+<title>KMX Helmets — Stock Control</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -556,7 +556,16 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
     .sess-pick-head { padding: 16px 18px 0; flex-shrink: 0; }
     .sess-pick-more { grid-column: 1 / -1; text-align: center; font-size: 12px; color: var(--text-dim); margin: 4px 0 0; }
     .sess-pick-search { margin-bottom: 10px; }
-    .sess-pick-cats { margin-bottom: 4px; flex-wrap: wrap; }
+    /* All 12 categories now render every time, so the row would wrap onto
+       several lines and push the grid down. Scrolling it sideways instead
+       keeps the picker's height stable, the same trade YouTube's own filter
+       chips make. */
+    .sess-pick-cats {
+      margin-bottom: 4px; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden;
+      scrollbar-width: none; -ms-overflow-style: none;
+    }
+    .sess-pick-cats::-webkit-scrollbar { display: none; }
+    .sess-pick-cats .chip { flex-shrink: 0; white-space: nowrap; }
     .sess-pick-grid {
       flex: 1; min-height: 0; overflow-y: auto; padding: 14px 18px 18px;
       /* 1fr, not a fixed maximum. auto-fill counts repetitions using the
@@ -1002,6 +1011,14 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
   html[data-theme="light"] .del-row { background: var(--bg); }
   .del-row:hover { border-color: var(--chip-hover); }
   .del-row-on { border-color: var(--danger-border); background: var(--danger-bg); }
+  /* A product still holding stock can't be deleted -- the row shows why
+     instead of accepting a tap, rather than silently failing to select. */
+  .del-row-locked {
+    cursor: default; opacity: .6;
+  }
+  .del-row-locked:hover { border-color: var(--border); }
+  .del-row-locked .del-meta { color: var(--warn-fg); }
+  .del-lock-ic { flex-shrink: 0; color: var(--text-dim); }
   .del-check {
     width: 20px; height: 20px; flex-shrink: 0; border-radius: 5px; border: 1.5px solid var(--border);
     display: flex; align-items: center; justify-content: center; color: #fff;
@@ -1590,6 +1607,7 @@ const ICONS = {
   copy: '<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
   upload: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,9 12,4 17,9"/><line x1="12" y1="4" x2="12" y2="16"/>',
   move: '<polyline points="16,3 20,7 16,11"/><path d="M20 7H9a4 4 0 0 0-4 4v1"/><polyline points="8,21 4,17 8,13"/><path d="M4 17h11a4 4 0 0 0 4-4v-1"/>',
+  lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
 };
 function icon(name, size, extraClass) {
   return '<svg class="' + (extraClass || '') + '" width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICONS[name] || '') + '</svg>';
@@ -2197,6 +2215,7 @@ const I18N = {
     nothingToDeleteSub: "Enter one or more Product IDs or barcodes above. Separate them with commas, spaces, or new lines.",
     notFoundLabel: "not found:", noMatchingProducts: "No matching products.",
     foundOf: "Found", ofWord: "of", tapRowToToggle: "tap a row to include or exclude it",
+    cannotDeleteInStock: "Still has stock \u2014 reduce to 0 before deleting",
     selectAtLeastOne: "Select at least one product",
     deleteSelected: "Delete", selectedWord: "selected",
     permanentlyDelete: "Permanently delete", productOne: "product", productMany: "products",
@@ -2404,6 +2423,7 @@ const I18N = {
     foundOf: "រកឃើញ",
     ofWord: "ក្នុងចំណោម",
     tapRowToToggle: "ចុចជួរដើម្បីបញ្ចូល ឬដកចេញ",
+    cannotDeleteInStock: "នៅមានស្តុក \u2014 សូមកាត់ចេញឲ្យសល់ 0 សិន មុននឹងលុប",
     selectAtLeastOne: "សូមជ្រើសយ៉ាងហោចមួយទំនិញ",
     deleteSelected: "លុប",
     selectedWord: "ដែលបានជ្រើស",
@@ -2627,7 +2647,7 @@ function renderHeader() {
             '<button type="button" class="back-btn" data-action="set-tab" data-tab="home" title="' + escapeHtml(t("back")) + '" aria-label="' + escapeHtml(t("back")) + '">' + icon("chevronLeft", 20) + "</button>" +
             '<div class="brand-mark">' + icon("box", 18) + "</div>" +
             '<div class="brand-text">' +
-              "<h1>NIJA Helmets</h1>" +
+              "<h1>KMX Helmets</h1>" +
               t("appSub") +
             "</div>" +
           "</div>" +
@@ -2694,7 +2714,7 @@ function renderHeader() {
         '<div class="brand-left">' +
           '<div class="brand-mark">' + icon("box", 18) + "</div>" +
           '<div class="brand-text">' +
-            "<h1>NIJA Helmets</h1>" +
+            "<h1>KMX Helmets</h1>" +
             t("appSub") +
           "</div>" +
         "</div>" +
@@ -3535,7 +3555,9 @@ function renderDeleteTab() {
   // Products are chosen by typing or scanning their IDs/barcodes, so the list
   // only ever shows what was matched -- there's no default catalog to browse.
   const list = result.matched;
-  const selected = state.products.filter(p => state.deleteSelected[p.id]);
+  // Stock still in the product means it can't be armed for deletion, even if
+  // it was selected earlier and only just got restocked.
+  const selected = state.products.filter(p => state.deleteSelected[p.id] && p.stock === 0);
 
   const notFoundBox = (!browsing && result.notFound.length)
     ? '<div class="notfound-box">' + icon("alert", 13) +
@@ -3572,20 +3594,38 @@ function renderDeleteTab() {
   } else {
     const rows = list.map(p => {
       const checked = !!state.deleteSelected[p.id];
+      const locked = p.stock > 0;
       const thumb = thumbOf(p)
         ? '<img class="row-thumb" src="' + thumbOf(p) + '" alt="" />'
         : '<div class="row-thumb-placeholder">' + icon("camera", 16) + "</div>";
+      const meta =
+        '<span class="del-meta">' +
+          (p.productId ? escapeHtml(p.productId) : t("noId")) +
+          (p.barcode ? " \u00b7 " + escapeHtml(p.barcode) : "") +
+          " \u00b7 " + (locked ? t("cannotDeleteInStock") : p.stock + " " + t("inStock")) +
+        "</span>";
+      // A product still holding stock can't be armed for deletion at all --
+      // it renders without data-action so a tap does nothing, rather than a
+      // disabled button that still needs a click handler to reject it.
+      if (locked) {
+        return (
+          '<div class="del-row del-row-locked">' +
+            '<span class="del-lock-ic">' + icon("lock", 16) + "</span>" +
+            thumb +
+            '<span class="del-info">' +
+              '<span class="del-name">' + escapeHtml(p.name) + "</span>" +
+              meta +
+            "</span>" +
+          "</div>"
+        );
+      }
       return (
         '<button type="button" class="del-row' + (checked ? " del-row-on" : "") + '" data-action="toggle-delete-select" data-id="' + p.id + '">' +
           '<span class="del-check' + (checked ? " on" : "") + '">' + (checked ? icon("check", 12) : "") + "</span>" +
           thumb +
           '<span class="del-info">' +
             '<span class="del-name">' + escapeHtml(p.name) + "</span>" +
-            '<span class="del-meta">' +
-              (p.productId ? escapeHtml(p.productId) : t("noId")) +
-              (p.barcode ? " \u00b7 " + escapeHtml(p.barcode) : "") +
-              " \u00b7 " + p.stock + " " + t("inStock") +
-            "</span>" +
+            meta +
           "</span>" +
         "</button>"
       );
@@ -4216,7 +4256,10 @@ function renderSessPickHead() {
   const head = sessEl.querySelector(".sess-pick-head");
   if (!head) return;
 
-  const cats = ["All"].concat(CATEGORIES.filter(c => state.products.some(p => p.category === c)));
+  // Every category the system supports, not just the ones already stocked —
+  // so a brand-new category is still there to pick before its first product
+  // exists.
+  const cats = ["All"].concat(CATEGORIES);
   head.innerHTML =
     '<div class="search-wrap sess-pick-search">' +
       '<span class="search-icon">' + icon("search", 15) + "</span>" +
@@ -5139,7 +5182,9 @@ function downloadImportTemplate() {
 }
 
 async function performBulkDelete() {
-  const selected = state.products.filter(p => state.deleteSelected[p.id]);
+  // Last line of defense: never delete a product that still carries stock,
+  // even if something upstream let it stay selected.
+  const selected = state.products.filter(p => state.deleteSelected[p.id] && p.stock === 0);
   if (selected.length === 0) return;
 
   state.deleteBusy = true;
@@ -5383,6 +5428,10 @@ appEl.addEventListener("click", (e) => {
   }
   else if (action === "toggle-delete-select") {
     const id = el.dataset.id;
+    const product = state.products.find(p => p.id === id);
+    // The row itself is locked out of this action once stock exists, but
+    // guard here too in case selection state is ever driven another way.
+    if (product && product.stock > 0) return;
     if (state.deleteSelected[id]) delete state.deleteSelected[id];
     else state.deleteSelected[id] = true;
     state.deleteConfirming = false;
@@ -5471,8 +5520,12 @@ function applyFieldValue(field, value) {
     // Pasting IDs selects exactly those products; clearing the box clears the
     // selection so nothing stays armed for deletion by accident.
     state.deleteSelected = {};
+    // Only auto-arm matches that have no stock left; an in-stock hit still
+    // shows up in the list, just locked, so it doesn't disappear silently.
     const hits = matchIdTerms(parseIdTerms(value)).matched;
-    for (let i = 0; i < hits.length; i++) state.deleteSelected[hits[i].id] = true;
+    for (let i = 0; i < hits.length; i++) {
+      if (hits[i].stock === 0) state.deleteSelected[hits[i].id] = true;
+    }
   }
 
   // A barcode scanner types the whole code then Enter. If what's typed exactly
