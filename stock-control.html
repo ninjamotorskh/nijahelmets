@@ -296,6 +296,14 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
   /* The barcode gets a solid tag too, so all three read as one set \u2014 but in
      slate, so it still sits behind the two shelf codes. */
   .slot-tag-code { background: var(--slot3); color: var(--slot3-ink); }
+  /* Reference data like the barcode, so it shares the slate tag; the figure
+     itself is green, matching how price reads on the sales screen. */
+  /* Reserves the label row without drawing anything. */
+  .slot-tag-ghost { background: none; border-color: transparent; }
+  .slot-money {
+    font-size: 13.5px; font-weight: 700; color: var(--success);
+    font-variant-numeric: tabular-nums; white-space: nowrap;
+  }
 
   .slot-value { display: flex; align-items: baseline; gap: 7px; min-width: 0; max-width: 100%; line-height: 1.4; }
   .slot-code {
@@ -387,12 +395,33 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
     position: fixed; inset: 0; z-index: 120; background: var(--bg);
     display: flex; flex-direction: column;
   }
+  .sess-bar-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  .sess-import-btn { padding: 8px 14px; border-radius: var(--radius); font-size: 13px; }
+  /* Back on the left and the title beside it, the same shape as every other
+     page's header. The action group keeps the right. */
+  .sess-back { flex-shrink: 0; }
+  .sess-title { flex: 1; min-width: 0; }
   .sess-bar {
     display: flex; align-items: center; justify-content: space-between; gap: 12px;
     padding: 12px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0;
   }
   .sess-title { font-size: 14px; font-weight: 600; }
+  /* Phone: the cart is the whole screen and the picker is hidden. Desktop
+     splits it into a browsable catalogue on the left and the sale on the right,
+     which is what the reference layout does. */
+  .sess-body { flex: 1; min-height: 0; display: flex; }
+  .sess-side { flex: 1; min-width: 0; display: flex; flex-direction: column; min-height: 0; }
+  .sess-pick { display: none; }
   .sess-list { flex: 1; min-height: 0; overflow-y: auto; padding: 10px 14px; }
+
+  /* Totals sit directly above the action, so the number you are about to
+     commit to is next to the button that commits it. */
+  .sess-totals:empty { display: none; }
+  .sess-total-row {
+    display: flex; align-items: baseline; justify-content: space-between;
+    padding: 12px 14px 0; font-size: 14px; color: var(--text-dim);
+  }
+  .sess-total-val { font-size: 21px; font-weight: 700; color: var(--success); font-variant-numeric: tabular-nums; }
   .sess-empty { text-align: center; color: var(--text-dim); font-size: 13px; padding: 28px 10px; }
   .sess-row {
     display: flex; align-items: center; gap: 10px; padding: 10px;
@@ -503,7 +532,67 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
   .sess-bar .lb-close:hover { background: var(--accent-tint); color: var(--text); border-color: var(--accent-tint-border); }
 
   @media (min-width: 1024px) {
-    .sess-overlay { max-width: 640px; margin: 0 auto; border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
+    /* Full width now: the catalogue needs the room, and the sale column keeps
+       a fixed width so it reads like a receipt. */
+    .sess-overlay { max-width: none; margin: 0; }
+    /* The catalogue is capped at five columns' worth (5 x 168px cards plus the
+       gaps and its own padding) and the sale column takes everything left over.
+       Sizing it this way keeps the card size fixed and lets the panel grow,
+       rather than the other way round. */
+    .sess-pick {
+      display: flex; flex-direction: column; min-width: 0;
+      /* flex-basis, not max-width. A maximum only caps the pane; with flex: 1
+         on both sides they simply split the row in half and the catalogue
+         never reaches its cap. A basis makes 942px the width it starts from,
+         with no growth, so the sale panel takes everything else. */
+      flex: 0 1 942px;
+      border-right: 1px solid var(--border); background: var(--bg);
+    }
+    .sess-side { flex: 1; min-width: 420px; background: var(--surface); }
+    html[data-theme="light"] .sess-side { background: var(--bg); }
+    /* The picker search does the scanning here, so the second input in the sale
+       column would be a duplicate. */
+    .sess-side .sess-hw { display: none; }
+    .sess-pick-head { padding: 16px 18px 0; flex-shrink: 0; }
+    .sess-pick-more { grid-column: 1 / -1; text-align: center; font-size: 12px; color: var(--text-dim); margin: 4px 0 0; }
+    .sess-pick-search { margin-bottom: 10px; }
+    .sess-pick-cats { margin-bottom: 4px; flex-wrap: wrap; }
+    .sess-pick-grid {
+      flex: 1; min-height: 0; overflow-y: auto; padding: 14px 18px 18px;
+      /* 1fr, not a fixed maximum. auto-fill counts repetitions using the
+         track's max size when that is definite, so minmax(168px, 200px) fits
+         FEWER, WIDER tracks — the opposite of capping the card size. With 1fr
+         it packs as many 168px minimums as fit and shares the remainder. */
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+      gap: 14px; align-content: start;
+    }
+    .sess-card {
+      display: flex; flex-direction: column; gap: 3px; text-align: left;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 10px; cursor: pointer;
+      font-family: inherit; color: var(--text); transition: border-color .15s ease;
+    }
+    .sess-card:hover { border-color: var(--signal); }
+    .sess-card-pic {
+      position: relative; display: flex; align-items: center; justify-content: center;
+      height: 104px; margin-bottom: 8px; border-radius: var(--radius-sm);
+      background: var(--surface-2); overflow: hidden; color: var(--text-dimmer);
+    }
+    .sess-card-pic img { width: 100%; height: 100%; object-fit: contain; }
+    .sess-card-add {
+      position: absolute; top: 6px; right: 6px; width: 22px; height: 22px;
+      border-radius: 50%; background: var(--success); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .sess-card-cat { font-size: 9.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-dimmer); }
+    .sess-card-name { font-size: 13px; font-weight: 600; line-height: 1.3; }
+    .sess-card-code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 10.5px; color: var(--text-dimmer); }
+    .sess-card-foot { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-top: 4px; }
+    .sess-card-price { font-size: 14px; font-weight: 700; color: var(--success); }
+    .sess-card-stock { font-size: 10.5px; color: var(--text-dim); }
+    .sess-card-stock.is-low { color: var(--danger); font-weight: 600; }
+    /* The camera is a small preview here, not the main event. */
+    .sess-cam { height: 190px; min-height: 0; }
   }
 
   .scan-overlay {
@@ -963,7 +1052,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
     :root {
       --thumb-d: 56px;
       /* thumb | name | pick face | reserve | barcode | stock | actions */
-      --product-cols: var(--thumb-d) minmax(0, 1fr) 112px 112px 152px 84px 96px;
+      --product-cols: var(--thumb-d) minmax(0, 1fr) 112px 112px 152px 92px 84px 96px;
     }
     /* One product per row. The extra width goes into dedicated columns for
        location, barcode and stock rather than a second card, so the list reads
@@ -972,7 +1061,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
     .product-row {
       --thumb: var(--thumb-d);
       grid-template-columns: var(--product-cols);
-      grid-template-areas: "thumb info loc res code stock actions";
+      grid-template-areas: "thumb info loc res code price stock actions";
       column-gap: 16px; padding: 12px 16px;
     }
     /* The chips become grid items of the row itself, so they land in their own
@@ -981,6 +1070,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
     .extra-loc { grid-area: loc; }
     .extra-reserve { grid-area: res; }
     .extra-barcode { grid-area: code; }
+    .extra-price { grid-area: price; }
     .product-row .row-actions { justify-content: flex-end; }
     .product-row .row-stock-num { font-size: 22px; }
     /* History stays a single column: a grid would run left-to-right then wrap,
@@ -1294,6 +1384,10 @@ function scanBtn(field) {
 // every list renders. Firestore sends whole documents, so leaving full images
 // inside the product record meant every list load dragged the entire photo
 // library down with it.
+// Cards carry a photo each, so the grid is capped the same way the Overview
+// list is. Everything above this stays searchable.
+const PICK_PAGE = 48;
+
 const PHOTO_COLLECTION = "stock_photos";
 const THUMB_DIM = 120;
 const THUMB_QUALITY = 0.6;
@@ -2047,6 +2141,8 @@ const I18N = {
     dupCheckWord: "Check",
     all: "All",
     allCategories: "All",
+    totalWord: "Total",
+    pickSearchPlaceholder: "Search or scan, then Enter\u2026",
     addProduct: "Add Product", editProduct: "Edit Product",
     searchProducts: "Search name, ID, or barcode\u2026",
     noProductsTitle: "No products yet",
@@ -2057,7 +2153,7 @@ const I18N = {
     stockInTitle: "Stock In \u2014 Supplier Delivery",
     stockOutTitle: "Stock Out \u2014 Customer Sale",
     addProductFirst: "Add a product first.", addOneNow: "Add one now",
-    modeSingle: "One item", modeImport: "From file",
+    modeImport: "From file",
     product: "Product", quantity: "Quantity",
     supplierNote: "Supplier / note (optional)", customerNote: "Customer / note (optional)",
     supplierEg: "e.g. ABC Trading", customerEg: "e.g. Mr. Dara",
@@ -2144,7 +2240,8 @@ const I18N = {
     errQtyPositive: "Enter a quantity greater than 0.",
     errOnly: "Only", errInStock: "in stock.",
     errSaveGeneric: "Could not save. Check your connection.",
-    errPermission: "Blocked by Firestore security rules \u2014 add a rule allowing read/write on stock_products and stock_transactions.",
+    errPermission: "Blocked by Firestore security rules \u2014 add a rule allowing read/write on stock_products, stock_transactions and stock_photos.",
+    savedWithIssues: "Saved, but photos or history could not be written \u2014 check your Firestore rules allow stock_photos.",
     errUnauth: "Firestore rejected this as unauthenticated \u2014 check your security rules.",
     errCodePrefix: "Could not save (", errCodeSuffix: "). Open the browser console (F12) for details.",
     toastAdded: "Added", toastUpdated: "Updated", toastDeleted: "Deleted",
@@ -2224,6 +2321,8 @@ const I18N = {
     dupCheckWord: "ពិនិត្យ",
     all: "ទាំងអស់",
     allCategories: "ទាំងអស់",
+    totalWord: "សរុប",
+    pickSearchPlaceholder: "ស្វែងរក ឬស្កែន រួចចុច Enter…",
     addProduct: "បន្ថែមទំនិញ",
     editProduct: "កែសម្រួលទំនិញ",
     searchProducts: "ស្វែងរកឈ្មោះ លេខសម្គាល់ ឬបាកូដ…",
@@ -2239,7 +2338,6 @@ const I18N = {
     stockOutTitle: "ចេញស្តុក — លក់ឲ្យអតិថិជន",
     addProductFirst: "សូមបន្ថែមទំនិញជាមុនសិន។",
     addOneNow: "បន្ថែមឥឡូវនេះ",
-    modeSingle: "មួយមុខ",
     modeImport: "ពីឯកសារ",
     product: "ទំនិញ",
     quantity: "បរិមាណ",
@@ -2368,7 +2466,8 @@ const I18N = {
     errOnly: "មានតែ",
     errInStock: "ក្នុងស្តុក។",
     errSaveGeneric: "មិនអាចរក្សាទុកបានទេ។ សូមពិនិត្យអ៊ីនធឺណិត។",
-    errPermission: "ត្រូវបានទប់ស្កាត់ដោយច្បាប់សុវត្ថិភាព Firestore — សូមបន្ថែមច្បាប់អនុញ្ញាត read/write លើ stock_products និង stock_transactions។",
+    errPermission: "ត្រូវបានទប់ស្កាត់ដោយច្បាប់សុវត្ថិភាព Firestore — សូមបន្ថែមច្បាប់អនុញ្ញាត read/write លើ stock_products, stock_transactions និង stock_photos។",
+    savedWithIssues: "បានរក្សាទុក ប៉ុន្តែរូបភាព ឬប្រវត្តិមិនអាចសរសេរបានទេ — សូមពិនិត្យច្បាប់ Firestore សម្រាប់ stock_photos។",
     errUnauth: "Firestore បានបដិសេធការស្នើសុំនេះ — សូមពិនិត្យច្បាប់សុវត្ថិភាព។",
     errCodePrefix: "មិនអាចរក្សាទុកបាន (",
     errCodeSuffix: ")។ សូមមើល console ក្នុងកម្មវិធីរុករក (F12)។",
@@ -2803,6 +2902,19 @@ function renderProductRow(p) {
       "</div>"
     : "";
 
+  // Products priced at zero are usually just unpriced, so the column stays
+  // empty for them rather than claiming they are free.
+  const priceVal = Number(p.price) || 0;
+  const priceCell = priceVal > 0
+    ? '<div class="slot extra-price">' +
+        // The currency symbol says what this is, so the label is dropped. An
+        // empty tag keeps the label row's height, which is what lines the price
+        // up with the codes beside it instead of floating a line higher.
+        '<span class="slot-tag slot-tag-ghost" aria-hidden="true">&nbsp;</span>' +
+        '<span class="slot-value"><span class="slot-money">' + money(priceVal) + "</span></span>" +
+      "</div>"
+    : "";
+
   return (
     '<div class="product-row' + (low ? " is-low" : "") + '">' +
       thumb +
@@ -2829,8 +2941,8 @@ function renderProductRow(p) {
         '<button type="button" class="icon-btn icon-btn-down" title="Stock out" data-action="quick-out" data-id="' + p.id + '">' + icon("down", 14) + "</button>" +
         '<button type="button" class="icon-btn" title="Edit" data-action="open-edit-modal" data-id="' + p.id + '">' + icon("pencil", 14) + "</button>" +
       "</div>" +
-      (pickCell || resCell || codeCell ?
-        '<div class="product-extra">' + pickCell + resCell + codeCell + "</div>" : ""
+      (pickCell || resCell || codeCell || priceCell ?
+        '<div class="product-extra">' + pickCell + resCell + codeCell + priceCell + "</div>" : ""
       ) +
     "</div>"
   );
@@ -2865,10 +2977,10 @@ function renderStockForm(mode) {
     return heading + '<p class="muted">' + t("addProductFirst") + ' <button type="button" class="link-btn" data-action="open-add-modal">' + t("addOneNow") + "</button></p>";
   }
 
-  const modeToggle =
+  // Only the file importer keeps a toggle, so there is a way back to scanning.
+  const modeToggle = subMode !== "import" ? "" :
     '<div class="filter-row filter-row-stock">' +
-      '<button type="button" class="chip' + (subMode === "single" ? " chip-active" : "") + '" data-action="set-stock-mode" data-mode="' + mode + '" data-sub="single">' + t("modeSingle") + "</button>" +
-      '<button type="button" class="chip' + (subMode === "import" ? " chip-active" : "") + '" data-action="set-stock-mode" data-mode="' + mode + '" data-sub="import">' + t("modeImport") + "</button>" +
+      '<button type="button" class="chip chip-active" data-action="set-stock-mode" data-mode="' + mode + '" data-sub="import">' + t("modeImport") + "</button>" +
       '<button type="button" class="chip chip-scan" data-action="start-scan-session" data-mode="' + mode + '">' +
         icon("scan", 14) + " " + t("scanMany") +
       "</button>" +
@@ -3998,6 +4110,10 @@ let sessCart = [];
 let sessLastCode = null, sessLastAt = 0, sessCodeInView = false, sessAbsentFrames = 0;
 let sessPendingCode = null, sessPendingCount = 0;
 let sessNote = "";
+let sessPickSearch = "", sessPickCat = "All";
+// Where closing the scanner should land: the menu when it was opened from a
+// tile, or the importer when it was opened from there.
+let sessReturn = "home";
 
 function sessProductFor(code) {
   const key = String(code).trim().toLowerCase();
@@ -4042,8 +4158,12 @@ function renderSessList() {
           thumb +
           '<div class="sess-info">' +
             '<div class="sess-name">' + escapeHtml(r.name) + "</div>" +
-            '<div class="sess-meta">' + escapeHtml(r.code) +
-              (sessMode === "out" ? " \u00b7 " + r.stock + " " + escapeHtml(t("inStock")) : "") +
+            '<div class="sess-meta">' +
+              // Selling shows the money; receiving shows the code and the shelf
+              // count, which is what matters when checking a delivery.
+              (sessShowsMoney()
+                ? money(r.price) + " \u00d7 " + r.qty + " = " + money((Number(r.price) || 0) * r.qty)
+                : escapeHtml(r.code) + " \u00b7 " + r.stock + " " + escapeHtml(t("inStock"))) +
             "</div>" +
           "</div>" +
           '<div class="sess-qty">' +
@@ -4061,19 +4181,132 @@ function renderSessList() {
   // The note applies to every row in the batch, so it lives beside the action
   // rather than on each line. Re-rendering the list must not wipe what is being
   // typed, so the current value is carried across.
+  const totalsEl = sessEl.querySelector(".sess-totals");
+  if (totalsEl) {
+    totalsEl.innerHTML = sessShowsMoney() && sessCart.length
+      ? '<div class="sess-total-row"><span>' + escapeHtml(t("totalWord")) + "</span>" +
+          '<strong class="sess-total-val">' + money(sessCartTotal()) + "</strong></div>"
+      : "";
+  }
+
   const noteLabel = sessMode === "in" ? t("supplierNote") : t("customerNote");
   footEl.innerHTML =
     '<span class="sess-count">' + n + " " + escapeHtml(t("scanItems")) + "</span>" +
     '<input class="sess-note" type="text" autocomplete="off" value="' + escapeHtml(sessNote) +
       '" placeholder="' + escapeHtml(noteLabel) + '" />' +
     '<button type="button" class="btn ' + (sessMode === "in" ? "btn-primary" : "btn-danger") + '" data-sess="apply"' +
-      (n === 0 ? " disabled" : "") + ">" + escapeHtml(label) + "</button>";
+      (n === 0 ? " disabled" : "") + ">" +
+      escapeHtml(label) + (sessShowsMoney() && n ? " \u00b7 " + money(sessCartTotal()) : "") +
+    "</button>";
   const noteEl = footEl.querySelector(".sess-note");
   if (noteEl) {
     noteEl.addEventListener("input", () => { sessNote = noteEl.value; });
     // Enter in the note shouldn't add a phantom scan, and shouldn't submit.
     noteEl.addEventListener("keydown", (e) => { if (e.key === "Enter") e.preventDefault(); });
   }
+}
+
+// The picker pane. Only rendered on a wide screen; on a phone the cart is the
+// whole interface and this is hidden by CSS.
+// The head is built once. Rebuilding it while someone is typing replaces the
+// input element, and a fresh element starts with the caret at position zero —
+// which is why the cursor kept jumping to the front of the text.
+function renderSessPickHead() {
+  if (!sessEl) return;
+  const head = sessEl.querySelector(".sess-pick-head");
+  if (!head) return;
+
+  const cats = ["All"].concat(CATEGORIES.filter(c => state.products.some(p => p.category === c)));
+  head.innerHTML =
+    '<div class="search-wrap sess-pick-search">' +
+      '<span class="search-icon">' + icon("search", 15) + "</span>" +
+      '<input class="input input-search input-scan sess-pick-input" value="' + escapeHtml(sessPickSearch) +
+        '" placeholder="' + escapeHtml(t("pickSearchPlaceholder")) + '" autocomplete="off" ' +
+        'autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" />' +
+      '<button type="button" class="scan-btn sess-cam-btn" data-sess="cam" ' +
+        'title="' + escapeHtml(t("scanBarcode")) + '" aria-label="' + escapeHtml(t("scanBarcode")) + '">' +
+        icon("scan", 22) +
+      "</button>" +
+    "</div>" +
+    '<div class="filter-row sess-pick-cats">' +
+      cats.map(c =>
+        '<button type="button" class="chip' + (c === sessPickCat ? " chip-active" : "") + '" data-sess="cat" data-cat="' + escapeHtml(c) + '">' +
+          escapeHtml(c === "All" ? t("allCategories") : catLabel(c)) +
+        "</button>").join("") +
+    "</div>";
+}
+
+// Only the cards are redrawn as you type, so the field you are typing into is
+// never touched.
+function renderSessPickGrid() {
+  if (!sessEl) return;
+  const grid = sessEl.querySelector(".sess-pick-grid");
+  if (!grid) return;
+
+  const list = sessPickMatches(sessPickSearch);
+  // Drawing every product would hand the browser hundreds of image-bearing
+  // cards at once, which is what makes a page lock up. Search narrows it.
+  const total = list.length;
+  const shown = list.slice(0, PICK_PAGE);
+
+  grid.innerHTML = shown.length
+    ? shown.map(p => {
+        const th = thumbOf(p);
+        const low = p.stock <= p.threshold;
+        return '<button type="button" class="sess-card" data-sess="pick" data-id="' + p.id + '">' +
+          '<span class="sess-card-pic">' +
+            (th ? '<img src="' + th + '" alt="" />' : icon("camera", 18)) +
+            '<span class="sess-card-add">' + icon("plus", 13) + "</span>" +
+          "</span>" +
+          '<span class="sess-card-cat">' + escapeHtml(catLabel(p.category)) + "</span>" +
+          '<span class="sess-card-name">' + escapeHtml(p.name) + "</span>" +
+          '<span class="sess-card-code">' + escapeHtml(labelCodeFor(p) || "") + "</span>" +
+          '<span class="sess-card-foot">' +
+            '<span class="sess-card-price">' + money(p.price) + "</span>" +
+            '<span class="sess-card-stock' + (low ? " is-low" : "") + '">' + p.stock + " " + t("inStock") + "</span>" +
+          "</span>" +
+        "</button>";
+      }).join("")
+    : '<p class="sess-empty">' + t("noMatch") + "</p>";
+
+  if (total > shown.length) {
+    grid.insertAdjacentHTML("beforeend",
+      '<p class="sess-pick-more">' +
+        t("showingOf").replace("{a}", shown.length).replace("{b}", total) +
+      "</p>");
+  }
+}
+
+function renderSessPick() {
+  renderSessPickHead();
+  renderSessPickGrid();
+}
+
+// One filter shared by the grid and by Enter, so what you see is what gets
+// added.
+function sessPickMatches(term) {
+  const q = String(term || "").trim().toLowerCase();
+  return state.products.filter(p => {
+    if (sessPickCat !== "All" && p.category !== sessPickCat) return false;
+    if (!q) return true;
+    return (p.name || "").toLowerCase().includes(q) ||
+      (p.productId || "").toLowerCase().includes(q) ||
+      (p.barcode || "").toLowerCase().includes(q);
+  });
+}
+
+// Prices are a sale concept, so they only appear on the way out.
+function sessShowsMoney() { return sessMode === "out"; }
+
+function money(v) {
+  const n = Number(v) || 0;
+  return "$" + n.toFixed(2);
+}
+
+function sessCartTotal() {
+  let n = 0;
+  for (let i = 0; i < sessCart.length; i++) n += (Number(sessCart[i].price) || 0) * sessCart[i].qty;
+  return n;
 }
 
 function sessAddCode(code) {
@@ -4092,7 +4325,12 @@ function sessAddCode(code) {
     return;
   }
   scanBeep();
+  sessAddProduct(p, code);
+}
 
+// Shared by the scanner and by tapping a product in the picker, so both paths
+// enforce the same stock limits and produce the same cart rows.
+function sessAddProduct(p, code) {
   const existing = sessCart.find(r => r.id === p.id);
   if (existing) {
     if (sessMode === "out" && existing.qty >= p.stock) {
@@ -4107,7 +4345,10 @@ function sessAddCode(code) {
       sessFlash(t("errOnly") + " 0 " + t("inStock"), true);
       return;
     }
-    sessCart.unshift({ id: p.id, name: p.name, code: labelCodeFor(p) || code, qty: 1, stock: p.stock });
+    sessCart.unshift({
+      id: p.id, name: p.name, code: labelCodeFor(p) || code || "",
+      qty: 1, stock: p.stock, price: Number(p.price) || 0,
+    });
     sessFlash(p.name, false);
   }
   renderSessList();
@@ -4121,6 +4362,7 @@ function stopScanSession() {
   }
   if (sessEl && sessEl.parentNode) sessEl.parentNode.removeChild(sessEl);
   sessEl = null; sessMode = null; sessCart = []; sessNote = "";
+  sessPickSearch = ""; sessPickCat = "All";
   sessLastCode = null; sessLastAt = 0; sessCodeInView = false; sessAbsentFrames = 0;
   sessPendingCode = null; sessPendingCount = 0;
   try { document.body.style.overflow = ""; } catch (e) { /* no body */ }
@@ -4172,9 +4414,23 @@ async function startScanSession(mode) {
   sessEl.className = "sess-overlay";
   sessEl.innerHTML =
     '<div class="sess-bar">' +
+      '<button type="button" class="back-btn sess-back" data-sess="close" ' +
+        'title="' + escapeHtml(t("back")) + '" aria-label="' + escapeHtml(t("back")) + '">' +
+        icon("chevronLeft", 20) +
+      "</button>" +
       '<span class="sess-title">' + escapeHtml(mode === "in" ? t("tabIn") : t("tabOut")) + " \u00b7 " + escapeHtml(t("scanMany")) + "</span>" +
-      '<button type="button" class="lb-close" data-sess="close" aria-label="' + escapeHtml(t("close")) + '">' + icon("x", 18) + "</button>" +
+      '<span class="sess-bar-actions">' +
+        '<button type="button" class="btn btn-secondary sess-import-btn" data-sess="import">' +
+          icon("upload", 14) + "<span>" + escapeHtml(t("modeImport")) + "</span>" +
+        "</button>" +
+      "</span>" +
     "</div>" +
+    '<div class="sess-body">' +
+    '<div class="sess-pick">' +
+      '<div class="sess-pick-head"></div>' +
+      '<div class="sess-pick-grid"></div>' +
+    "</div>" +
+    '<div class="sess-side">' +
     '<div class="sess-hw">' +
       '<div class="sess-hw-wrap">' +
         '<input class="sess-hw-input" type="text" inputmode="text" autocomplete="off" ' +
@@ -4193,7 +4449,9 @@ async function startScanSession(mode) {
       '<div class="sess-frame"></div>' +
       '<div class="sess-cam-msg"></div>' +
     "</div>" +
-    '<div class="sess-foot"></div>';
+    '<div class="sess-totals"></div>' +
+    '<div class="sess-foot"></div>' +
+    "</div></div>";
   document.body.appendChild(sessEl);
   try { document.body.style.overflow = "hidden"; } catch (e) { /* no body */ }
 
@@ -4201,9 +4459,41 @@ async function startScanSession(mode) {
     const btn = e.target.closest("[data-sess]");
     if (!btn) return;
     const act = btn.dataset.sess;
-    if (act === "close") { stopScanSession(); render(); return; }
+    if (act === "close") {
+      const back = sessReturn;
+      const m = sessMode;
+      stopScanSession();
+      // Without this the scanner would close onto an empty stock form, which is
+      // not a page anyone asked for.
+      if (back === "home") state.tab = "home";
+      else if (m) { state.tab = m; if (m === "in") state.inMode = "import"; else state.outMode = "import"; }
+      render();
+      return;
+    }
     if (act === "apply") { applyScanSession(); return; }
     if (act === "cam") { toggleSessCam(); return; }
+    if (act === "import") {
+      const m = sessMode;
+      sessReturn = "import";
+      stopScanSession();
+      state.tab = m;
+      if (m === "in") state.inMode = "import"; else state.outMode = "import";
+      render();
+      return;
+    }
+    if (act === "cat") {
+      sessPickCat = btn.dataset.cat || "All";
+      // Toggling classes rather than rebuilding the head, for the same reason.
+      sessEl.querySelectorAll('[data-sess="cat"]').forEach(c =>
+        c.classList.toggle("chip-active", c.dataset.cat === sessPickCat));
+      renderSessPickGrid();
+      return;
+    }
+    if (act === "pick") {
+      const prod = state.products.find(x => x.id === btn.dataset.id);
+      if (prod) { scanBeep(); sessAddProduct(prod, labelCodeFor(prod)); }
+      return;
+    }
     const i = parseInt(btn.dataset.i, 10);
     const row = sessCart[i];
     if (!row) return;
@@ -4226,13 +4516,53 @@ async function startScanSession(mode) {
   // A scanner types the barcode into the focused field and sends Enter, so a
   // kept-focused input is all that is needed -- no camera required. This is the
   // way to use "Scan many" on a computer.
+  // On a computer the picker search is the only input, so Enter there means
+  // "add this" — the same as a scanner gun pulling its trigger.
+  sessEl.addEventListener("keydown", (e) => {
+    if (!e.target.classList.contains("sess-pick-input")) return;
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    const typed = sessPickSearch.trim();
+    if (!typed) return;
+    // An exact code wins; otherwise a search narrowed to a single product is
+    // unambiguous enough to add.
+    let prod = sessProductFor(typed);
+    if (!prod) {
+      const hits = sessPickMatches(typed);
+      if (hits.length === 1) prod = hits[0];
+    }
+    if (!prod) { sessFlash(t("scanNotFound") + " " + typed, true); return; }
+    scanBeep();
+    sessAddProduct(prod, labelCodeFor(prod));
+    sessPickSearch = "";
+    const field = sessEl.querySelector(".sess-pick-input");
+    if (field) {
+      field.value = "";
+      field.focus();
+      try { field.setSelectionRange(0, 0); } catch (err) { /* not a text field */ }
+    }
+    renderSessPickGrid();
+  });
+
+  sessEl.addEventListener("input", (e) => {
+    if (e.target.classList.contains("sess-pick-input")) {
+      sessPickSearch = e.target.value;
+      // Grid only: the input element stays put, so the caret does too.
+      renderSessPickGrid();
+    }
+  });
+
   const hwInput = sessEl.querySelector(".sess-hw-input");
   // Phones use the camera, and auto-focusing here would pop up the on-screen
   // keyboard, so only grab focus on devices with a real pointer (a computer).
   const isTouch = !!(window.matchMedia && window.matchMedia("(pointer: coarse)").matches);
   function focusHwInput() {
-    if (isTouch || !hwInput) return;
-    try { hwInput.focus(); } catch (e) { /* not focusable */ }
+    if (isTouch) return;
+    // On a computer the picker search is the live field; the hardware bar is
+    // hidden there, so focusing it would send scans nowhere.
+    const target = sessEl && (sessEl.querySelector(".sess-pick-input") || hwInput);
+    if (!target) return;
+    try { target.focus(); } catch (e) { /* not focusable */ }
   }
   if (hwInput) {
     hwInput.addEventListener("keydown", (e) => {
@@ -4248,12 +4578,16 @@ async function startScanSession(mode) {
       focusHwInput();
     });
     // If focus drifts (e.g. after clicking a button), a click anywhere that
-    // isn't a control brings it back so the next scan still lands.
+    // isn't a control brings it back so the next scan still lands. Any field
+    // the operator can type into has to be excluded, or clicking it hands focus
+    // straight back to the scan box and the typing lands there instead.
     sessEl.addEventListener("click", (e) => {
-      if (!e.target.closest("[data-sess], .sess-hw-input")) focusHwInput();
+      if (e.target.closest("[data-sess], input, textarea, select, button")) return;
+      focusHwInput();
     });
   }
 
+  renderSessPick();
   renderSessList();
   focusHwInput();
 
@@ -4617,24 +4951,35 @@ async function saveProduct() {
       patch.stock = binsTotal(bins);
       delta = patch.stock - Math.max(0, parseInt(before ? before.stock : 0, 10) || 0);
     }
+    // The product itself is saved first and on its own. Writing the photos
+    // first meant a photo failure aborted the whole save, so nothing was kept.
+    try {
+      await updateDoc(doc(db, "stock_products", state.editingProductId), patch);
+    } catch (err) {
+      console.error(err);
+      state.modalError = describeError(err);
+      render();
+      return;
+    }
+    // Photos and the audit record are secondary: if they fail the product is
+    // already saved, so the form closes rather than inviting a retry that would
+    // save it twice.
+    let sideErr = null;
     try {
       await savePhotoDoc(state.editingProductId, photos);
-      await updateDoc(doc(db, "stock_products", state.editingProductId), patch);
-      if (delta !== 0) {
+    } catch (err) { console.error("photos not saved", err); sideErr = err; }
+    if (delta !== 0) {
+      try {
         await addDoc(collection(db, "stock_transactions"), {
           productId: state.editingProductId, productName: name,
           type: delta > 0 ? "in" : "out", qty: Math.abs(delta),
           bin: bins.length ? bins[0].code : "",
           note: SYS_NOTE_ADJUST, date: now,
         });
-      }
-      showToast(t("toastUpdated") + " " + name);
-      closeModal();
-    } catch (err) {
-      console.error(err);
-      state.modalError = describeError(err);
-      render();
+      } catch (err) { console.error("history not written", err); sideErr = sideErr || err; }
     }
+    showToast(sideErr ? t("savedWithIssues") : t("toastUpdated") + " " + name);
+    closeModal();
     return;
   }
 
@@ -4642,28 +4987,38 @@ async function saveProduct() {
   // Stock box only shows when no bin has been entered.
   const startStock = bins.length ? binsTotal(bins) : Math.max(0, parseInt(state.newStock, 10) || 0);
   const now = Date.now();
+  let ref;
   try {
-    const ref = await addDoc(collection(db, "stock_products"), {
+    ref = await addDoc(collection(db, "stock_products"), {
       name: name, category: state.newCategory, stock: startStock, threshold: threshold,
       productId: productId, barcode: barcode, price: price, location: location,
       bins: bins,
       photo: photo, photoCount: photos.length,
       createdAt: now, updatedAt: now,
     });
-    if (photos.length) await savePhotoDoc(ref.id, photos);
-    if (startStock > 0) {
-      await addDoc(collection(db, "stock_transactions"), {
-        productId: ref.id, productName: name, type: "in", qty: startStock,
-        bin: location, note: SYS_NOTE_INITIAL, date: now,
-      });
-    }
-    showToast(t("toastAdded") + " " + name);
-    closeModal();
   } catch (err) {
     console.error(err);
     state.modalError = describeError(err);
     render();
+    return;
   }
+  // From here the product exists. Anything that fails below must not be
+  // reported as a failed save, or the operator presses Save again and ends up
+  // with the same product two or three times.
+  let sideErr = null;
+  try {
+    if (photos.length) await savePhotoDoc(ref.id, photos);
+  } catch (err) { console.error("photos not saved", err); sideErr = err; }
+  if (startStock > 0) {
+    try {
+      await addDoc(collection(db, "stock_transactions"), {
+        productId: ref.id, productName: name, type: "in", qty: startStock,
+        bin: location, note: SYS_NOTE_INITIAL, date: now,
+      });
+    } catch (err) { console.error("history not written", err); sideErr = sideErr || err; }
+  }
+  showToast(sideErr ? t("savedWithIssues") : t("toastAdded") + " " + name);
+  closeModal();
 }
 
 function resetImport() {
@@ -4932,7 +5287,19 @@ appEl.addEventListener("click", (e) => {
   const el = e.target.closest("[data-action]");
   if (!el) return;
   const action = el.dataset.action;
-  if (action === "set-tab") setTab(el.dataset.tab);
+  if (action === "set-tab") {
+    const tab = el.dataset.tab;
+    // Scanning is how stock actually moves, so those two tiles go straight
+    // there rather than to a form nobody was choosing.
+    if (tab === "in" || tab === "out") {
+      state.tab = tab;
+      if (tab === "in") state.inMode = "scan"; else state.outMode = "scan";
+      sessReturn = "home";
+      startScanSession(tab);
+      return;
+    }
+    setTab(tab);
+  }
   else if (action === "set-history-filter") { state.historyFilter = el.dataset.filter; render(); }
   else if (action === "view-product-history") {
     const p = state.products.find(x => x.id === state.editingProductId);
@@ -5024,8 +5391,9 @@ appEl.addEventListener("click", (e) => {
   else if (action === "ask-bulk-delete") { state.deleteConfirming = true; state.deleteError = ""; render(); }
   else if (action === "cancel-bulk-delete") { state.deleteConfirming = false; render(); }
   else if (action === "confirm-bulk-delete") performBulkDelete();
-  else if (action === "quick-in") { state.tab = "in"; state.inProductId = el.dataset.id; state.inError = ""; render(); }
-  else if (action === "quick-out") { state.tab = "out"; state.outProductId = el.dataset.id; state.outError = ""; render(); }
+  // The row's arrows still open the one-item form; they are the only way in now.
+  else if (action === "quick-in") { state.tab = "in"; state.inMode = "single"; state.inProductId = el.dataset.id; state.inError = ""; render(); }
+  else if (action === "quick-out") { state.tab = "out"; state.outMode = "single"; state.outProductId = el.dataset.id; state.outError = ""; render(); }
   else if (action === "remove-photo") {
     state.newPhotos.splice(parseInt(el.dataset.index, 10), 1);
     state.modalError = "";
@@ -5042,7 +5410,7 @@ appEl.addEventListener("click", (e) => {
   else if (action === "toggle-theme") toggleTheme();
   else if (action === "toggle-lang") toggleLang();
   else if (action === "scan") startScan(el.dataset.scanField);
-  else if (action === "start-scan-session") startScanSession(el.dataset.mode);
+  else if (action === "start-scan-session") { sessReturn = "import"; startScanSession(el.dataset.mode); }
   else if (action === "toggle-label-select") {
     const id = el.dataset.id;
     if (state.labelSelected[id]) delete state.labelSelected[id];
